@@ -5,7 +5,6 @@
 #include "exceptions/throw_helper.hpp"
 
 #include <cassert>
-#include <cstddef>
 
 namespace mikodev::binary
 {
@@ -29,7 +28,7 @@ namespace mikodev::binary
                 return 4;
         }
 
-        static number_length_t decode_number_length(std::byte header)
+        static number_length_t decode_number_length(byte_t header)
         {
             number_length_t result = static_cast<number_length_t>(header) >> 6;
             if (result > 1)
@@ -37,29 +36,29 @@ namespace mikodev::binary
             return result + 1;
         }
 
-        static void encode_number_fixed4(std::byte* data, number_t number)
+        static void encode_number_fixed4(byte_t* data, number_t number)
         {
             assert(number >= 0 && number <= INT32_MAX);
 
-            data[0] = static_cast<std::byte>((number >> 24) | 0x80);
-            data[1] = static_cast<std::byte>(number >> 16);
-            data[2] = static_cast<std::byte>(number >> 8);
-            data[3] = static_cast<std::byte>(number);
+            data[0] = static_cast<byte_t>((number >> 24) | 0x80);
+            data[1] = static_cast<byte_t>(number >> 16);
+            data[2] = static_cast<byte_t>(number >> 8);
+            data[3] = static_cast<byte_t>(number);
         }
 
-        static void encode_number(std::byte* data, number_length_t length, number_t number)
+        static void encode_number(byte_t* data, number_length_t length, number_t number)
         {
             assert(number >= 0 && number <= INT32_MAX);
             assert(length == 1 || length == 2 || length == 4);
 
             if (length == 1)
             {
-                data[0] = static_cast<std::byte>(number);
+                data[0] = static_cast<byte_t>(number);
             }
             else if (length == 2)
             {
-                data[0] = static_cast<std::byte>((number >> 8) | 0x40);
-                data[1] = static_cast<std::byte>(number);
+                data[0] = static_cast<byte_t>((number >> 8) | 0x40);
+                data[1] = static_cast<byte_t>(number);
             }
             else
             {
@@ -67,7 +66,7 @@ namespace mikodev::binary
             }
         }
 
-        static number_t decode_number(const std::byte* data, number_length_t length)
+        static number_t decode_number(const byte_t* data, number_length_t length)
         {
             assert(length == 1 || length == 2 || length == 4);
             if (length == 1)
@@ -83,7 +82,7 @@ namespace mikodev::binary
             if (number > INT32_MAX)
                 exceptions::throw_helper::throw_argument_exception();
             number_length_t length = encode_number_length(static_cast<number_t>(number));
-            std::byte* location = allocator._allocate(length);
+            byte_t* location = allocator._allocate(length);
             encode_number(location, length, static_cast<number_t>(number));
         }
 
@@ -91,7 +90,7 @@ namespace mikodev::binary
         {
             if (span.size() == 0)
                 exceptions::throw_helper::throw_argument_exception();
-            const std::byte* data = span.data();
+            const byte_t* data = span.data();
             number_length_t length = decode_number_length(data[0]);
             // check bounds via slice method
             span = span.slice(length);
@@ -104,7 +103,7 @@ namespace mikodev::binary
             number_t length;
             number_length_t number_length;
             size_t limits = span.size();
-            const std::byte* location = span.data();
+            const byte_t* location = span.data();
             if (limits == 0 || limits < (number_length = decode_number_length(*location)) || (limits - number_length) < (length = decode_number(location, number_length)))
                 exceptions::throw_helper::throw_not_enough_bytes();
 

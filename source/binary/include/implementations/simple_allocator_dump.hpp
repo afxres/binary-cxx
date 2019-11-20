@@ -3,23 +3,22 @@
 #include "../span_view.hpp"
 
 #include <memory>
-#include <cstddef>
 
 namespace mikodev::binary::implementations
 {
     class simple_allocator_dump
     {
     private:
-        std::shared_ptr<std::byte[]> _data;
+        std::shared_ptr<byte_t[]> _data;
 
         size_t _offset;
 
         size_t _capacity;
 
     public:
-        simple_allocator_dump(std::shared_ptr<std::byte[]> data, size_t offset, size_t capacity) : _data(data), _offset(offset), _capacity(capacity) {}
+        simple_allocator_dump(std::shared_ptr<byte_t[]> data, size_t offset, size_t capacity) : _data(data), _offset(offset), _capacity(capacity) {}
 
-        std::shared_ptr<std::byte[]> data() const noexcept { return _data; }
+        std::shared_ptr<byte_t[]> data() const noexcept { return _data; }
 
         size_t capacity() const noexcept { return _capacity; };
 

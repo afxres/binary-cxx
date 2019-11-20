@@ -9,7 +9,7 @@ namespace mikodev::binary
     using allocator_length_prefix_anchor_t = size_t;
 
     template <typename T>
-    using allocator_action_t = void (*)(std::byte * data, size_t size, const T & item);
+    using allocator_action_t = void (*)(byte_t * data, size_t size, const T & item);
 
     class allocator_helper
     {
@@ -25,7 +25,7 @@ namespace mikodev::binary
         static void append_length_prefix(allocator_base& allocator, allocator_length_prefix_anchor_t anchor)
         {
             size_t offset;
-            std::byte* location = allocator._make_append(static_cast<size_t>(anchor), sizeof(number_t), offset);
+            byte_t* location = allocator._make_append(static_cast<size_t>(anchor), sizeof(number_t), offset);
             size_t origin = static_cast<size_t>(anchor) + sizeof(number_t);
             primitive_helper::encode_number_fixed4(location, static_cast<number_t>(offset - origin));
         }
@@ -34,7 +34,7 @@ namespace mikodev::binary
         {
             if (size == 0)
                 return;
-            std::byte* location = allocator._allocate(size);
+            byte_t* location = allocator._allocate(size);
             std::memcpy(location, data, size);
         }
 
@@ -45,7 +45,7 @@ namespace mikodev::binary
                 exceptions::throw_helper::throw_argument_exception();
             if (size == 0)
                 return;
-            std::byte* data = allocator._allocate_without_increase_offset(size);
+            byte_t* data = allocator._allocate_without_increase_offset(size);
             action(data, size, item);
             allocator._increase_offset(size);
         }

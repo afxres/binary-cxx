@@ -6,7 +6,6 @@
 
 #include <memory>
 #include <cassert>
-#include <cstddef>
 
 namespace mikodev::binary::implementations
 {
@@ -14,7 +13,7 @@ namespace mikodev::binary::implementations
     class simple_allocator : public mikodev::binary::allocator_base
     {
     private:
-        std::shared_ptr<std::byte[]> _data;
+        std::shared_ptr<byte_t[]> _data;
 
         size_t _offset;
 
@@ -37,7 +36,7 @@ namespace mikodev::binary::implementations
                 capacity *= 2;
             while (capacity < amount);
 
-            std::shared_ptr<std::byte[]> new_data(new std::byte[capacity]);
+            std::shared_ptr<byte_t[]> new_data(new byte_t[capacity]);
             auto old_data = std::move(_data);
             if (_offset != 0)
                 std::memcpy(&new_data[0], &old_data[0], _offset);
@@ -63,7 +62,7 @@ namespace mikodev::binary::implementations
         virtual size_t size() const noexcept { return _offset; }
 
     protected:
-        virtual std::byte* _allocate(size_t size) override
+        virtual byte_t* _allocate(size_t size) override
         {
             assert(size != 0);
             ensure_capacity(size);
@@ -72,7 +71,7 @@ namespace mikodev::binary::implementations
             return &_data[origin];
         }
 
-        virtual std::byte* _allocate_without_increase_offset(size_t size) override
+        virtual byte_t* _allocate_without_increase_offset(size_t size) override
         {
             assert(size != 0);
             ensure_capacity(size);
@@ -96,7 +95,7 @@ namespace mikodev::binary::implementations
             return offset;
         }
 
-        virtual std::byte* _make_append(size_t anchor, size_t size, size_t& out_offset) override
+        virtual byte_t* _make_append(size_t anchor, size_t size, size_t& out_offset) override
         {
             assert(size != 0);
             size_t offset = _offset;

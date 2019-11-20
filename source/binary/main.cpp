@@ -1,17 +1,20 @@
 ﻿#include "include/span_view.hpp"
+#include "include/span_view_base.hpp"
 #include "include/allocator_helper.hpp"
 #include "include/primitive_helper.hpp"
 #include "include/converters/native_converter.hpp"
 #include "include/converters/string_converter.hpp"
 #include "include/converters/tuple_converter.hpp"
 #include "include/implementations/simple_allocator.hpp"
+#include "include/implementations/simple_span_view.hpp"
 
 #include <iostream>
-#include <array>
 
 namespace mk = mikodev::binary;
 namespace mkc = mikodev::binary::converters;
 namespace mki = mikodev::binary::implementations;
+
+// TODO: use an unit test framework
 
 void number_test(size_t number)
 {
@@ -81,6 +84,16 @@ void tuple_converter_test()
     auto c_item = converter.decode_with_length_prefix(c_view);
 }
 
+void simple_span_view_test()
+{
+    size_t size = 100;
+    auto data = std::shared_ptr<mk::byte_t[]>(new mk::byte_t[size]);
+    auto span = mki::simple_span_view(data, size);
+    auto slice = span.slice(20);
+    auto span_copy = span;
+    span_copy.slice_this(40);
+}
+
 int main()
 {
     converter_test(1024);
@@ -101,5 +114,7 @@ int main()
     number_test(16383);
     number_test(16384);
     number_test(65536);
+
+    simple_span_view_test();
     return 0;
 }
