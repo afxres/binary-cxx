@@ -83,7 +83,7 @@ namespace mikodev::binary
             if (number > INT32_MAX)
                 exceptions::throw_helper::throw_argument_exception();
             number_length_t length = encode_number_length(static_cast<number_t>(number));
-            std::byte* location = allocator.allocate(length);
+            std::byte* location = allocator._allocate(length);
             encode_number(location, length, static_cast<number_t>(number));
         }
 

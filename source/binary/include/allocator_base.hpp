@@ -2,14 +2,19 @@
 
 namespace mikodev::binary
 {
+    /* allocator interface */
     class allocator_base
     {
-    public:
-        virtual size_t capacity() const noexcept = 0;
+        friend class allocator_helper;
 
-        virtual size_t size() const noexcept = 0;
+        friend class primitive_helper;
 
-        virtual std::byte* allocate(size_t size) = 0;
+    protected:
+        virtual std::byte* _allocate(size_t size) = 0;
+
+        virtual std::byte* _allocate_without_increase_offset(size_t size) = 0;
+
+        virtual void _increase_offset(size_t size) = 0;
 
         virtual size_t _make_anchor(size_t size) = 0;
 

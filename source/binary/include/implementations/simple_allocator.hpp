@@ -16,8 +16,6 @@ namespace mikodev::binary::implementations
     private:
         std::shared_ptr<std::byte[]> _data;
 
-        std::byte* _location;
-
         size_t _offset;
 
         size_t _capacity;
@@ -44,7 +42,6 @@ namespace mikodev::binary::implementations
             if (_offset != 0)
                 std::memcpy(&new_data[0], &old_data[0], _offset);
             _data = std::move(new_data);
-            _location = &_data[0];
             _capacity = capacity;
         }
 
@@ -57,23 +54,37 @@ namespace mikodev::binary::implementations
         }
 
     public:
-        simple_allocator() noexcept : _data(nullptr), _location(nullptr), _offset(0), _capacity(0) {}
+        simple_allocator() noexcept : _data(nullptr), _offset(0), _capacity(0) {}
 
         simple_allocator_dump dump() { return simple_allocator_dump(_data, _offset, _capacity); }
 
-        virtual size_t capacity() const noexcept override { return _capacity; };
+        virtual size_t capacity() const noexcept { return _capacity; };
 
-        virtual size_t size() const noexcept override { return _offset; }
+        virtual size_t size() const noexcept { return _offset; }
 
-        virtual std::byte* allocate(size_t size) override
+    protected:
+        virtual std::byte* _allocate(size_t size) override
         {
+            assert(size != 0);
             ensure_capacity(size);
-            assert(_location != nullptr);
-            assert(_location == &_data[0]);
-
             size_t origin = _offset;
             _offset = origin + size;
-            return &_location[origin];
+            return &_data[origin];
+        }
+
+        virtual std::byte* _allocate_without_increase_offset(size_t size) override
+        {
+            assert(size != 0);
+            ensure_capacity(size);
+            return &_data[_offset];
+        }
+
+        virtual void _increase_offset(size_t size) override
+        {
+            assert(size != 0);
+            assert(_capacity > _offset);
+            assert(_capacity - _offset >= size);
+            _offset += size;
         }
 
         virtual size_t _make_anchor(size_t size) override
@@ -92,7 +103,7 @@ namespace mikodev::binary::implementations
             if (anchor > offset || size > offset - anchor)
                 exceptions::throw_helper::throw_argument_exception();
             out_offset = offset;
-            return &_location[anchor];
+            return &_data[anchor];
         }
     };
 }
