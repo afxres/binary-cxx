@@ -42,7 +42,7 @@ namespace mikodev::binary
             else
             {
                 auto result = this->decode(span);
-                span = span.slice(0, size);
+                span = span.slice(size);
                 return result;
             }
         }

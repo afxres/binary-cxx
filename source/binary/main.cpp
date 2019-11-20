@@ -58,13 +58,27 @@ void string_converter_test(const std::string& text)
 
 void tuple_converter_test()
 {
-    auto converter = mkc::tuple_converter<int32_t, int64_t>(
+    auto converter = mkc::tuple_converter<int32_t, std::string>(
         std::make_shared<mkc::native_converter<int32_t>>(),
-        std::make_shared<mkc::native_converter<int64_t>>());
-    auto allocator = mki::simple_allocator();
-    converter.encode(allocator, std::make_tuple(1, 2));
-    auto dump = allocator.dump();
-    std::cout << "buffer: " << dump.size() << std::endl;
+        std::make_shared<mkc::string_converter>());
+    auto t = std::make_tuple(1, "1024");
+    auto a = mki::simple_allocator();
+    auto b = mki::simple_allocator();
+    auto c = mki::simple_allocator();
+    converter.encode(a, t);
+    converter.encode_auto(b, t);
+    converter.encode_with_length_prefix(c, t);
+    auto a_dump = a.dump();
+    auto b_dump = b.dump();
+    auto c_dump = c.dump();
+    std::cout << "encode: " << a_dump.size() << ", encode auto: " << b_dump.size() << ", encode with length prefix: " << c_dump.size() << std::endl;
+
+    auto a_view = a_dump.as_span_view();
+    auto b_view = b_dump.as_span_view();
+    auto c_view = c_dump.as_span_view();
+    auto a_item = converter.decode(a_view);
+    auto b_item = converter.decode_auto(b_view);
+    auto c_item = converter.decode_with_length_prefix(c_view);
 }
 
 int main()
