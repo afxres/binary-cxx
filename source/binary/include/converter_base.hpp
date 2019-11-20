@@ -13,7 +13,7 @@ namespace mikodev::binary
     public:
         converter_base() : converter_abstract(0) {}
 
-        converter_base(size_t byte_size) : converter_abstract(byte_size) {}
+        converter_base(size_t size) : converter_abstract(size) {}
 
         virtual void encode(allocator_base& allocator, const T& item) = 0;
 
@@ -21,7 +21,7 @@ namespace mikodev::binary
 
         virtual void encode_auto(allocator_base& allocator, const T& item)
         {
-            auto size = this->byte_size();
+            auto size = this->size();
             if (size == 0)
             {
                 encode_with_length_prefix(allocator, item);
@@ -34,7 +34,7 @@ namespace mikodev::binary
 
         virtual T decode_auto(span_view& span)
         {
-            auto size = this->byte_size();
+            auto size = this->size();
             if (size == 0)
             {
                 return decode_with_length_prefix(span);
@@ -49,7 +49,7 @@ namespace mikodev::binary
 
         virtual void encode_with_length_prefix(allocator_base& allocator, const T& item)
         {
-            auto size = this->byte_size();
+            auto size = this->size();
             if (size == 0)
             {
                 auto anchor = allocator_helper::anchor_length_prefix(allocator);

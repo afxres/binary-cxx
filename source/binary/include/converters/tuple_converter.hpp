@@ -7,6 +7,7 @@
 
 #include <memory>
 #include <tuple>
+#include <vector>
 
 namespace mikodev::binary::converters
 {
@@ -14,11 +15,11 @@ namespace mikodev::binary::converters
     class tuple_converter : public converter_base<std::tuple<TArgs ...>>
     {
     private:
-        template <typename TCvts, typename TItem, bool is_auto, std::size_t N>
+        static constexpr auto _tuple_size = sizeof ... (TArgs);
+
+        template <typename TCvts, typename TItem, bool is_auto, size_t N>
         struct _adapter
         {
-            static constexpr auto _tuple_size = sizeof ... (TArgs);
-
             static void encode(allocator_base& allocator, const TItem& item, const TCvts& converters)
             {
                 auto c = std::get<N>(converters);
@@ -45,16 +46,44 @@ namespace mikodev::binary::converters
             }
         };
 
+        template <typename TCvts, size_t N>
+        struct _counter
+        {
+            static void select_size(std::vector<size_t>& vector, const TCvts& converters)
+            {
+                auto c = std::get<N>(converters);
+                auto s = c->size();
+                vector.push_back(s);
+                if constexpr (N != _tuple_size - 1)
+                    _counter<TCvts, N + 1>::select_size(vector, converters);
+            }
+        };
+
         using _tuple_converter_shared_ptr_t = std::tuple<std::shared_ptr<converter_base<TArgs>> ...>;
 
         using _adapter_t = _adapter<_tuple_converter_shared_ptr_t, std::tuple<TArgs ...>, false, 0>;
 
         using _adapter_auto_t = _adapter<_tuple_converter_shared_ptr_t, std::tuple<TArgs ...>, true, 0>;
 
+        size_t _size(_tuple_converter_shared_ptr_t converters)
+        {
+            std::vector<size_t> vector;
+            _counter< _tuple_converter_shared_ptr_t, 0>::select_size(vector, converters);
+            auto end = vector.end();
+            if (std::find(vector.begin(), end, 0) != end)
+                return 0;
+            size_t size = 0;
+            for (auto i : vector)
+                size += i;
+            return size;
+        }
+
         _tuple_converter_shared_ptr_t _converters;
 
     public:
-        tuple_converter(std::shared_ptr<converter_base<TArgs>> ... converters) : _converters(std::make_tuple(converters ...)) {}
+        tuple_converter(std::tuple<std::shared_ptr<converter_base<TArgs>> ...> converters) : converter_base(_size(converters)), _converters(converters) {}
+
+        tuple_converter(std::shared_ptr<converter_base<TArgs>> ... converters) : tuple_converter(std::make_tuple(converters ...)) {}
 
         virtual void encode(allocator_base& allocator, const std::tuple<TArgs ...>& item) override
         {
