@@ -1,7 +1,9 @@
 ﻿#include "include/span_view.hpp"
 #include "include/allocator_helper.hpp"
 #include "include/primitive_helper.hpp"
-#include "include/converters/native_endian_binary_converter.hpp"
+#include "include/converters/native_converter.hpp"
+#include "include/converters/string_converter.hpp"
+#include "include/converters/tuple_converter.hpp"
 #include "include/implementations/simple_allocator.hpp"
 
 #include <iostream>
@@ -35,7 +37,7 @@ void anchor_test()
 void converter_test(int32_t item)
 {
     auto allocator = mki::simple_allocator();
-    auto converter = mkc::native_endian_binary_converter<std::int32_t>();
+    auto converter = mkc::native_converter<std::int32_t>();
     converter.encode_with_length_prefix(allocator, item);
     auto dump = allocator.dump();
     auto view = dump.as_span_view();
@@ -43,10 +45,37 @@ void converter_test(int32_t item)
     std::cout << "source :" << item << ", result: " << result << ", size: " << allocator.size() << ", capacity: " << allocator.capacity() << std::endl;
 }
 
+void string_converter_test(const std::string& text)
+{
+    auto converter = mkc::string_converter();
+    auto allocator = mki::simple_allocator();
+    converter.encode_with_length_prefix(allocator, text);
+    auto dump = allocator.dump();
+    auto view = dump.as_span_view();
+    auto result = converter.decode_with_length_prefix(view);
+    std::cout << "source :" << text << ", result: " << result << ", size: " << allocator.size() << ", capacity: " << allocator.capacity() << std::endl;
+}
+
+void tuple_converter_test()
+{
+    auto converter = mkc::tuple_converter<int32_t, int64_t>(
+        std::make_shared<mkc::native_converter<int32_t>>(),
+        std::make_shared<mkc::native_converter<int64_t>>());
+    auto allocator = mki::simple_allocator();
+    converter.encode(allocator, std::make_tuple(1, 2));
+    auto dump = allocator.dump();
+    std::cout << "buffer: " << dump.size() << std::endl;
+}
+
 int main()
 {
     converter_test(1024);
     converter_test(123456789);
+
+    string_converter_test("Abcd");
+    string_converter_test("0123456789");
+
+    tuple_converter_test();
 
     anchor_test();
 

@@ -7,13 +7,14 @@
 
 namespace mikodev::binary::converters
 {
+    /* native binary converter (copy memory directly) */
     template <typename T>
-    class native_endian_binary_converter : public mikodev::binary::converter_base<T>
+    class native_converter : public converter_base<T>
     {
     public:
-        native_endian_binary_converter() : converter_base(sizeof(T)) {}
+        native_converter() : converter_base(sizeof(T)) {}
 
-        virtual void encode(mikodev::binary::allocator_base& allocator, const T& item) override
+        virtual void encode(allocator_base& allocator, const T& item) override
         {
             std::byte* location = allocator.allocate(sizeof(T));
             *(reinterpret_cast<T*>(location)) = item;
@@ -22,7 +23,7 @@ namespace mikodev::binary::converters
         virtual T decode(const span_view& span) override
         {
             if (span.size() < sizeof(T))
-                mikodev::binary::exceptions::throw_helper::throw_not_enough_bytes();
+                exceptions::throw_helper::throw_not_enough_bytes();
             return *(reinterpret_cast<const T*>(span.data()));
         }
     };
