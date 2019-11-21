@@ -3,3 +3,9 @@
 project ("binary-cxx")
 
 add_subdirectory ("binary")
+
+add_subdirectory ("binary-tests")
+
+enable_testing ()
+
+add_test (NAME "BINARY_TESTS" COMMAND "binary-tests")

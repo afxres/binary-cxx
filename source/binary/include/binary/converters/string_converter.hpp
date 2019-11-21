@@ -15,7 +15,7 @@ namespace mikodev::binary::converters
     public:
         virtual void encode(allocator_base& allocator, const std::string& item) override
         {
-            allocator_helper::append(allocator, item.c_str(), item.size());
+            allocator_helper::append(allocator, item.data(), item.size());
         }
 
         virtual std::string decode(const span_view_base& span) override
@@ -27,7 +27,7 @@ namespace mikodev::binary::converters
         {
             size_t size = item.size();
             primitive_helper::encode_number(allocator, size);
-            allocator_helper::append(allocator, item.c_str(), size);
+            allocator_helper::append(allocator, item.data(), size);
         }
 
         virtual std::string decode_with_length_prefix(span_view_base& span) override
