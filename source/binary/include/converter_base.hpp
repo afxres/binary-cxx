@@ -1,27 +1,19 @@
 #pragma once
 
-#include "allocator_base.hpp"
-#include "converter_abstract.hpp"
+#include "converter_template.hpp"
 #include "primitive_helper.hpp"
-#include "span_view.hpp"
 
 namespace mikodev::binary
 {
     template <typename T>
-    class converter_base : public converter_abstract
+    class converter_base : public converter_template<T>
     {
     public:
-        converter_base() : converter_abstract(0) {}
-
-        converter_base(size_t size) : converter_abstract(size) {}
-
-        virtual void encode(allocator_base& allocator, const T& item) = 0;
-
-        virtual T decode(const span_view& span) = 0;
+        using converter_template::converter_template;
 
         virtual void encode_auto(allocator_base& allocator, const T& item)
         {
-            auto size = this->size();
+            size_t size = this->size();
             if (size == 0)
             {
                 encode_with_length_prefix(allocator, item);
@@ -32,27 +24,27 @@ namespace mikodev::binary
             }
         }
 
-        virtual T decode_auto(span_view& span)
+        virtual T decode_auto(span_view_base& span)
         {
-            auto size = this->size();
+            size_t size = this->size();
             if (size == 0)
             {
                 return decode_with_length_prefix(span);
             }
             else
             {
-                auto result = this->decode(span);
-                span = span.slice(size);
+                T result = this->decode(span);
+                span.slice_this(size);
                 return result;
             }
         }
 
         virtual void encode_with_length_prefix(allocator_base& allocator, const T& item)
         {
-            auto size = this->size();
+            size_t size = this->size();
             if (size == 0)
             {
-                auto anchor = allocator_helper::anchor_length_prefix(allocator);
+                allocator_length_prefix_anchor_t anchor = allocator_helper::anchor_length_prefix(allocator);
                 encode(allocator, item);
                 allocator_helper::append_length_prefix(allocator, anchor);
             }
@@ -63,9 +55,11 @@ namespace mikodev::binary
             }
         }
 
-        virtual T decode_with_length_prefix(span_view& span)
+        virtual T decode_with_length_prefix(span_view_base& span)
         {
-            return decode(primitive_helper::decode_buffer_with_length_prefix(span));
+            // lifetime management via smart pointer
+            std::unique_ptr<span_view_base> view = primitive_helper::decode_buffer_with_length_prefix(span);
+            return decode(*(view.get()));
         }
     };
 }

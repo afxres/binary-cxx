@@ -31,6 +31,8 @@ namespace mikodev::binary::implementations
 
         virtual size_t size() const noexcept override { return _length; }
 
+        virtual std::unique_ptr<span_view_base> clone() const noexcept override { return std::unique_ptr<simple_span_view>(new simple_span_view(*this)); }
+
         virtual std::unique_ptr<span_view_base> slice(size_t offset) const override
         {
             if (offset > _length)

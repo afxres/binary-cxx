@@ -1,10 +1,8 @@
 #pragma once
 
-#include "../allocator_base.hpp"
 #include "../allocator_helper.hpp"
 #include "../converter_base.hpp"
 #include "../primitive_helper.hpp"
-#include "../span_view.hpp"
 #include "../exceptions/throw_helper.hpp"
 
 #include <string>
@@ -20,7 +18,7 @@ namespace mikodev::binary::converters
             allocator_helper::append(allocator, item.c_str(), item.size());
         }
 
-        virtual std::string decode(const span_view& span) override
+        virtual std::string decode(const span_view_base& span) override
         {
             return std::string(reinterpret_cast<const char*>(span.data()), span.size());
         }
@@ -32,11 +30,11 @@ namespace mikodev::binary::converters
             allocator_helper::append(allocator, item.c_str(), size);
         }
 
-        virtual std::string decode_with_length_prefix(span_view& span) override
+        virtual std::string decode_with_length_prefix(span_view_base& span) override
         {
-            // use helper class for length prefix
-            span_view view = primitive_helper::decode_buffer_with_length_prefix(span);
-            return std::string(reinterpret_cast<const char*>(view.data()), view.size());
+            // lifetime management via smart pointer
+            std::unique_ptr<span_view_base> view = primitive_helper::decode_buffer_with_length_prefix(span);
+            return std::string(reinterpret_cast<const char*>(view->data()), view->size());
         }
     };
 }

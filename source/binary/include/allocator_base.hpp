@@ -1,5 +1,7 @@
 #pragma once
 
+#include "span_view_base.hpp"
+
 namespace mikodev::binary
 {
     /* allocator interface */

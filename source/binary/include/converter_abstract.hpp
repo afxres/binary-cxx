@@ -8,6 +8,8 @@ namespace mikodev::binary
         size_t _size;
 
     public:
+        converter_abstract() : converter_abstract(0) {}
+
         converter_abstract(size_t size) : _size(size) {}
 
         size_t size() const noexcept { return _size; }

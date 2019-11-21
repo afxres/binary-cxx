@@ -1,10 +1,11 @@
 #pragma once
 
 #include "allocator_base.hpp"
-#include "span_view.hpp"
+#include "span_view_base.hpp"
 #include "exceptions/throw_helper.hpp"
 
 #include <cassert>
+#include <memory>
 
 namespace mikodev::binary
 {
@@ -86,19 +87,19 @@ namespace mikodev::binary
             encode_number(location, length, static_cast<number_t>(number));
         }
 
-        static size_t decode_number(span_view& span)
+        static size_t decode_number(span_view_base& span)
         {
             if (span.size() == 0)
                 exceptions::throw_helper::throw_argument_exception();
             const byte_t* data = span.data();
             number_length_t length = decode_number_length(data[0]);
             // check bounds via slice method
-            span = span.slice(length);
+            span.slice_this(length);
             number_t number = decode_number(data, length);
             return static_cast<size_t>(number);
         }
 
-        static span_view decode_buffer_with_length_prefix(span_view& span)
+        static std::unique_ptr<span_view_base> decode_buffer_with_length_prefix(span_view_base& span)
         {
             number_t length;
             number_length_t number_length;
@@ -107,9 +108,9 @@ namespace mikodev::binary
             if (limits == 0 || limits < (number_length = decode_number_length(*location)) || (limits - number_length) < (length = decode_number(location, number_length)))
                 exceptions::throw_helper::throw_not_enough_bytes();
 
-            size_t origin = number_length + length;
-            span = span_view(location + origin, limits - origin);
-            return span_view(location + number_length, length);
+            std::unique_ptr<span_view_base> view = span.slice(number_length, length);
+            span.slice_this(number_length + length);
+            return view;
         }
     };
 }

@@ -13,6 +13,8 @@ namespace mikodev::binary
 
         virtual size_t size() const noexcept = 0;
 
+        virtual std::unique_ptr<span_view_base> clone() const noexcept = 0;
+
         virtual std::unique_ptr<span_view_base> slice(size_t offset) const = 0;
 
         virtual std::unique_ptr<span_view_base> slice(size_t offset, size_t length) const = 0;

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../span_view.hpp"
+#include "simple_span_view.hpp"
 
 #include <memory>
 
@@ -24,6 +24,6 @@ namespace mikodev::binary::implementations
 
         size_t size() const noexcept { return _offset; }
 
-        mikodev::binary::span_view as_span_view() const noexcept { return  mikodev::binary::span_view(_offset == 0 ? nullptr : &_data[0], _offset); }
+        simple_span_view as_span_view() const noexcept { return simple_span_view(_data, _offset); }
     };
 }
