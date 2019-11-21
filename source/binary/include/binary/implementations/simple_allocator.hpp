@@ -57,6 +57,8 @@ namespace mikodev::binary::implementations
 
         simple_allocator_dump dump() { return simple_allocator_dump(_data, _offset, _capacity); }
 
+        simple_span_view dump_as_span_view() { return simple_span_view(_data, _offset); }
+
         virtual size_t capacity() const noexcept { return _capacity; };
 
         virtual size_t size() const noexcept { return _offset; }
