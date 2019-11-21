@@ -23,10 +23,6 @@ namespace mikodev::binary::implementations
     public:
         simple_span_view(std::shared_ptr<byte_t[]> data, size_t size) : simple_span_view(data, size, 0, size) {}
 
-        std::shared_ptr<byte_t[]> origin_data() const noexcept { return _data; }
-
-        size_t origin_size() const noexcept { return _size; }
-
         virtual const byte_t* data() const noexcept override { return &_data[_offset]; }
 
         virtual size_t size() const noexcept override { return _length; }

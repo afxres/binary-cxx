@@ -3,6 +3,7 @@
 #include "include/converters/native_converter.hpp"
 #include "include/converters/string_converter.hpp"
 #include "include/converters/tuple_converter.hpp"
+#include "include/converters/vector_converter.hpp"
 #include "include/implementations/simple_allocator.hpp"
 #include "include/implementations/simple_span_view.hpp"
 
@@ -92,6 +93,28 @@ void simple_span_view_test()
     span_copy.slice_this(40);
 }
 
+void vector_converter_test()
+{
+    auto int32_converter = std::make_shared<mkc::native_converter<int32_t>>();
+    auto converter = mkc::vector_converter<int32_t>(int32_converter);
+    auto source = std::vector<int32_t>{ 1, 2, 4, 8, 16 };
+    auto allocator = mki::simple_allocator();
+    converter.encode(allocator, source);
+    auto dump = allocator.dump();
+    auto view = dump.as_span_view();
+    auto result = converter.decode(view);
+
+    std::cout << "source: ";
+    for (auto i : source)
+        std::cout << i << ", ";
+    std::cout << std::endl;
+
+    std::cout << "result: ";
+    for (auto i : result)
+        std::cout << i << ", ";
+    std::cout << std::endl;
+}
+
 int main()
 {
     converter_test(1024);
@@ -101,6 +124,8 @@ int main()
     string_converter_test("0123456789");
 
     tuple_converter_test();
+
+    vector_converter_test();
 
     anchor_test();
 
