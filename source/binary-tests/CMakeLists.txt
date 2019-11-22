@@ -13,8 +13,9 @@ include_directories(
 add_executable (
 	${PROJECT_NAME}
 	"main.cpp"
-	"converters_tests/containers_tests/sequence_converter_tests.cpp"
-	"converters_tests/native_converter_tests.cpp"
-	"converters_tests/string_converter_tests.cpp")
+	"binary/converters/containers/container_converter_integration_tests.cpp"
+	"binary/converters/native_converter_tests.cpp"
+	"binary/converters/string_converter_tests.cpp"
+	"binary/implementations/simple_span_view_tests.cpp")
 
 target_link_libraries (${PROJECT_NAME} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})

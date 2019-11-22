@@ -12,16 +12,14 @@ namespace mikodev::binary::implementations
     private:
         std::shared_ptr<byte_t[]> _data;
 
-        size_t _size;
-
         size_t _offset;
 
         size_t _length;
 
-        simple_span_view(std::shared_ptr<byte_t[]> data, size_t size, size_t offset, size_t length) : _data(size == 0 ? nullptr : data), _size(size), _offset(offset), _length(length) {}
+        simple_span_view(std::shared_ptr<byte_t[]> data, size_t offset, size_t length) : _data(length == 0 ? nullptr : data), _offset(length == 0 ? 0 : offset), _length(length) {}
 
     public:
-        simple_span_view(std::shared_ptr<byte_t[]> data, size_t size) : simple_span_view(data, size, 0, size) {}
+        simple_span_view(std::shared_ptr<byte_t[]> data, size_t size) : simple_span_view(data, 0, size) {}
 
         virtual const byte_t* data() const noexcept override { return &_data[_offset]; }
 
@@ -34,7 +32,7 @@ namespace mikodev::binary::implementations
             if (offset > _length)
                 exceptions::throw_helper::throw_argument_exception();
             else
-                return std::unique_ptr<simple_span_view>(new simple_span_view(_data, _size, _offset + offset, _length - offset));
+                return std::unique_ptr<simple_span_view>(new simple_span_view(_data, _offset + offset, _length - offset));
         }
 
         virtual std::unique_ptr<span_view_base> slice(size_t offset, size_t length) const override
@@ -42,7 +40,7 @@ namespace mikodev::binary::implementations
             if (offset > _length || length > _length - offset)
                 exceptions::throw_helper::throw_argument_exception();
             else
-                return std::unique_ptr<simple_span_view>(new simple_span_view(_data, _size, _offset + offset, length));
+                return std::unique_ptr<simple_span_view>(new simple_span_view(_data, _offset + offset, length));
         }
 
         virtual void slice_this(size_t offset) override
