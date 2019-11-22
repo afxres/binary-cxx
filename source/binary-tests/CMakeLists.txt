@@ -13,6 +13,7 @@ include_directories(
 add_executable (
 	${PROJECT_NAME}
 	"main.cpp"
+	"converters_tests/container_converter_tests.cpp"
 	"converters_tests/native_converter_tests.cpp"
 	"converters_tests/string_converter_tests.cpp")
 
