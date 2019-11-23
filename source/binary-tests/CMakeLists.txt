@@ -16,6 +16,7 @@ add_executable (
 	"binary/converters/containers/container_converter_integration_tests.cpp"
 	"binary/converters/native_converter_tests.cpp"
 	"binary/converters/string_converter_tests.cpp"
-	"binary/implementations/simple_span_view_tests.cpp")
+	"binary/implementations/simple_span_view_tests.cpp"
+	"binary/primitive_helper_tests.cpp")
 
 target_link_libraries (${PROJECT_NAME} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})

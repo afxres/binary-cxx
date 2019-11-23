@@ -31,32 +31,28 @@ namespace mikodev::binary::implementations
         {
             if (offset > _length)
                 exceptions::throw_helper::throw_argument_exception();
-            else
-                return std::unique_ptr<simple_span_view>(new simple_span_view(_data, _offset + offset, _length - offset));
+            return std::unique_ptr<simple_span_view>(new simple_span_view(_data, _offset + offset, _length - offset));
         }
 
         virtual std::unique_ptr<span_view_base> slice(size_t offset, size_t length) const override
         {
             if (offset > _length || length > _length - offset)
                 exceptions::throw_helper::throw_argument_exception();
-            else
-                return std::unique_ptr<simple_span_view>(new simple_span_view(_data, _offset + offset, length));
+            return std::unique_ptr<simple_span_view>(new simple_span_view(_data, _offset + offset, length));
         }
 
         virtual void slice_this(size_t offset) override
         {
             if (offset > _length)
                 exceptions::throw_helper::throw_argument_exception();
-            _offset += offset;
-            _length -= offset;
+            (*this) = simple_span_view(_data, _offset + offset, _length - offset);
         }
 
         virtual void slice_this(size_t offset, size_t length) override
         {
             if (offset > _length || length > _length - offset)
                 exceptions::throw_helper::throw_argument_exception();
-            _offset += offset;
-            _length = length;
+            (*this) = simple_span_view(_data, _offset + offset, length);
         }
     };
 }
