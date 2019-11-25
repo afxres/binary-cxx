@@ -23,7 +23,7 @@ namespace mikodev::binary::tests::converters::string_converter_tests
         converter.encode(allocator, source);
         BOOST_REQUIRE_EQUAL(size, allocator.size());
 
-        auto view = allocator.dump_as_span_view();
+        auto view = allocator.as_span_view();
         auto result = converter.decode(view);
         BOOST_REQUIRE_EQUAL(source, result);
         BOOST_REQUIRE_EQUAL(size, view.size());

@@ -17,7 +17,7 @@ namespace mikodev::binary::converters::containers
 
         virtual void encode(allocator_base& allocator, const _Container& item) override
         {
-            converter_base<_Element>& converter = *(_converter.get());
+            converter_base<_Element>& converter = *_converter;
             for (const _Element& i : item)
                 converter.encode_auto(allocator, i);
         }
@@ -25,8 +25,8 @@ namespace mikodev::binary::converters::containers
         virtual _Container decode(const span_view_base& span) override
         {
             std::shared_ptr<span_view_base> view = span.clone();
-            span_view_base& data = *(view.get());
-            converter_base<_Element>& converter = *(_converter.get());
+            span_view_base& data = *view;
+            converter_base<_Element>& converter = *_converter;
             _Container container;
             while (data.size() != 0)
                 _Adder<_Container, _Element>::add(container, converter.decode_auto(data));

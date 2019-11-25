@@ -19,10 +19,10 @@ namespace mikodev::binary::tests::implementations::simple_span_view_tests
     BOOST_AUTO_TEST_CASE(simple_span_view__slice__offset__size_zero)
     {
         auto data = std::shared_ptr<byte_t[]>(new byte_t[10]);
-        BOOST_REQUIRE(data.get() != nullptr);
+        BOOST_REQUIRE(data != nullptr);
         auto span = mki::simple_span_view(data, 10);
         BOOST_REQUIRE(span.size() == 10);
-        BOOST_REQUIRE(span.data() == data.get());
+        BOOST_REQUIRE(span.data() == &data[0]);
 
         auto view = span.slice(10);
         BOOST_REQUIRE(view->size() == 0);
@@ -32,10 +32,10 @@ namespace mikodev::binary::tests::implementations::simple_span_view_tests
     BOOST_AUTO_TEST_CASE(simple_span_view__slice__offset_length__size_zero)
     {
         auto data = std::shared_ptr<byte_t[]>(new byte_t[10]);
-        BOOST_REQUIRE(data.get() != nullptr);
+        BOOST_REQUIRE(data != nullptr);
         auto span = mki::simple_span_view(data, 10);
         BOOST_REQUIRE(span.size() == 10);
-        BOOST_REQUIRE(span.data() == data.get());
+        BOOST_REQUIRE(span.data() == &data[0]);
 
         auto view = span.slice(5, 0);
         BOOST_REQUIRE(view->size() == 0);
@@ -45,10 +45,10 @@ namespace mikodev::binary::tests::implementations::simple_span_view_tests
     BOOST_AUTO_TEST_CASE(simple_span_view__slice_this__offset__size_zero)
     {
         auto data = std::shared_ptr<byte_t[]>(new byte_t[10]);
-        BOOST_REQUIRE(data.get() != nullptr);
+        BOOST_REQUIRE(data != nullptr);
         auto span = mki::simple_span_view(data, 10);
         BOOST_REQUIRE(span.size() == 10);
-        BOOST_REQUIRE(span.data() == data.get());
+        BOOST_REQUIRE(span.data() == &data[0]);
 
         span.slice_this(10);
         BOOST_REQUIRE(span.size() == 0);
@@ -58,10 +58,10 @@ namespace mikodev::binary::tests::implementations::simple_span_view_tests
     BOOST_AUTO_TEST_CASE(simple_span_view__slice_this__offset_length__size_zero)
     {
         auto data = std::shared_ptr<byte_t[]>(new byte_t[10]);
-        BOOST_REQUIRE(data.get() != nullptr);
+        BOOST_REQUIRE(data != nullptr);
         auto span = mki::simple_span_view(data, 10);
         BOOST_REQUIRE(span.size() == 10);
-        BOOST_REQUIRE(span.data() == data.get());
+        BOOST_REQUIRE(span.data() == &data[0]);
 
         span.slice_this(5, 0);
         BOOST_REQUIRE(span.size() == 0);

@@ -26,7 +26,7 @@ namespace mikodev::binary::tests::converters::native_converter_tests
         converter.encode(allocator, source);
         BOOST_REQUIRE_EQUAL(sizeof(TArgs), allocator.size());
 
-        auto view = allocator.dump_as_span_view();
+        auto view = allocator.as_span_view();
         auto result = converter.decode(view);
         BOOST_REQUIRE_EQUAL(source, result);
         BOOST_REQUIRE_EQUAL(sizeof(TArgs), view.size());

@@ -59,7 +59,7 @@ namespace mikodev::binary
         {
             // lifetime management via smart pointer
             std::unique_ptr<span_view_base> view = primitive_helper::decode_buffer_with_length_prefix(span);
-            return decode(*(view.get()));
+            return decode(*view);
         }
     };
 }

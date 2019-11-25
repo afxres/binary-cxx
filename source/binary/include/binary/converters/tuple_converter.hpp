@@ -94,7 +94,7 @@ namespace mikodev::binary::converters
         {
             // lifetime management via smart pointer
             std::unique_ptr<span_view_base> view = span.clone();
-            return _adapter_t::decode(*(view.get()), _converters);
+            return _adapter_t::decode(*view, _converters);
         }
 
         virtual std::tuple<TArgs ...> decode_auto(span_view_base& span) override

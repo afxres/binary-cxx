@@ -11,7 +11,7 @@ namespace mikodev::binary
 {
     using number_t = uint32_t;
 
-    using number_length_t = size_t;
+    using number_length_t = uint32_t;
 
     class primitive_helper
     {
@@ -101,15 +101,14 @@ namespace mikodev::binary
 
         static std::unique_ptr<span_view_base> decode_buffer_with_length_prefix(span_view_base& span)
         {
-            number_t length;
             number_length_t number_length;
             size_t limits = span.size();
             const byte_t* location = span.data();
-            if (limits == 0 || limits < (number_length = decode_number_length(*location)) || (limits - number_length) < (length = decode_number(location, number_length)))
+            if (limits == 0 || limits < (number_length = decode_number_length(*location)))
                 exceptions::throw_helper::throw_not_enough_bytes();
-
+            number_t length = decode_number(location, number_length);
             std::unique_ptr<span_view_base> view = span.slice(number_length, length);
-            span.slice_this(number_length + length);
+            span.slice_this(static_cast<size_t>(number_length) + static_cast<size_t>(length));
             return view;
         }
     };

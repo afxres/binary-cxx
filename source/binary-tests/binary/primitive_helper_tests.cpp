@@ -14,7 +14,7 @@ namespace mikodev::binary::tests::primitive_helper_tests
         auto allocator = mki::simple_allocator();
         primitive_helper::encode_number(allocator, number);
         BOOST_REQUIRE_EQUAL(size, allocator.size());
-        auto span = allocator.dump_as_span_view();
+        auto span = allocator.as_span_view();
         BOOST_REQUIRE_EQUAL(size, span.size());
         auto result = primitive_helper::decode_number(span);
         BOOST_REQUIRE_EQUAL(number, result);
