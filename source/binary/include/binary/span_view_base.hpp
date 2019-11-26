@@ -9,6 +9,8 @@ namespace mikodev::binary
     class span_view_base
     {
     public:
+        virtual ~span_view_base() {}
+
         virtual const byte_t* data() const noexcept = 0;
 
         virtual size_t size() const noexcept = 0;

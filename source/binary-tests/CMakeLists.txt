@@ -17,6 +17,7 @@ add_executable (
 	"binary/converters/native_converter_tests.cpp"
 	"binary/converters/pair_converter_tests.cpp"
 	"binary/converters/string_converter_tests.cpp"
+	"binary/converters/tuple_converter_tests.cpp"
 	"binary/implementations/simple_allocator_tests.cpp"
 	"binary/implementations/simple_span_view_tests.cpp"
 	"binary/primitive_helper_tests.cpp")

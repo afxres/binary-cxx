@@ -70,14 +70,12 @@ namespace mikodev::binary::tests::models
             return _hash < other._hash;
         }
 
-        friend std::ostream& operator<<(std::ostream& out, const test_type& other);
+        friend std::ostream& operator<<(std::ostream& out, const mikodev::binary::tests::models::test_type& other)
+        {
+            out << other.hash();
+            return out;
+        }
     };
-
-    std::ostream& operator<<(std::ostream& out, const mikodev::binary::tests::models::test_type& other)
-    {
-        out << other.hash();
-        return out;
-    }
 }
 
 template<>

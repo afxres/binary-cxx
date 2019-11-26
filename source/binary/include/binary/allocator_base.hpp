@@ -21,5 +21,8 @@ namespace mikodev::binary
         virtual size_t _make_anchor(size_t size) = 0;
 
         virtual byte_t* _make_append(size_t anchor, size_t size, size_t& out_offset) = 0;
+
+    public:
+        virtual ~allocator_base() {}
     };
 }

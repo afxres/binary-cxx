@@ -21,11 +21,10 @@ namespace mikodev::binary::converters
             static void encode(allocator_base& allocator, const TElms& item, const TCvts& converters)
             {
                 auto c = std::get<Is>(converters);
-                auto i = std::get<Is>(item);
                 if constexpr (!IsAuto && Is == _TUPLE_SIZE - 1)
-                    c->encode(allocator, i);
+                    c->encode(allocator, std::get<Is>(item));
                 else
-                    c->encode_auto(allocator, i);
+                    c->encode_auto(allocator, std::get<Is>(item));
                 if constexpr (Is != _TUPLE_SIZE - 1)
                     _adapter<TCvts, TElms, IsAuto, Is + 1>::encode(allocator, item, converters);
             }
@@ -36,11 +35,11 @@ namespace mikodev::binary::converters
                 auto i = (!IsAuto && Is == _TUPLE_SIZE - 1)
                     ? c->decode(span)
                     : c->decode_auto(span);
-                auto t = std::make_tuple(i);
+                auto t = std::make_tuple(std::move(i));
                 if constexpr (Is == _TUPLE_SIZE - 1)
                     return t;
                 else
-                    return std::tuple_cat(t, _adapter<TCvts, TElms, IsAuto, Is + 1>::decode(span, converters));
+                    return std::tuple_cat(std::move(t), _adapter<TCvts, TElms, IsAuto, Is + 1>::decode(span, converters));
             }
         };
 

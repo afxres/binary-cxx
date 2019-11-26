@@ -12,6 +12,8 @@ namespace mikodev::binary
 
         converter_abstract(size_t size) : _size(size) {}
 
+        virtual ~converter_abstract() {}
+
         size_t size() const noexcept { return _size; }
     };
 }

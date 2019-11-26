@@ -1,3 +1,6 @@
+#include "../../../models/test_type.hpp"
+#include "../../../models/test_type_converter.hpp"
+
 #include <boost/test/auto_unit_test.hpp>
 #include <boost/test/test_case_template.hpp>
 #include <boost/mpl/list.hpp>
@@ -5,9 +8,6 @@
 #include <list>
 #include <deque>
 #include <vector>
-
-#include "../../../models/test_type.hpp"
-#include "../../../models/test_type_converter.hpp"
 
 #include <binary/converters/native_converter.hpp>
 #include <binary/converters/pair_converter.hpp>

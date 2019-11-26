@@ -14,7 +14,7 @@ namespace mikodev::binary
     class allocator_helper
     {
     private:
-        allocator_helper() = default;
+        allocator_helper() = delete;
 
     public:
         static allocator_length_prefix_anchor_t anchor_length_prefix(allocator_base& allocator)
