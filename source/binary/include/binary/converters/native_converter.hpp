@@ -11,7 +11,7 @@ namespace mikodev::binary::converters
     class native_converter : public converter_base<T>
     {
     public:
-        native_converter() : converter_base(sizeof(T)) {}
+        native_converter() : converter_base<T>::converter_base(sizeof(T)) {}
 
         virtual void encode(allocator_base& allocator, const T& item) override
         {

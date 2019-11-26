@@ -1,13 +1,12 @@
 #pragma once
 
-#include <exception>
-#include <string>
+#include "application_exception.hpp"
 
 namespace mikodev::binary::exceptions
 {
-    class not_enough_bytes_exception : public std::exception
+    class not_enough_bytes_exception : public application_exception
     {
     public:
-        using exception::exception;
+        using application_exception::application_exception;
     };
 }

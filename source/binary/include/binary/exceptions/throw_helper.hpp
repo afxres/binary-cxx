@@ -3,6 +3,7 @@
 #include "argument_exception.hpp"
 #include "not_supported_exception.hpp"
 #include "not_enough_bytes_exception.hpp"
+#include "out_of_memory_exception.hpp"
 
 #include <exception>
 
@@ -20,6 +21,6 @@ namespace mikodev::binary::exceptions
 
         [[noreturn]] static void throw_not_enough_bytes() { throw not_enough_bytes_exception("not enough bytes."); }
 
-        [[noreturn]] static void throw_capacity_limited() { throw std::exception("maximum capacity has been reached."); }
+        [[noreturn]] static void throw_capacity_limited() { throw out_of_memory_exception("maximum capacity has been reached."); }
     };
 }

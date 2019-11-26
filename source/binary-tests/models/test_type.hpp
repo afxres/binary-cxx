@@ -1,5 +1,7 @@
 #pragma once
 
+#include <binary/exceptions/not_supported_exception.hpp>
+
 #include <boost/test/unit_test_log.hpp>
 
 namespace mikodev::binary::tests::models
@@ -28,7 +30,7 @@ namespace mikodev::binary::tests::models
 
         test_type(const test_type& other)
         {
-            throw std::exception("invalid operation, copy constructor called!");
+            throw exceptions::not_supported_exception("invalid operation, copy constructor called!");
         }
 
         test_type(test_type&& other) noexcept

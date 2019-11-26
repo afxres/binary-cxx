@@ -9,7 +9,7 @@ namespace mikodev::binary
     class converter_base : public converter_template<T>
     {
     public:
-        using converter_template::converter_template;
+        using converter_template<T>::converter_template;
 
         virtual void encode_auto(allocator_base& allocator, const T& item)
         {
@@ -45,13 +45,13 @@ namespace mikodev::binary
             if (size == 0)
             {
                 allocator_length_prefix_anchor_t anchor = allocator_helper::anchor_length_prefix(allocator);
-                encode(allocator, item);
+                this->encode(allocator, item);
                 allocator_helper::append_length_prefix(allocator, anchor);
             }
             else
             {
                 primitive_helper::encode_number(allocator, size);
-                encode(allocator, item);
+                this->encode(allocator, item);
             }
         }
 
@@ -59,7 +59,7 @@ namespace mikodev::binary
         {
             // lifetime management via smart pointer
             std::unique_ptr<span_view_base> view = primitive_helper::decode_buffer_with_length_prefix(span);
-            return decode(*view);
+            return this->decode(*view);
         }
     };
 }

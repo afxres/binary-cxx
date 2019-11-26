@@ -4,6 +4,8 @@
 #include "primitive_helper.hpp"
 #include "exceptions/throw_helper.hpp"
 
+#include <cstring>
+
 namespace mikodev::binary
 {
     using allocator_length_prefix_anchor_t = size_t;

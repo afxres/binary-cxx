@@ -75,7 +75,7 @@ namespace mikodev::binary::converters
         _tuple_converter_shared_ptr_t _converters;
 
     public:
-        tuple_converter(std::tuple<std::shared_ptr<converter_base<TArgs>> ...> converters) : converter_base(_size(converters)), _converters(converters) {}
+        tuple_converter(std::tuple<std::shared_ptr<converter_base<TArgs>> ...> converters) : converter_base<std::tuple<TArgs ...>>::converter_base(_size(converters)), _converters(converters) {}
 
         tuple_converter(std::shared_ptr<converter_base<TArgs>> ... converters) : tuple_converter(std::make_tuple(converters ...)) {}
 

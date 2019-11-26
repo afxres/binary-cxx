@@ -1,13 +1,12 @@
 #pragma once
 
-#include <exception>
-#include <string>
+#include "application_exception.hpp"
 
 namespace mikodev::binary::exceptions
 {
-    class argument_exception : public std::exception
+    class argument_exception : public application_exception
     {
     public:
-        using exception::exception;
+        using application_exception::application_exception;
     };
 }
