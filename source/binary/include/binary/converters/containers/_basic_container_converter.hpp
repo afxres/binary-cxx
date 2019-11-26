@@ -6,7 +6,7 @@
 
 namespace mikodev::binary::converters::containers
 {
-    template <typename _Container, typename _Element, template<typename, typename> typename _Adder>
+    template <typename _Container, typename _Element, template<typename, typename> typename _Adder, template<typename, typename> typename _Counter>
     class _basic_container_converter : public converter_base<_Container>
     {
     private:
@@ -28,6 +28,7 @@ namespace mikodev::binary::converters::containers
             span_view_base& data = *view;
             converter_base<_Element>& converter = *_converter;
             _Container container;
+            _Counter<_Container, _Element>::reserve(container, converter, data);
             while (data.size() != 0)
                 _Adder<_Container, _Element>::add(container, converter.decode_auto(data));
             return container;

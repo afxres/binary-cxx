@@ -22,6 +22,8 @@ namespace mikodev::binary::converters
     public:
         pair_converter(std::pair<std::shared_ptr<converter_base<_Ty1>>, std::shared_ptr<converter_base<_Ty2>>> converters) : converter_base(_size(converters)), _converters(converters) {}
 
+        pair_converter(std::shared_ptr<converter_base<_Ty1>> converter_1, std::shared_ptr<converter_base<_Ty2>> converter_2) : pair_converter(std::make_pair(converter_1, converter_2)) {}
+
         virtual void encode(allocator_base& allocator, const std::pair<_Ty1, _Ty2>& item) override
         {
             converter_base<_Ty1>& converter_1 = *(_converters.first);
