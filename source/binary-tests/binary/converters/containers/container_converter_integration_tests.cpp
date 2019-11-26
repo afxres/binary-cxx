@@ -15,10 +15,10 @@
 #include <binary/converters/containers/list_converter.hpp>
 #include <binary/converters/containers/deque_converter.hpp>
 #include <binary/converters/containers/vector_converter.hpp>
+#include <binary/converters/containers/map_converter.hpp>
 #include <binary/converters/containers/set_converter.hpp>
 #include <binary/converters/containers/unordered_map_converter.hpp>
 #include <binary/converters/containers/unordered_set_converter.hpp>
-#include <binary/converters/containers/map_converter.hpp>
 #include <binary/implementations/simple_allocator.hpp>
 
 namespace mikodev::binary::tests::converters::containers::integration_tests
@@ -117,7 +117,9 @@ namespace mikodev::binary::tests::converters::containers::integration_tests
         BOOST_REQUIRE_EQUAL(32, view.size());
         auto result = converter.decode(view);
         BOOST_REQUIRE_EQUAL(32, view.size());
-        BOOST_REQUIRE_EQUAL_COLLECTIONS(source.begin(), source.end(), result.begin(), result.end());
+        for (const models::test_type& i : source)
+            BOOST_REQUIRE(result.find(i) != result.end());
+        BOOST_REQUIRE_EQUAL(source.size(), result.size());
     }
 
     BOOST_AUTO_TEST_CASE(container__map__encode_decode)
