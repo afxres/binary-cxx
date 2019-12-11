@@ -331,3 +331,6 @@ ASALocalRun/
 
 # CMake output
 out/
+
+# CMake settings
+CMakeSettings.json
