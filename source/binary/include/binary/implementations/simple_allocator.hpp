@@ -31,11 +31,11 @@ namespace mikodev::binary::implementations
             if (amount >= _max_capacity)
                 exceptions::throw_helper::throw_capacity_limited();
 
-            const size_t initial_capacity = 0x80;
+            const size_t initial_capacity = 0x40;
             if (bounds == 0)
                 bounds = initial_capacity;
             do
-                bounds *= 2;
+                bounds <<= 2;
             while (bounds < amount);
 
             std::shared_ptr<byte_t[]> new_data(new byte_t[bounds]);
