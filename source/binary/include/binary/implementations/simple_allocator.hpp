@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../allocator_base.hpp"
+#include "../primitive_helper.hpp"
 #include "../exceptions/throw_helper.hpp"
 #include "simple_span_view.hpp"
 
@@ -80,7 +81,7 @@ namespace mikodev::binary::implementations
         simple_span_view as_span_view() const noexcept { return simple_span_view(_data, _offset); }
 
     protected:
-        virtual byte_t* _allocate(size_t size) override
+        virtual auto assign(size_t size)->byte_t* override
         {
             assert(size != 0);
             ensure_capacity(size);
@@ -89,38 +90,34 @@ namespace mikodev::binary::implementations
             return &_data[origin];
         }
 
-        virtual byte_t* _allocate_without_increase_offset(size_t size) override
+        virtual auto anchor_length_prefix()->size_t override
         {
-            assert(size != 0);
-            ensure_capacity(size);
-            return &_data[_offset];
-        }
-
-        virtual void _increase_offset(size_t size) override
-        {
-            assert(size != 0);
-            assert(_bounds > _offset);
-            assert(_bounds - _offset >= size);
-            _offset += size;
-        }
-
-        virtual size_t _make_anchor(size_t size) override
-        {
-            assert(size != 0);
             size_t offset = _offset;
-            ensure_capacity(size);
-            _offset = offset + size;
+            ensure_capacity(sizeof(number_t));
+            _offset = offset + sizeof(number_t);
             return offset;
         }
 
-        virtual byte_t* _make_append(size_t anchor, size_t size, size_t& out_offset) override
+        virtual void append_length_prefix(size_t anchor) override
         {
-            assert(size != 0);
             size_t offset = _offset;
-            if (anchor > offset || size > offset - anchor)
+            if (anchor > offset || sizeof(number_t) > offset - anchor)
                 exceptions::throw_helper::throw_argument_exception();
-            out_offset = offset;
-            return &_data[anchor];
+            size_t length = offset - anchor - sizeof(number_t);
+            assert(length >= 0);
+            byte_t* target = &_data[anchor];
+            const size_t limits = 32;
+            if (length < limits)
+            {
+                if (length > 0)
+                    std::memmove(target + sizeof(byte_t), target + sizeof(number_t), length);
+                *target = static_cast<byte_t>(length);
+                _offset = offset - (sizeof(number_t) - sizeof(byte_t));
+            }
+            else
+            {
+                primitive_helper::encode_number_fixed4(&_data[anchor], length);
+            }
         }
     };
 }

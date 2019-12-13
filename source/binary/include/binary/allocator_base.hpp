@@ -12,15 +12,11 @@ namespace mikodev::binary
         friend class primitive_helper;
 
     protected:
-        virtual byte_t* _allocate(size_t size) = 0;
+        virtual auto assign(size_t size)->byte_t* = 0;
 
-        virtual byte_t* _allocate_without_increase_offset(size_t size) = 0;
+        virtual auto anchor_length_prefix()->size_t = 0;
 
-        virtual void _increase_offset(size_t size) = 0;
-
-        virtual size_t _make_anchor(size_t size) = 0;
-
-        virtual byte_t* _make_append(size_t anchor, size_t size, size_t& out_offset) = 0;
+        virtual void append_length_prefix(size_t anchor) = 0;
 
     public:
         virtual ~allocator_base() {}

@@ -21,22 +21,19 @@ namespace mikodev::binary
     public:
         static allocator_length_prefix_anchor_t anchor_length_prefix(allocator_base& allocator)
         {
-            return static_cast<allocator_length_prefix_anchor_t>(allocator._make_anchor(sizeof(number_t)));
+            return static_cast<allocator_length_prefix_anchor_t>(allocator.anchor_length_prefix());
         }
 
         static void append_length_prefix(allocator_base& allocator, allocator_length_prefix_anchor_t anchor)
         {
-            size_t offset;
-            byte_t* location = allocator._make_append(static_cast<size_t>(anchor), sizeof(number_t), offset);
-            size_t origin = static_cast<size_t>(anchor) + sizeof(number_t);
-            primitive_helper::encode_number_fixed4(location, static_cast<number_t>(offset - origin));
+            allocator.append_length_prefix(static_cast<size_t>(anchor));
         }
 
         static void append(allocator_base& allocator, const void* data, size_t size)
         {
             if (size == 0)
                 return;
-            byte_t* location = allocator._allocate(size);
+            byte_t* location = allocator.assign(size);
             std::memcpy(location, data, size);
         }
 
@@ -47,9 +44,8 @@ namespace mikodev::binary
                 exceptions::throw_helper::throw_argument_exception();
             if (size == 0)
                 return;
-            byte_t* data = allocator._allocate_without_increase_offset(size);
+            byte_t* data = allocator.assign(size);
             action(data, size, item);
-            allocator._increase_offset(size);
         }
     };
 }
