@@ -1,11 +1,6 @@
-﻿cmake_minimum_required (VERSION 3.8)
-
-project ("binary-cxx")
-
-add_subdirectory ("binary")
-
-add_subdirectory ("binary-tests")
-
-enable_testing ()
-
-add_test (NAME "BINARY_TESTS" COMMAND "binary-tests")
+﻿cmake_minimum_required(VERSION 3.8)
+project("binary-cxx")
+add_subdirectory("binary")
+add_subdirectory("binary-tests")
+enable_testing()
+add_test(NAME "BINARY_TESTS" COMMAND "binary-tests")
