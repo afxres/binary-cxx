@@ -1,4 +1,4 @@
-#include <boost/test/auto_unit_test.hpp>
+#include <boost/test/unit_test.hpp>
 
 #include <binary/converters/native_converter.hpp>
 #include <binary/converters/pair_converter.hpp>

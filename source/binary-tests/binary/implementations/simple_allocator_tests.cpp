@@ -1,4 +1,4 @@
-#include <boost/test/auto_unit_test.hpp>
+#include <boost/test/unit_test.hpp>
 
 #include <binary/allocator_helper.hpp>
 #include <binary/implementations/simple_allocator.hpp>

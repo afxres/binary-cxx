@@ -1,8 +1,7 @@
 #include "../../../models/test_type.hpp"
 #include "../../../models/test_type_converter.hpp"
 
-#include <boost/test/auto_unit_test.hpp>
-#include <boost/test/test_case_template.hpp>
+#include <boost/test/unit_test.hpp>
 #include <boost/mpl/list.hpp>
 
 #include <list>

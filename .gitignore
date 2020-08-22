@@ -334,3 +334,6 @@ out/
 
 # CMake settings
 CMakeSettings.json
+
+# CMake files
+CMakeFiles/

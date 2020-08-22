@@ -1,4 +1,4 @@
-#include <boost/test/auto_unit_test.hpp>
+#include <boost/test/unit_test.hpp>
 
 #include <binary/implementations/simple_span_view.hpp>
 
