@@ -1,5 +1,5 @@
+#include <boost/test/unit_test.hpp>
 #include <boost/test/data/test_case.hpp>
-#include <boost/test/test_case_template.hpp>
 #include <boost/mpl/list.hpp>
 
 #include <binary/implementations/simple_allocator.hpp>
