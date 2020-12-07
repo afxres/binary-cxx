@@ -1,6 +1,7 @@
 #pragma once
 
 #include "argument_exception.hpp"
+#include "argument_null_exception.hpp"
 #include "not_supported_exception.hpp"
 #include "not_enough_bytes_exception.hpp"
 #include "out_of_memory_exception.hpp"
@@ -15,12 +16,16 @@ namespace mikodev::binary::exceptions
         throw_helper() = delete;
 
     public:
-        [[noreturn]] static void throw_argument_exception() { throw argument_exception("invalid argument."); }
+        [[noreturn]] static void throw_argument_exception() { throw argument_exception("argument invalid."); }
+
+        [[noreturn]] static void throw_argument_null_exception() { throw argument_null_exception("argument can not be null."); }
 
         [[noreturn]] static void throw_not_supported() { throw not_supported_exception("not supported or not implemented."); }
 
         [[noreturn]] static void throw_not_enough_bytes() { throw not_enough_bytes_exception("not enough bytes."); }
 
         [[noreturn]] static void throw_capacity_limited() { throw out_of_memory_exception("maximum capacity has been reached."); }
+
+        [[noreturn]] static void throw_out_of_memory() { throw out_of_memory_exception("out of memory."); }
     };
 }
