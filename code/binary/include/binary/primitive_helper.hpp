@@ -1,7 +1,9 @@
 #pragma once
 
+#include "endian.hpp"
 #include "allocator_base.hpp"
 #include "span_view_base.hpp"
+
 #include "exceptions/throw_helper.hpp"
 
 #include <cassert>
@@ -37,19 +39,9 @@ namespace mikodev::binary
             return result + 1;
         }
 
-        static void encode_number_fixed4(byte_t* data, number_t number)
-        {
-            assert(number >= 0 && number <= INT32_MAX);
-
-            data[0] = static_cast<byte_t>((number >> 24) | 0x80);
-            data[1] = static_cast<byte_t>(number >> 16);
-            data[2] = static_cast<byte_t>(number >> 8);
-            data[3] = static_cast<byte_t>(number);
-        }
-
         static void encode_number(byte_t* data, number_length_t length, number_t number)
         {
-            assert(number >= 0 && number <= INT32_MAX);
+            assert(number >= 0 && number <= std::numeric_limits<int32_t>::max());
             assert(length == 1 || length == 2 || length == 4);
 
             if (length == 1)
@@ -58,12 +50,11 @@ namespace mikodev::binary
             }
             else if (length == 2)
             {
-                data[0] = static_cast<byte_t>((number >> 8) | 0x40);
-                data[1] = static_cast<byte_t>(number);
+                *reinterpret_cast<uint16_t*>(data) = endian<uint16_t>::ensure_big_endian(number | 0x4000U);
             }
             else
             {
-                encode_number_fixed4(data, number);
+                *reinterpret_cast<uint32_t*>(data) = endian<uint32_t>::ensure_big_endian(number | 0x8000'0000U);
             }
         }
 
@@ -80,7 +71,7 @@ namespace mikodev::binary
 
         static void encode_number(allocator_base& allocator, size_t number)
         {
-            if (number > INT32_MAX)
+            if (number > std::numeric_limits<int32_t>::max())
                 exceptions::throw_helper::throw_argument_exception();
             number_length_t length = encode_number_length(static_cast<number_t>(number));
             byte_t* location = allocator.assign(length);

@@ -24,7 +24,7 @@ namespace mikodev::binary
 
         virtual ~span() = default;
 
-        data_t buffer() { return buffer_->buffer() + offset_; }
+        byte_ptr buffer() { return buffer_->buffer() + offset_; }
 
         size_t length() { return length_; }
 

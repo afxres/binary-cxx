@@ -3,6 +3,7 @@
 #include "../allocator_base.hpp"
 #include "../primitive_helper.hpp"
 #include "../exceptions/throw_helper.hpp"
+
 #include "simple_span_view.hpp"
 
 #include <cmath>
@@ -116,7 +117,7 @@ namespace mikodev::binary::implementations
             }
             else
             {
-                primitive_helper::encode_number_fixed4(&_data[anchor], length);
+                primitive_helper::encode_number(&_data[anchor], 4, length);
             }
         }
     };

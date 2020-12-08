@@ -1,11 +1,11 @@
 #pragma once
 
+#include "define.hpp"
+
 #include <memory>
 
 namespace mikodev::binary
 {
-    using byte_t = unsigned char;
-
     class span_view_base
     {
     public:
