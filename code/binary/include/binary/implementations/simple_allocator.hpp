@@ -44,7 +44,7 @@ namespace mikodev::binary::implementations
             std::shared_ptr<byte_t[]> old_data = std::move(_data);
             if (_offset != 0)
                 std::memcpy(&new_data[0], &old_data[0], _offset);
-            _data = std::move(new_data);
+            _data = new_data;
             _bounds = bounds;
         }
 

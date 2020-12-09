@@ -10,7 +10,9 @@ namespace mikodev::binary
     class allocator
     {
     private:
-        abstract_buffer_ptr buffer_;
+        abstract_buffer_ptr shared_;
+
+        byte_ptr buffer_;
 
         size_t offset_;
 
@@ -33,28 +35,30 @@ namespace mikodev::binary
                 bounds <<= 2;
             while (bounds < amount);
 
-            abstract_buffer_ptr buffer_new = allocator.buffer_->create(bounds);
-            abstract_buffer_ptr buffer_old = std::move(allocator.buffer_);
+            abstract_buffer_ptr buffer_new = allocator.shared_->create(bounds);
+            abstract_buffer_ptr buffer_old = std::move(allocator.shared_);
             if (allocator.offset_ > 0)
                 std::memcpy(buffer_new->buffer(), buffer_old->buffer(), allocator.offset_);
-            allocator.buffer_ = std::move(buffer_new);
+            allocator.buffer_ = buffer_new->buffer();
+            allocator.shared_ = buffer_new;
             allocator.bounds_ = bounds;
         }
 
     public:
-        allocator(abstract_buffer_ptr buffer, size_t max_capacity)
+        allocator(abstract_buffer_ptr shared, size_t max_capacity)
         {
-            if (buffer == nullptr)
+            if (shared == nullptr)
                 exceptions::throw_helper::throw_argument_null_exception();
             if (max_capacity > std::numeric_limits<int32_t>::max())
                 exceptions::throw_helper::throw_argument_exception();
-            buffer_ = buffer;
+            buffer_ = shared->buffer();
+            bounds_ = shared->length();
+            shared_ = shared;
             offset_ = 0;
-            bounds_ = buffer->length();
             limits_ = max_capacity;
         }
 
-        allocator(abstract_buffer_ptr buffer) : allocator(buffer, std::numeric_limits<int32_t>::max()) {}
+        allocator(abstract_buffer_ptr shared) : allocator(shared, std::numeric_limits<int32_t>::max()) {}
 
         allocator(allocator&&) = delete;
 
