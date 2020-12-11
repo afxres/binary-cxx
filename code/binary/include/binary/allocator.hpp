@@ -1,15 +1,18 @@
 #pragma once
 
 #include "abstract_buffer.hpp"
+#include "exceptions/throw_helper.hpp"
 
 #include <cassert>
 #include <cstring>
 
 namespace mikodev::binary
 {
-    class allocator
+    class allocator final
     {
     private:
+        static const size_t max_supported_capacity = static_cast<size_t>(std::numeric_limits<int32_t>::max());
+
         abstract_buffer_ptr shared_;
 
         byte_ptr buffer_;
@@ -22,26 +25,37 @@ namespace mikodev::binary
 
         static void resize(allocator& allocator, size_t length)
         {
-            assert(length > 0);
-            size_t bounds = allocator.bounds_;
-            uintmax_t amount = bounds + length;
-            if (amount >= allocator.limits_)
+            assert(allocator.bounds_ <= allocator.shared_->length());
+            assert(allocator.limits_ <= max_supported_capacity);
+            assert(allocator.bounds_ <= max_supported_capacity);
+            assert(allocator.offset_ <= allocator.bounds_);
+            if (length == 0 || length > max_supported_capacity)
+                exceptions::throw_helper::throw_argument_out_of_range_exception();
+            size_t offset = allocator.offset_;
+            size_t limits = allocator.limits_;
+            size_t amount = offset + length;
+            if (amount > limits)
                 exceptions::throw_helper::throw_capacity_limited();
 
-            const size_t initial_capacity = 0x40;
-            if (bounds == 0)
-                bounds = initial_capacity;
+            size_t cursor = allocator.bounds_;
+            const size_t initial = 64;
+            if (cursor == 0)
+                cursor = initial;
             do
-                bounds <<= 2;
-            while (bounds < amount);
+                cursor <<= 2;
+            while (cursor < amount);
+            if (cursor > limits)
+                cursor = limits;
+            assert(amount <= cursor);
+            assert(cursor <= limits);
 
-            abstract_buffer_ptr buffer_new = allocator.shared_->create(bounds);
+            abstract_buffer_ptr buffer_new = allocator.shared_->create(cursor);
             abstract_buffer_ptr buffer_old = std::move(allocator.shared_);
-            if (allocator.offset_ > 0)
-                std::memcpy(buffer_new->buffer(), buffer_old->buffer(), allocator.offset_);
+            if (offset > 0)
+                std::memcpy(buffer_new->buffer(), buffer_old->buffer(), offset);
             allocator.buffer_ = buffer_new->buffer();
             allocator.shared_ = buffer_new;
-            allocator.bounds_ = bounds;
+            allocator.bounds_ = cursor;
         }
 
     public:
@@ -49,8 +63,8 @@ namespace mikodev::binary
         {
             if (shared == nullptr)
                 exceptions::throw_helper::throw_argument_null_exception();
-            if (max_capacity > std::numeric_limits<int32_t>::max())
-                exceptions::throw_helper::throw_argument_exception();
+            if (max_capacity > max_supported_capacity)
+                exceptions::throw_helper::throw_argument_out_of_range_exception();
             buffer_ = shared->buffer();
             bounds_ = shared->length();
             shared_ = shared;
@@ -58,13 +72,13 @@ namespace mikodev::binary
             limits_ = max_capacity;
         }
 
-        allocator(abstract_buffer_ptr shared) : allocator(shared, std::numeric_limits<int32_t>::max()) {}
+        allocator(abstract_buffer_ptr shared) : allocator(shared, max_supported_capacity) {}
 
-        allocator(allocator&&) = delete;
+        size_t length() const noexcept { return offset_; }
 
-        allocator(const allocator&) = delete;
+        size_t capacity() const noexcept { return bounds_; }
 
-        virtual ~allocator() = default;
+        size_t max_capacity() const noexcept { return limits_; }
 
         static inline void ensure(allocator& allocator, size_t length)
         {
@@ -74,6 +88,12 @@ namespace mikodev::binary
             if (allocator.bounds_ - allocator.offset_ >= length)
                 return;
             resize(allocator, length);
+        }
+
+        static inline void expand(allocator& allocator, size_t length)
+        {
+            ensure(allocator, length);
+            allocator.offset_ += length;
         }
     };
 }

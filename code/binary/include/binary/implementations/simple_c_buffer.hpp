@@ -4,7 +4,7 @@
 
 namespace mikodev::binary::implementations
 {
-    class simple_c_buffer : public abstract_buffer
+    class simple_c_buffer final : public abstract_buffer
     {
     private:
         byte_ptr buffer_;
@@ -16,9 +16,9 @@ namespace mikodev::binary::implementations
     public:
         simple_c_buffer() : simple_c_buffer(nullptr, 0) {}
 
-        simple_c_buffer(simple_c_buffer&& _) = delete;
+        simple_c_buffer(simple_c_buffer&&) = delete;
 
-        simple_c_buffer(const simple_c_buffer& _) = delete;
+        simple_c_buffer(const simple_c_buffer&) = delete;
 
         virtual byte_ptr buffer() override { return buffer_; }
 
