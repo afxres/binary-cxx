@@ -1,6 +1,6 @@
 #pragma once
 
-#include <cstddef>
+#include <cstdint>
 
 namespace mikodev::binary
 {
@@ -9,4 +9,8 @@ namespace mikodev::binary
     using byte_ptr = byte_t*;
 
     using const_byte_ptr = const byte_t*;
+
+    using length_t = uint32_t;
+
+    const length_t length_max = static_cast<length_t>(std::numeric_limits<int32_t>::max());
 }

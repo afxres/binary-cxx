@@ -10,8 +10,6 @@ namespace mikodev::binary
 {
     using number_t = uint32_t;
 
-    using length_t = uint32_t;
-
     class number
     {
     private:
@@ -20,8 +18,6 @@ namespace mikodev::binary
         friend class allocator;
 
         friend class converter;
-
-        static const size_t max_supported_size = static_cast<size_t>(std::numeric_limits<int32_t>::max());
 
         template <typename T>
         static void encode(byte_ptr buffer, T data)
@@ -33,7 +29,7 @@ namespace mikodev::binary
         {
             assert(length == 1 || length == 4);
             assert(length >= encode_length(number));
-            assert(static_cast<size_t>(number) <= max_supported_size);
+            assert(static_cast<length_t>(number) <= length_max);
             if (length == 1)
                 encode<uint8_t>(buffer, static_cast<uint8_t>(number));
             else
@@ -46,7 +42,7 @@ namespace mikodev::binary
             return endian<T>::ensure_big_endian(*reinterpret_cast<const T*>(buffer));
         }
 
-        static number_t decode(const_byte_ptr buffer, size_t& offset, size_t limits)
+        static number_t decode(const_byte_ptr buffer, length_t& offset, length_t limits)
         {
             assert(limits >= offset);
             if (limits == offset)
@@ -64,12 +60,12 @@ namespace mikodev::binary
             return static_cast<number_t>(result & 0x7FFF'FFFU);
         }
 
-        static number_t decode_ensure_buffer(const_byte_ptr buffer, size_t& offset, size_t limits)
+        static length_t decode_ensure_buffer(const_byte_ptr buffer, length_t& offset, length_t limits)
         {
             assert(limits >= offset);
-            number_t length = decode(buffer, offset, limits);
+            length_t length = static_cast<length_t>(decode(buffer, offset, limits));
             assert(limits >= offset);
-            if (limits - offset < static_cast<size_t>(length))
+            if (limits - offset < length)
                 exceptions::throw_helper::throw_not_enough_bytes();
             return length;
         }
@@ -77,7 +73,7 @@ namespace mikodev::binary
     public:
         static length_t encode_length(number_t number)
         {
-            assert(static_cast<size_t>(number) <= max_supported_size);
+            assert(static_cast<length_t>(number) <= length_max);
             if ((static_cast<uint32_t>(number) >> 7) == 0)
                 return 1;
             else

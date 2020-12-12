@@ -13,7 +13,7 @@ namespace mikodev::binary::tests::allocator_tests
 {
     BOOST_AUTO_TEST_CASE(allocator__constructor__buffer)
     {
-        for (size_t i = 0; i <= 1024; i++)
+        for (uint32_t i = 0; i <= 1024; i++)
         {
             mk::abstract_buffer_ptr buffer = mki::simple_c_buffer().create(i);
             mk::allocator allocator(buffer);
@@ -50,8 +50,8 @@ namespace mikodev::binary::tests::allocator_tests
     BOOST_AUTO_TEST_CASE(allocator__constructor__max_capacity_error)
     {
         mk::abstract_buffer_ptr buffer = mki::simple_c_buffer().create(0);
-        std::vector<size_t> list = { 0x8000'0000, 0xFFFF'FFFF };
-        for (size_t i : list)
+        std::vector<uint32_t> list = { 0x8000'0000, 0xFFFF'FFFF };
+        for (uint32_t i : list)
         {
             BOOST_REQUIRE_EXCEPTION(
                 ([buffer, i]() { mk::allocator allocator(buffer, i); })(),

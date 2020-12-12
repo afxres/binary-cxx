@@ -1,5 +1,7 @@
 #pragma once
 
+#include "define.hpp"
+
 #include <memory>
 
 namespace mikodev::binary
@@ -11,15 +13,15 @@ namespace mikodev::binary
     class abstract_converter_interface
     {
     private:
-        size_t length_;
+        length_t length_;
 
     public:
         abstract_converter_interface() : abstract_converter_interface(0) {}
 
-        abstract_converter_interface(size_t length) : length_(length) {}
+        abstract_converter_interface(length_t length) : length_(length) {}
 
         virtual ~abstract_converter_interface() {}
 
-        size_t length() const noexcept { return length_; }
+        length_t length() const noexcept { return length_; }
     };
 }

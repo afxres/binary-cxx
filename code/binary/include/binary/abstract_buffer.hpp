@@ -17,8 +17,8 @@ namespace mikodev::binary
 
         virtual byte_ptr buffer() = 0;
 
-        virtual size_t length() = 0;
+        virtual length_t length() = 0;
 
-        virtual abstract_buffer_ptr create(size_t length) = 0;
+        virtual abstract_buffer_ptr create(length_t length) = 0;
     };
 }

@@ -9,9 +9,9 @@ namespace mikodev::binary::implementations
     private:
         byte_ptr buffer_;
 
-        size_t length_;
+        length_t length_;
 
-        simple_c_buffer(byte_ptr buffer, size_t length) : buffer_(buffer), length_(length) {}
+        simple_c_buffer(byte_ptr buffer, length_t length) : buffer_(buffer), length_(length) {}
 
     public:
         simple_c_buffer() : simple_c_buffer(nullptr, 0) {}
@@ -22,7 +22,7 @@ namespace mikodev::binary::implementations
 
         virtual byte_ptr buffer() override { return buffer_; }
 
-        virtual size_t length() override { return length_; }
+        virtual length_t length() override { return length_; }
 
         virtual ~simple_c_buffer() override
         {
@@ -33,7 +33,7 @@ namespace mikodev::binary::implementations
             length_ = 0;
         }
 
-        virtual abstract_buffer_ptr create(size_t length) override
+        virtual abstract_buffer_ptr create(length_t length) override
         {
             if (length == 0)
                 return std::make_shared<simple_c_buffer>();
