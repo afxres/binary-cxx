@@ -7,6 +7,8 @@ namespace mikodev::binary
 {
     class span final
     {
+        friend class converter;
+
     private:
         abstract_buffer_ptr shared_;
 
@@ -15,6 +17,21 @@ namespace mikodev::binary
         size_t length_;
 
         span(abstract_buffer_ptr shared, const_byte_ptr buffer, size_t length) : shared_(shared), buffer_(buffer), length_(length) {}
+
+        span __slice_unchecked__(size_t offset, size_t length)
+        {
+            assert(offset <= length_);
+            assert(length <= length_);
+            assert(offset + length <= length_);
+            return span(shared_, buffer_ + offset, length_ - offset);
+        }
+
+        static void __slice_in_place_unchecked__(span& span, size_t offset)
+        {
+            assert(offset <= span.length_);
+            span.buffer_ += offset;
+            span.length_ -= offset;
+        }
 
     public:
         span() : span(nullptr, nullptr, 0) {}

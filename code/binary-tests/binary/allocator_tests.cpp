@@ -23,7 +23,7 @@ namespace mikodev::binary::tests::allocator_tests
         }
     }
 
-    bool __constructor__buffer_null_filter(const mke::argument_null_exception& e)
+    bool __constructor__buffer_null__filter(const mke::argument_null_exception& e)
     {
         BOOST_TEST_MESSAGE(e.what());
         return std::string(e.what()) == std::string("argument can not be null.");
@@ -34,14 +34,14 @@ namespace mikodev::binary::tests::allocator_tests
         BOOST_REQUIRE_EXCEPTION(
             ([]() { mk::allocator allocator(nullptr); })(),
             mke::argument_null_exception,
-            __constructor__buffer_null_filter);
+            __constructor__buffer_null__filter);
         BOOST_REQUIRE_EXCEPTION(
             ([]() { mk::allocator allocator(nullptr, 256); })(),
             mke::argument_null_exception,
-            __constructor__buffer_null_filter);
+            __constructor__buffer_null__filter);
     }
 
-    bool __constructor__max_capacity_error_filter(const mke::argument_out_of_range_exception& e)
+    bool __constructor__max_capacity_error__filter(const mke::argument_out_of_range_exception& e)
     {
         BOOST_TEST_MESSAGE(e.what());
         return std::string(e.what()) == std::string("argument out of range.");
@@ -56,7 +56,7 @@ namespace mikodev::binary::tests::allocator_tests
             BOOST_REQUIRE_EXCEPTION(
                 ([buffer, i]() { mk::allocator allocator(buffer, i); })(),
                 mke::argument_out_of_range_exception,
-                __constructor__max_capacity_error_filter);
+                __constructor__max_capacity_error__filter);
         }
     }
 
