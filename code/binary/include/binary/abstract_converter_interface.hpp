@@ -1,6 +1,7 @@
 #pragma once
 
 #include "define.hpp"
+#include "exceptions/throw_helper.hpp"
 
 #include <memory>
 
@@ -16,9 +17,14 @@ namespace mikodev::binary
         length_t length_;
 
     public:
-        abstract_converter_interface() : abstract_converter_interface(0) {}
+        abstract_converter_interface(length_t length)
+        {
+            if (length > length_max)
+                exceptions::throw_helper::throw_argument_out_of_range_exception();
+            length_ = length;
+        }
 
-        abstract_converter_interface(length_t length) : length_(length) {}
+        abstract_converter_interface() : abstract_converter_interface(0) {}
 
         virtual ~abstract_converter_interface() {}
 
