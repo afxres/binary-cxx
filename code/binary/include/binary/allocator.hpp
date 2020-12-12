@@ -107,7 +107,7 @@ namespace mikodev::binary
             if (max_capacity > length_max)
                 exceptions::throw_helper::throw_argument_out_of_range_exception();
             buffer_ = shared->buffer();
-            bounds_ = shared->length();
+            bounds_ = std::min(max_capacity, shared->length());
             shared_ = shared;
             offset_ = 0;
             limits_ = max_capacity;

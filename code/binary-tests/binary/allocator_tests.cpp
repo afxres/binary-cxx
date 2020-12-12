@@ -13,7 +13,7 @@ namespace mikodev::binary::tests::allocator_tests
 {
     BOOST_AUTO_TEST_CASE(allocator__constructor__buffer)
     {
-        for (uint32_t i = 0; i <= 1024; i++)
+        for (length_t i = 0; i <= 1024; i++)
         {
             mk::abstract_buffer_ptr buffer = mki::simple_c_buffer().create(i);
             mk::allocator allocator(buffer);
@@ -50,13 +50,39 @@ namespace mikodev::binary::tests::allocator_tests
     BOOST_AUTO_TEST_CASE(allocator__constructor__max_capacity_error)
     {
         mk::abstract_buffer_ptr buffer = mki::simple_c_buffer().create(0);
-        std::vector<uint32_t> list = { 0x8000'0000, 0xFFFF'FFFF };
-        for (uint32_t i : list)
+        std::vector<length_t> vector = { 0x8000'0000, 0xFFFF'FFFF };
+        for (length_t i : vector)
         {
             BOOST_REQUIRE_EXCEPTION(
                 ([buffer, i]() { mk::allocator allocator(buffer, i); })(),
                 mke::argument_out_of_range_exception,
                 __constructor__max_capacity_error__filter);
+        }
+    }
+
+    BOOST_AUTO_TEST_CASE(allocator__constructor__max_capacity_little_than_buffer_length)
+    {
+        mk::abstract_buffer_ptr buffer = mki::simple_c_buffer().create(1024);
+        std::vector<length_t> vector = { 0, 128, 768 };
+        for (length_t i : vector)
+        {
+            mk::allocator allocator(buffer, i);
+            BOOST_REQUIRE_EQUAL(allocator.length(), 0);
+            BOOST_REQUIRE_EQUAL(allocator.capacity(), i);
+            BOOST_REQUIRE_EQUAL(allocator.max_capacity(), i);
+        }
+    }
+
+    BOOST_AUTO_TEST_CASE(allocator__constructor__max_capacity_greater_than_buffer_length)
+    {
+        mk::abstract_buffer_ptr buffer = mki::simple_c_buffer().create(1024);
+        std::vector<length_t> vector = { 4096, 32768 };
+        for (length_t i : vector)
+        {
+            mk::allocator allocator(buffer, i);
+            BOOST_REQUIRE_EQUAL(allocator.length(), 0);
+            BOOST_REQUIRE_EQUAL(allocator.capacity(), buffer->length());
+            BOOST_REQUIRE_EQUAL(allocator.max_capacity(), i);
         }
     }
 
