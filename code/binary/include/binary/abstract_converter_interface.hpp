@@ -17,17 +17,14 @@ namespace mikodev::binary
         length_t length_;
 
     public:
-        abstract_converter_interface(length_t length)
-        {
-            if (length > length_max)
-                exceptions::throw_helper::throw_argument_out_of_range_exception();
-            length_ = length;
-        }
+        abstract_converter_interface(length_t length) : length_(length) {}
 
         abstract_converter_interface() : abstract_converter_interface(0) {}
 
-        virtual ~abstract_converter_interface() {}
+        virtual ~abstract_converter_interface() = 0;
 
         length_t length() const noexcept { return length_; }
     };
+
+    abstract_converter_interface::~abstract_converter_interface() {}
 }
