@@ -14,15 +14,7 @@ namespace mikodev::binary::tests::abstract_converter_interface_tests
 
         virtual void encode(allocator& allocator, const T& item) override { throw std::exception(); }
 
-        virtual void encode_auto(allocator& allocator, const T& item) override { throw std::exception(); }
-
-        virtual void encode_with_length_prefix(allocator& allocator, const T& item) override { throw std::exception(); }
-
         virtual T decode(const span& span) override { throw std::exception(); }
-
-        virtual T decode_auto(span& span) override { throw std::exception(); }
-
-        virtual T decode_with_length_prefix(span& span) override { throw std::exception(); }
     };
 
     BOOST_AUTO_TEST_CASE(abstract_converter__constructor__default)

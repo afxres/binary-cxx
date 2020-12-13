@@ -13,6 +13,9 @@ namespace mikodev::binary
     {
         friend class converter;
 
+        template <typename T>
+        friend class abstract_converter;
+
     private:
         abstract_buffer_ptr shared_;
 
