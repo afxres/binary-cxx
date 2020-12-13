@@ -1,7 +1,6 @@
 #include <boost/test/unit_test.hpp>
 
 #include <binary/span.hpp>
-#include <binary/implementations/simple_c_buffer.hpp>
 
 namespace mk = mikodev::binary;
 

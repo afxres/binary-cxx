@@ -1,7 +1,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include <binary/allocator.hpp>
-#include <binary/implementations/simple_c_buffer.hpp>
+#include <binary/implementations/simple_heap_buffer.hpp>
 
 #include <string>
 
@@ -15,7 +15,7 @@ namespace mikodev::binary::tests::allocator_tests
     {
         for (length_t i = 0; i <= 1024; i++)
         {
-            mk::abstract_buffer_ptr buffer = mki::simple_c_buffer().create(i);
+            mk::abstract_buffer_ptr buffer = mki::simple_heap_buffer().create(i);
             mk::allocator allocator(buffer);
             BOOST_REQUIRE_EQUAL(allocator.length(), 0);
             BOOST_REQUIRE_EQUAL(allocator.capacity(), i);
@@ -49,7 +49,7 @@ namespace mikodev::binary::tests::allocator_tests
 
     BOOST_AUTO_TEST_CASE(allocator__constructor__max_capacity_error)
     {
-        mk::abstract_buffer_ptr buffer = mki::simple_c_buffer().create(0);
+        mk::abstract_buffer_ptr buffer = mki::simple_heap_buffer().create(0);
         std::vector<length_t> vector = { 0x8000'0000, 0xFFFF'FFFF };
         for (length_t i : vector)
         {
@@ -62,7 +62,7 @@ namespace mikodev::binary::tests::allocator_tests
 
     BOOST_AUTO_TEST_CASE(allocator__constructor__max_capacity_little_than_buffer_length)
     {
-        mk::abstract_buffer_ptr buffer = mki::simple_c_buffer().create(1024);
+        mk::abstract_buffer_ptr buffer = mki::simple_heap_buffer().create(1024);
         std::vector<length_t> vector = { 0, 128, 768 };
         for (length_t i : vector)
         {
@@ -75,7 +75,7 @@ namespace mikodev::binary::tests::allocator_tests
 
     BOOST_AUTO_TEST_CASE(allocator__constructor__max_capacity_greater_than_buffer_length)
     {
-        mk::abstract_buffer_ptr buffer = mki::simple_c_buffer().create(1024);
+        mk::abstract_buffer_ptr buffer = mki::simple_heap_buffer().create(1024);
         std::vector<length_t> vector = { 4096, 32768 };
         for (length_t i : vector)
         {
@@ -88,7 +88,7 @@ namespace mikodev::binary::tests::allocator_tests
 
     BOOST_AUTO_TEST_CASE(allocator__expand__with_empty_allocator)
     {
-        mk::abstract_buffer_ptr buffer = mki::simple_c_buffer().create(0);
+        mk::abstract_buffer_ptr buffer = mki::simple_heap_buffer().create(0);
         mk::allocator allocator(buffer);
         BOOST_REQUIRE_EQUAL(allocator.length(), 0);
         BOOST_REQUIRE_EQUAL(allocator.capacity(), 0);
