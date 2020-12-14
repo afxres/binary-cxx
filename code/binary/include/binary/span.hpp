@@ -7,6 +7,8 @@ namespace mikodev::binary
 {
     class span final
     {
+        friend class allocator;
+
         friend class converter;
 
     private:
@@ -25,18 +27,18 @@ namespace mikodev::binary
 
         span(abstract_buffer_ptr shared) : span(shared, shared == nullptr ? nullptr : shared->buffer(), shared == nullptr ? 0 : shared->length()) {}
 
-        const_byte_ptr buffer() { return buffer_; }
+        const_byte_ptr buffer() const noexcept { return buffer_; }
 
-        length_t length() { return length_; }
+        length_t length() const noexcept { return length_; }
 
-        span slice(length_t offset)
+        span slice(length_t offset) const
         {
             if (length_ < offset)
                 exceptions::throw_helper::throw_argument_exception();
             return span(shared_, buffer_ + offset, length_ - offset);
         }
 
-        span slice(length_t offset, length_t length)
+        span slice(length_t offset, length_t length) const
         {
             if (length_ < offset || length_ - offset < length)
                 exceptions::throw_helper::throw_argument_exception();

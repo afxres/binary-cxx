@@ -2,6 +2,7 @@
 
 #include "abstract_buffer.hpp"
 #include "number.hpp"
+#include "span.hpp"
 #include "exceptions/throw_helper.hpp"
 
 #include <cassert>
@@ -103,6 +104,8 @@ namespace mikodev::binary
         }
 
     public:
+        allocator(abstract_buffer_ptr shared) : allocator(shared, length_max) {}
+
         allocator(abstract_buffer_ptr shared, length_t max_capacity)
         {
             if (shared == nullptr)
@@ -116,13 +119,26 @@ namespace mikodev::binary
             limits_ = max_capacity;
         }
 
-        allocator(abstract_buffer_ptr shared) : allocator(shared, length_max) {}
+        allocator(byte_ptr buffer, length_t length)
+        {
+            if (buffer == nullptr && length != 0)
+                exceptions::throw_helper::throw_argument_null_exception();
+            if (length > length_max)
+                exceptions::throw_helper::throw_argument_out_of_range_exception();
+            buffer_ = buffer;
+            bounds_ = length;
+            shared_ = nullptr;
+            offset_ = 0;
+            limits_ = length;
+        }
 
         length_t length() const noexcept { return offset_; }
 
         length_t capacity() const noexcept { return bounds_; }
 
         length_t max_capacity() const noexcept { return limits_; }
+
+        span as_span() const noexcept { return span(shared_, buffer_, offset_); }
 
         static inline void ensure(allocator& allocator, length_t length)
         {
@@ -138,6 +154,13 @@ namespace mikodev::binary
         {
             ensure(allocator, length);
             allocator.offset_ += length;
+        }
+
+        static void append(allocator& allocator, const_byte_ptr buffer, length_t length)
+        {
+            if (length == 0)
+                return;
+            std::memcpy(assign__(allocator, length), buffer, length);
         }
     };
 }

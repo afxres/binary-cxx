@@ -50,11 +50,11 @@ namespace mikodev::binary
             }
             else if (length == 2)
             {
-                *reinterpret_cast<uint16_t*>(data) = endian<uint16_t>::ensure_big_endian(number | 0x4000U);
+                *reinterpret_cast<uint16_t*>(data) = endian::ensure_big_endian<uint16_t>(number | 0x4000U);
             }
             else
             {
-                *reinterpret_cast<uint32_t*>(data) = endian<uint32_t>::ensure_big_endian(number | 0x8000'0000U);
+                *reinterpret_cast<uint32_t*>(data) = endian::ensure_big_endian<uint32_t>(number | 0x8000'0000U);
             }
         }
 

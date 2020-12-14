@@ -22,7 +22,7 @@ namespace mikodev::binary
         template <typename T>
         static void encode(byte_ptr buffer, T data)
         {
-            *reinterpret_cast<T*>(buffer) = endian<T>::ensure_big_endian(data);
+            *reinterpret_cast<T*>(buffer) = endian::ensure_big_endian<T>(data);
         }
 
         static void encode(byte_ptr buffer, number_t number, length_t length)
@@ -39,7 +39,7 @@ namespace mikodev::binary
         template <typename T>
         static T decode(const_byte_ptr buffer)
         {
-            return endian<T>::ensure_big_endian(*reinterpret_cast<const T*>(buffer));
+            return endian::ensure_big_endian<T>(*reinterpret_cast<const T*>(buffer));
         }
 
         static number_t decode(const_byte_ptr buffer, length_t& offset, length_t limits)
