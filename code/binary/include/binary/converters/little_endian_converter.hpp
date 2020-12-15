@@ -14,17 +14,14 @@ namespace mikodev::binary::converters
 
         virtual void encode(allocator& allocator, const T& item) override
         {
-            T little = endian::ensure_little_endian<T>(item);
-            const_byte_ptr buffer = reinterpret_cast<const_byte_ptr>(&little);
-            allocator::append(allocator, buffer, sizeof(item));
+            allocator::append<const T&>(allocator, sizeof(item), item, [](byte_ptr buffer, length_t length, const T& status) { endian::encode_little_endian(buffer, status); });
         }
 
         virtual T decode(const span& span) override
         {
             if (span.length() < sizeof(T))
                 exceptions::throw_helper::throw_not_enough_bytes();
-            T result = *(reinterpret_cast<const T*>(span.buffer()));
-            return endian::ensure_little_endian(result);
+            return endian::decode_little_endian<T>(span.buffer());
         }
     };
 }

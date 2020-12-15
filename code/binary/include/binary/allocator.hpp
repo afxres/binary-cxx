@@ -10,6 +10,9 @@
 
 namespace mikodev::binary
 {
+    template <typename T>
+    using allocator_action_t = void(*)(byte_ptr buffer, length_t length, T status);
+
     class allocator final
     {
         friend class converter;
@@ -161,6 +164,14 @@ namespace mikodev::binary
             if (length == 0)
                 return;
             std::memcpy(assign__(allocator, length), buffer, length);
+        }
+
+        template <typename T>
+        static void append(allocator& allocator, length_t length, T status, allocator_action_t<T> action)
+        {
+            if (length == 0)
+                return;
+            action(assign__(allocator, length), length, status);
         }
     };
 }
