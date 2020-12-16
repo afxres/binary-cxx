@@ -2,7 +2,6 @@
 
 #include "../abstract_converter.hpp"
 #include "../endian.hpp"
-#include "../exceptions/throw_helper.hpp"
 
 namespace mikodev::binary::converters
 {

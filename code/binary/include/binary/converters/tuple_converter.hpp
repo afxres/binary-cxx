@@ -1,7 +1,6 @@
 #pragma once
 
-#include "../converter_base.hpp"
-#include "../exceptions/throw_helper.hpp"
+#include "../abstract_converter.hpp"
 
 #include <memory>
 #include <tuple>
@@ -10,33 +9,33 @@
 namespace mikodev::binary::converters
 {
     template <typename ... TArgs>
-    class tuple_converter : public converter_base<std::tuple<TArgs ...>>
+    class tuple_converter : public abstract_converter<std::tuple<TArgs ...>>
     {
     private:
-        static constexpr size_t _TUPLE_SIZE = sizeof ... (TArgs);
+        static constexpr size_t __tuple_size = sizeof ... (TArgs);
 
         template <typename TCvts, typename TElms, bool IsAuto, size_t Is>
         struct _adapter
         {
-            static void encode(allocator_base& allocator, const TElms& item, const TCvts& converters)
+            static void encode(allocator& allocator, const TElms& item, const TCvts& converters)
             {
                 auto c = std::get<Is>(converters);
-                if constexpr (!IsAuto && Is == _TUPLE_SIZE - 1)
+                if constexpr (!IsAuto && Is == __tuple_size - 1)
                     c->encode(allocator, std::get<Is>(item));
                 else
                     c->encode_auto(allocator, std::get<Is>(item));
-                if constexpr (Is != _TUPLE_SIZE - 1)
+                if constexpr (Is != __tuple_size - 1)
                     _adapter<TCvts, TElms, IsAuto, Is + 1>::encode(allocator, item, converters);
             }
 
-            static auto decode(span_view_base& span, const TCvts& converters)
+            static auto decode(span& span, const TCvts& converters)
             {
                 auto c = std::get<Is>(converters);
-                auto i = (!IsAuto && Is == _TUPLE_SIZE - 1)
+                auto i = (!IsAuto && Is == __tuple_size - 1)
                     ? c->decode(span)
                     : c->decode_auto(span);
                 auto t = std::make_tuple(std::move(i));
-                if constexpr (Is == _TUPLE_SIZE - 1)
+                if constexpr (Is == __tuple_size - 1)
                     return t;
                 else
                     return std::tuple_cat(std::move(t), _adapter<TCvts, TElms, IsAuto, Is + 1>::decode(span, converters));
@@ -46,59 +45,58 @@ namespace mikodev::binary::converters
         template <typename TCvts, size_t Is>
         struct _counter
         {
-            static void select_size(std::vector<size_t>& vector, const TCvts& converters)
+            static void select_length(std::vector<length_t>& vector, const TCvts& converters)
             {
-                vector.push_back(std::get<Is>(converters)->size());
-                if constexpr (Is != _TUPLE_SIZE - 1)
-                    _counter<TCvts, Is + 1>::select_size(vector, converters);
+                vector.push_back(std::get<Is>(converters)->length());
+                if constexpr (Is != __tuple_size - 1)
+                    _counter<TCvts, Is + 1>::select_length(vector, converters);
             }
         };
 
-        using _tuple_converter_shared_ptr_t = std::tuple<std::shared_ptr<converter_base<TArgs>> ...>;
+        using tuple_converter_ptr = std::tuple<abstract_converter_ptr<TArgs> ...>;
 
-        using _adapter_t = _adapter<_tuple_converter_shared_ptr_t, std::tuple<TArgs ...>, false, 0>;
+        using adapter_t = _adapter<tuple_converter_ptr, std::tuple<TArgs ...>, false, 0>;
 
-        using _adapter_auto_t = _adapter<_tuple_converter_shared_ptr_t, std::tuple<TArgs ...>, true, 0>;
+        using adapter_auto_t = _adapter<tuple_converter_ptr, std::tuple<TArgs ...>, true, 0>;
 
-        size_t _size(_tuple_converter_shared_ptr_t converters)
+        length_t __length(tuple_converter_ptr converters)
         {
-            std::vector<size_t> vector;
-            _counter< _tuple_converter_shared_ptr_t, 0>::select_size(vector, converters);
+            std::vector<length_t> vector;
+            _counter<tuple_converter_ptr, 0>::select_length(vector, converters);
             if (std::find(vector.begin(), vector.end(), 0) != vector.end())
                 return 0;
-            size_t size = 0;
-            for (size_t i : vector)
+            length_t size = 0;
+            for (length_t i : vector)
                 size += i;
             return size;
         }
 
-        _tuple_converter_shared_ptr_t _converters;
+        tuple_converter_ptr converters_;
 
     public:
-        tuple_converter(std::tuple<std::shared_ptr<converter_base<TArgs>> ...> converters) : converter_base<std::tuple<TArgs ...>>::converter_base(_size(converters)), _converters(converters) {}
+        tuple_converter(std::tuple<abstract_converter_ptr<TArgs> ...> converters) : abstract_converter<std::tuple<TArgs ...>>::abstract_converter(__length(converters)), converters_(converters) {}
 
-        tuple_converter(std::shared_ptr<converter_base<TArgs>> ... converters) : tuple_converter(std::make_tuple(converters ...)) {}
+        tuple_converter(abstract_converter_ptr<TArgs> ... converters) : tuple_converter(std::make_tuple(converters ...)) {}
 
-        virtual void encode(allocator_base& allocator, const std::tuple<TArgs ...>& item) override
+        virtual void encode(allocator& allocator, const std::tuple<TArgs ...>& item) override
         {
-            _adapter_t::encode(allocator, item, _converters);
+            adapter_t::encode(allocator, item, converters_);
         }
 
-        virtual void encode_auto(allocator_base& allocator, const std::tuple<TArgs ...>& item) override
+        virtual void encode_auto(allocator& allocator, const std::tuple<TArgs ...>& item) override
         {
-            _adapter_auto_t::encode(allocator, item, _converters);
+            adapter_auto_t::encode(allocator, item, converters_);
         }
 
-        virtual std::tuple<TArgs ...> decode(const span_view_base& span) override
+        virtual std::tuple<TArgs ...> decode(const span& span) override
         {
-            // lifetime management via smart pointer
-            std::unique_ptr<span_view_base> view = span.clone();
-            return _adapter_t::decode(*view, _converters);
+            binary::span view = span;
+            return adapter_t::decode(view, converters_);
         }
 
-        virtual std::tuple<TArgs ...> decode_auto(span_view_base& span) override
+        virtual std::tuple<TArgs ...> decode_auto(span& span) override
         {
-            return _adapter_auto_t::decode(span, _converters);
+            return adapter_auto_t::decode(span, converters_);
         }
     };
 }

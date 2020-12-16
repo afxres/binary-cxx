@@ -22,26 +22,4 @@
       </ArrayItems>
     </Expand>
   </Type>
-  <Type Name="mikodev::binary::implementations::simple_allocator">
-    <DisplayString>{{allocator size={_offset} capacity={_bounds}}}</DisplayString>
-    <Expand>
-      <Item Name="[size]">_offset</Item>
-      <Item Name="[capacity]">_bounds</Item>
-      <Item Name="[max_capacity]">_max_capacity</Item>
-      <ArrayItems>
-        <Size>_offset</Size>
-        <ValuePointer>_data._Ptr</ValuePointer>
-      </ArrayItems>
-    </Expand>
-  </Type>
-  <Type Name="mikodev::binary::implementations::simple_span_view">
-    <DisplayString>{{span_view size={_length}}}</DisplayString>
-    <Expand>
-      <Item Name="[size]">_length</Item>
-      <ArrayItems>
-        <Size>_length</Size>
-        <ValuePointer>_data._Ptr + _offset</ValuePointer>
-      </ArrayItems>
-    </Expand>
-  </Type>
 </AutoVisualizer>
