@@ -2,15 +2,17 @@
 
 #include "__length_calculator.hpp"
 
+#include <utility>
+
 namespace mikodev::binary::converters
 {
-    template <typename _TyK, typename _TyV>
-    class pair_converter : public abstract_converter<std::pair<_TyK, _TyV>>
+    template <typename Key, typename Value>
+    class pair_converter : public abstract_converter<std::pair<Key, Value>>
     {
     private:
-        using item_t = std::pair<_TyK, _TyV>;
+        using item_t = std::pair<Key, Value>;
 
-        using converter_ptr_pair = std::pair<abstract_converter_ptr<_TyK>, abstract_converter_ptr<_TyV>>;
+        using converter_ptr_pair = std::pair<abstract_converter_ptr<Key>, abstract_converter_ptr<Value>>;
 
         using calculator_t = __length_calculator<converter_ptr_pair, 2>;
 
