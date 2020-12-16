@@ -1,70 +1,49 @@
 #pragma once
 
-#include "../abstract_converter.hpp"
+#include "__length_calculator.hpp"
 
 namespace mikodev::binary::converters
 {
-    template <typename _Ty1, class _Ty2>
-    class pair_converter : public abstract_converter<std::pair<_Ty1, _Ty2>>
+    template <typename _TyK, typename _TyV>
+    class pair_converter : public abstract_converter<std::pair<_TyK, _TyV>>
     {
     private:
-        using cvt1 = abstract_converter<_Ty1>;
+        using item_t = std::pair<_TyK, _TyV>;
 
-        using cvt2 = abstract_converter<_Ty2>;
+        using converter_ptr_pair = std::pair<abstract_converter_ptr<_TyK>, abstract_converter_ptr<_TyV>>;
 
-        using cvt1_ptr = abstract_converter_ptr<_Ty1>;
+        using calculator_t = __length_calculator<converter_ptr_pair, 2>;
 
-        using cvt2_ptr = abstract_converter_ptr<_Ty2>;
-
-        static length_t length__(std::pair<cvt1_ptr, cvt2_ptr> converters)
-        {
-            length_t length_1 = converters.first->length();
-            length_t length_2 = converters.second->length();
-            if (length_1 == 0 || length_2 == 0)
-                return 0;
-            return length_1 + length_2;
-        }
-
-        std::pair<cvt1_ptr, cvt2_ptr> _converters;
+        converter_ptr_pair converters_;
 
     public:
-        pair_converter(std::pair<abstract_converter_ptr<_Ty1>, abstract_converter_ptr<_Ty2>> converters) : abstract_converter<std::pair<_Ty1, _Ty2>>::abstract_converter(length__(converters)), _converters(converters) {}
+        pair_converter(converter_ptr_pair converters) : abstract_converter<item_t>::abstract_converter(calculator_t::invoke(converters)), converters_(converters) {}
 
-        pair_converter(abstract_converter_ptr<_Ty1> converter_1, abstract_converter_ptr<_Ty2> converter_2) : pair_converter(std::make_pair(converter_1, converter_2)) {}
-
-        virtual void encode(allocator& allocator, const std::pair<_Ty1, _Ty2>& item) override
+        virtual void encode(allocator& allocator, const item_t& item) override
         {
-            cvt1& converter_1 = *(_converters.first);
-            cvt2& converter_2 = *(_converters.second);
-            converter_1.encode_auto(allocator, item.first);
-            converter_2.encode(allocator, item.second);
+            std::get<0>(converters_)->encode_auto(allocator, std::get<0>(item));
+            std::get<1>(converters_)->encode(allocator, std::get<1>(item));
         }
 
-        virtual std::pair<_Ty1, _Ty2> decode(const span& span) override
+        virtual item_t decode(const span& span) override
         {
-            cvt1& converter_1 = *(_converters.first);
-            cvt2& converter_2 = *(_converters.second);
-            binary::span view = span;
-            _Ty1 item_1 = converter_1.decode_auto(view);
-            _Ty2 item_2 = converter_2.decode(view);
-            return std::make_pair(item_1, item_2);
+            auto view(span);
+            auto k = std::get<0>(converters_)->decode_auto(view);
+            auto v = std::get<1>(converters_)->decode(view);
+            return std::make_pair(std::move(k), std::move(v));
         }
 
-        virtual void encode_auto(allocator& allocator, const std::pair<_Ty1, _Ty2>& item) override
+        virtual void encode_auto(allocator& allocator, const item_t& item) override
         {
-            cvt1& converter_1 = *(_converters.first);
-            cvt2& converter_2 = *(_converters.second);
-            converter_1.encode_auto(allocator, item.first);
-            converter_2.encode_auto(allocator, item.second);
+            std::get<0>(converters_)->encode_auto(allocator, std::get<0>(item));
+            std::get<1>(converters_)->encode_auto(allocator, std::get<1>(item));
         }
 
-        virtual std::pair<_Ty1, _Ty2> decode_auto(span& span) override
+        virtual item_t decode_auto(span& span) override
         {
-            cvt1& converter_1 = *(_converters.first);
-            cvt2& converter_2 = *(_converters.second);
-            _Ty1 item_1 = converter_1.decode_auto(span);
-            _Ty2 item_2 = converter_2.decode_auto(span);
-            return std::make_pair(item_1, item_2);
+            auto k = std::get<0>(converters_)->decode_auto(span);
+            auto v = std::get<1>(converters_)->decode_auto(span);
+            return std::make_pair(std::move(k), std::move(v));
         }
     };
 }
