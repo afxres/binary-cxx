@@ -17,7 +17,7 @@ namespace mikodev::binary::tests::converters::tuple_converter_tests
     BOOST_AUTO_TEST_CASE(tuple_converter__encode_decode_3)
     {
         auto underlying_converter = std::make_shared<models::test_type_converter>();
-        auto converter = mkc::tuple_converter<models::test_type, models::test_type, models::test_type>(underlying_converter, underlying_converter, underlying_converter);
+        auto converter = mkc::tuple_converter<models::test_type, models::test_type, models::test_type>(std::make_tuple(underlying_converter, underlying_converter, underlying_converter));
         auto source = std::make_tuple(models::test_type(2), models::test_type(3), models::test_type(4));
         auto buffer = mki::simple_heap_buffer().create(1024);
         auto allocator = mk::allocator(buffer);

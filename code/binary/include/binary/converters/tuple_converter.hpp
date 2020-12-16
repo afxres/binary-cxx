@@ -1,10 +1,8 @@
 #pragma once
 
-#include "../abstract_converter.hpp"
+#include "__length_calculator.hpp"
 
-#include <memory>
 #include <tuple>
-#include <vector>
 
 namespace mikodev::binary::converters
 {
@@ -12,89 +10,73 @@ namespace mikodev::binary::converters
     class tuple_converter : public abstract_converter<std::tuple<TArgs ...>>
     {
     private:
-        static constexpr size_t __tuple_size = sizeof ... (TArgs);
+        using item_t = std::tuple<TArgs ...>;
 
-        template <typename TCvts, typename TElms, bool IsAuto, size_t Is>
-        struct _adapter
+        using converter_ptr_tuple = std::tuple<abstract_converter_ptr<TArgs> ...>;
+
+        template <size_t Index, size_t Total, bool IsAuto>
+        struct __adapter
         {
-            static void encode(allocator& allocator, const TElms& item, const TCvts& converters)
+            using adapter_next_t = __adapter<Index + 1, Total, IsAuto>;
+
+            static void encode(allocator& allocator, const item_t& item, const converter_ptr_tuple& converters)
             {
-                auto c = std::get<Is>(converters);
-                if constexpr (!IsAuto && Is == __tuple_size - 1)
-                    c->encode(allocator, std::get<Is>(item));
+                auto& converter = *(std::get<Index>(converters));
+                if constexpr (Index == Total - 1 && !IsAuto)
+                    converter.encode(allocator, std::get<Index>(item));
                 else
-                    c->encode_auto(allocator, std::get<Is>(item));
-                if constexpr (Is != __tuple_size - 1)
-                    _adapter<TCvts, TElms, IsAuto, Is + 1>::encode(allocator, item, converters);
+                    converter.encode_auto(allocator, std::get<Index>(item));
+                if constexpr (Index != Total - 1)
+                    adapter_next_t::encode(allocator, item, converters);
             }
 
-            static auto decode(span& span, const TCvts& converters)
+            static auto decode__(span& span, const converter_ptr_tuple& converters)
             {
-                auto c = std::get<Is>(converters);
-                auto i = (!IsAuto && Is == __tuple_size - 1)
-                    ? c->decode(span)
-                    : c->decode_auto(span);
-                auto t = std::make_tuple(std::move(i));
-                if constexpr (Is == __tuple_size - 1)
-                    return t;
+                auto& converter = *(std::get<Index>(converters));
+                if constexpr (Index == Total - 1 && !IsAuto)
+                    return converter.decode(span);
                 else
-                    return std::tuple_cat(std::move(t), _adapter<TCvts, TElms, IsAuto, Is + 1>::decode(span, converters));
+                    return converter.decode_auto(span);
+            }
+
+            static auto decode(span& span, const converter_ptr_tuple& converters)
+            {
+                auto result = std::make_tuple(decode__(span, converters));
+                if constexpr (Index != Total - 1)
+                    return std::tuple_cat(std::move(result), adapter_next_t::decode(span, converters));
+                else
+                    return result;
             }
         };
 
-        template <typename TCvts, size_t Is>
-        struct _counter
-        {
-            static void select_length(std::vector<length_t>& vector, const TCvts& converters)
-            {
-                vector.push_back(std::get<Is>(converters)->length());
-                if constexpr (Is != __tuple_size - 1)
-                    _counter<TCvts, Is + 1>::select_length(vector, converters);
-            }
-        };
+        using adapter_t = __adapter<0, sizeof ... (TArgs), false>;
 
-        using tuple_converter_ptr = std::tuple<abstract_converter_ptr<TArgs> ...>;
+        using adapter_auto_t = __adapter<0, sizeof ... (TArgs), true>;
 
-        using adapter_t = _adapter<tuple_converter_ptr, std::tuple<TArgs ...>, false, 0>;
+        using calculator_t = __length_calculator<converter_ptr_tuple, sizeof ... (TArgs)>;
 
-        using adapter_auto_t = _adapter<tuple_converter_ptr, std::tuple<TArgs ...>, true, 0>;
-
-        length_t __length(tuple_converter_ptr converters)
-        {
-            std::vector<length_t> vector;
-            _counter<tuple_converter_ptr, 0>::select_length(vector, converters);
-            if (std::find(vector.begin(), vector.end(), 0) != vector.end())
-                return 0;
-            length_t size = 0;
-            for (length_t i : vector)
-                size += i;
-            return size;
-        }
-
-        tuple_converter_ptr converters_;
+        converter_ptr_tuple converters_;
 
     public:
-        tuple_converter(std::tuple<abstract_converter_ptr<TArgs> ...> converters) : abstract_converter<std::tuple<TArgs ...>>::abstract_converter(__length(converters)), converters_(converters) {}
+        tuple_converter(converter_ptr_tuple converters) : abstract_converter<item_t>::abstract_converter(calculator_t::invoke(converters)), converters_(converters) {}
 
-        tuple_converter(abstract_converter_ptr<TArgs> ... converters) : tuple_converter(std::make_tuple(converters ...)) {}
-
-        virtual void encode(allocator& allocator, const std::tuple<TArgs ...>& item) override
+        virtual void encode(allocator& allocator, const item_t& item) override
         {
             adapter_t::encode(allocator, item, converters_);
         }
 
-        virtual void encode_auto(allocator& allocator, const std::tuple<TArgs ...>& item) override
+        virtual void encode_auto(allocator& allocator, const item_t& item) override
         {
             adapter_auto_t::encode(allocator, item, converters_);
         }
 
-        virtual std::tuple<TArgs ...> decode(const span& span) override
+        virtual item_t decode(const span& span) override
         {
-            binary::span view = span;
+            auto view(span);
             return adapter_t::decode(view, converters_);
         }
 
-        virtual std::tuple<TArgs ...> decode_auto(span& span) override
+        virtual item_t decode_auto(span& span) override
         {
             return adapter_auto_t::decode(span, converters_);
         }
