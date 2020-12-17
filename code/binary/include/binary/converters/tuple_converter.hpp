@@ -1,6 +1,6 @@
 #pragma once
 
-#include "__length_calculator.hpp"
+#include "basic_length_calculator.hpp"
 
 #include <tuple>
 
@@ -15,9 +15,9 @@ namespace mikodev::binary::converters
         using converter_ptr_tuple = std::tuple<abstract_converter_ptr<TArgs> ...>;
 
         template <size_t Index, size_t Total, bool IsAuto>
-        struct __adapter
+        struct adapter
         {
-            using adapter_next_t = __adapter<Index + 1, Total, IsAuto>;
+            using adapter_next_t = adapter<Index + 1, Total, IsAuto>;
 
             static void encode(allocator& allocator, const item_t& item, const converter_ptr_tuple& converters)
             {
@@ -30,7 +30,7 @@ namespace mikodev::binary::converters
                     adapter_next_t::encode(allocator, item, converters);
             }
 
-            static auto decode__(span& span, const converter_ptr_tuple& converters)
+            static auto detach(span& span, const converter_ptr_tuple& converters)
             {
                 auto& converter = *(std::get<Index>(converters));
                 if constexpr (Index == Total - 1 && !IsAuto)
@@ -41,7 +41,7 @@ namespace mikodev::binary::converters
 
             static auto decode(span& span, const converter_ptr_tuple& converters)
             {
-                auto result = std::make_tuple(decode__(span, converters));
+                auto result = std::make_tuple(detach(span, converters));
                 if constexpr (Index != Total - 1)
                     return std::tuple_cat(std::move(result), adapter_next_t::decode(span, converters));
                 else
@@ -49,11 +49,11 @@ namespace mikodev::binary::converters
             }
         };
 
-        using adapter_t = __adapter<0, sizeof ... (TArgs), false>;
+        using adapter_t = adapter<0, sizeof ... (TArgs), false>;
 
-        using adapter_auto_t = __adapter<0, sizeof ... (TArgs), true>;
+        using adapter_auto_t = adapter<0, sizeof ... (TArgs), true>;
 
-        using calculator_t = __length_calculator<converter_ptr_tuple, sizeof ... (TArgs)>;
+        using calculator_t = basic_length_calculator<converter_ptr_tuple, sizeof ... (TArgs)>;
 
         converter_ptr_tuple converters_;
 

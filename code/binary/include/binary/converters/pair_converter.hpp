@@ -1,6 +1,6 @@
 #pragma once
 
-#include "__length_calculator.hpp"
+#include "basic_length_calculator.hpp"
 
 #include <utility>
 
@@ -14,7 +14,7 @@ namespace mikodev::binary::converters
 
         using converter_ptr_pair = std::pair<abstract_converter_ptr<Key>, abstract_converter_ptr<Value>>;
 
-        using calculator_t = __length_calculator<converter_ptr_pair, 2>;
+        using calculator_t = basic_length_calculator<converter_ptr_pair, 2>;
 
         converter_ptr_pair converters_;
 

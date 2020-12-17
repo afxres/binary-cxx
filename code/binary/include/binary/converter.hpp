@@ -32,29 +32,29 @@ namespace mikodev::binary
             std::memcpy(target + number_length, buffer, length);
         }
 
-        static number_t decode(span& span)
+        static number_t decode(span& source)
         {
-            const_byte_ptr buffer = span.buffer_;
-            length_t length = span.length_;
+            const_byte_ptr buffer = source.buffer_;
+            length_t length = source.length_;
             length_t offset = 0;
             number_t number = number::decode(buffer, offset, length);
-            assert(offset <= span.length_);
-            span.buffer_ = buffer + offset;
-            span.length_ = length - offset;
+            assert(offset <= source.length_);
+            source.buffer_ = buffer + offset;
+            source.length_ = length - offset;
             return number;
         }
 
-        static span decode_with_length_prefix(span& span)
+        static span decode_with_length_prefix(span& source)
         {
-            const_byte_ptr buffer = span.buffer_;
-            length_t length = span.length_;
+            const_byte_ptr buffer = source.buffer_;
+            length_t length = source.length_;
             length_t offset = 0;
             length_t number = number::decode_ensure_buffer(buffer, offset, length);
             length_t cursor = offset + number;
-            assert(cursor <= span.length_);
-            span.buffer_ = buffer + cursor;
-            span.length_ = length - cursor;
-            return binary::span(span.shared_, buffer + offset, number);
+            assert(cursor <= source.length_);
+            source.buffer_ = buffer + cursor;
+            source.length_ = length - cursor;
+            return span(source.shared_, buffer + offset, number);
         }
     };
 }
