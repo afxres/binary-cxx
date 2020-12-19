@@ -2,6 +2,7 @@
 
 #include "../abstract_converter.hpp"
 
+#include <algorithm>
 #include <vector>
 
 namespace mikodev::binary::converters
