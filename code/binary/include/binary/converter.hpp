@@ -1,5 +1,6 @@
 #pragma once
 
+#include "abstract_converter_interface.hpp"
 #include "allocator.hpp"
 #include "number.hpp"
 #include "span.hpp"
@@ -12,6 +13,11 @@ namespace mikodev::binary
         converter() = delete;
 
     public:
+        static std::type_index get_template_argument(abstract_converter_interface_ptr converter)
+        {
+            return converter->argument__();
+        }
+
         static void encode(allocator& allocator, number_t number)
         {
             if (static_cast<length_t>(number) > length_max)

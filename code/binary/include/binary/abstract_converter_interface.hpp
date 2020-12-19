@@ -4,6 +4,7 @@
 #include "exceptions/throw_helper.hpp"
 
 #include <memory>
+#include <typeindex>
 
 namespace mikodev::binary
 {
@@ -13,6 +14,8 @@ namespace mikodev::binary
 
     class abstract_converter_interface
     {
+        friend class converter;
+
         template <typename T>
         friend class abstract_converter;
 
@@ -20,6 +23,8 @@ namespace mikodev::binary
         length_t length_;
 
         abstract_converter_interface(length_t length) : length_(length) {}
+
+        virtual std::type_index argument__() = 0;
 
     public:
         virtual ~abstract_converter_interface() {};

@@ -18,6 +18,9 @@ namespace mikodev::binary
     template <typename T>
     class abstract_converter : public abstract_converter_interface
     {
+    private:
+        virtual std::type_index argument__() override { return typeid(T); }
+
     public:
         abstract_converter() : abstract_converter(0) {}
 

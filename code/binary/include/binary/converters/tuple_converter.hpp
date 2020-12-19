@@ -60,6 +60,8 @@ namespace mikodev::binary::converters
     public:
         tuple_converter(converter_ptr_tuple converters) : abstract_converter<item_t>::abstract_converter(calculator_t::invoke(converters)), converters_(converters) {}
 
+        tuple_converter(abstract_converter_ptr<TArgs> ... converters) : tuple_converter(std::make_tuple(converters ...)) {}
+
         virtual void encode(allocator& allocator, const item_t& item) override
         {
             adapter_t::encode(allocator, item, converters_);
