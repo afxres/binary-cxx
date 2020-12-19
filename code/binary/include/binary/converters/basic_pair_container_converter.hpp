@@ -19,6 +19,8 @@ namespace mikodev::binary::converters
     public:
         basic_pair_container_converter(converter_ptr_pair converters) : converters_(converters) {}
 
+        basic_pair_container_converter(abstract_converter_ptr<Key> key, abstract_converter_ptr<Value> value) : basic_pair_container_converter(std::make_pair(key, value)) {}
+
         virtual void encode(allocator& allocator, const item_t& item) override
         {
             auto& a = *(std::get<0>(converters_));

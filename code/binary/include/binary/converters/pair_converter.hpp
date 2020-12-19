@@ -21,6 +21,8 @@ namespace mikodev::binary::converters
     public:
         pair_converter(converter_ptr_pair converters) : abstract_converter<item_t>::abstract_converter(calculator_t::invoke(converters)), converters_(converters) {}
 
+        pair_converter(abstract_converter_ptr<Key> key, abstract_converter_ptr<Value> value) : pair_converter(std::make_pair(key, value)) {}
+
         virtual void encode(allocator& allocator, const item_t& item) override
         {
             std::get<0>(converters_)->encode_auto(allocator, std::get<0>(item));
