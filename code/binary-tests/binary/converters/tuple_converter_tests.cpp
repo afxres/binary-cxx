@@ -19,7 +19,7 @@ namespace mikodev::binary::tests::converters::tuple_converter_tests
     {
         auto generator = mk::generator();
         generator.add<models::test_type_converter>();
-        generator.add<mkc::tuple_converter, models::test_type_converter, models::test_type_converter, models::test_type_converter>();
+        generator.add<mkc::tuple_converter, models::test_type, models::test_type, models::test_type>();
         auto converter = generator.get<std::tuple<models::test_type, models::test_type, models::test_type>>();
         auto source = std::make_tuple(models::test_type(2), models::test_type(3), models::test_type(4));
         auto buffer = mki::simple_heap_buffer().create(1024);
