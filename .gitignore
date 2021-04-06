@@ -336,3 +336,5 @@ CMakeSettings.json
 cmake_install.cmake
 Makefile
 out/
+cmake-build-debug/
+cmake-build-release/
