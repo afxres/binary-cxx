@@ -72,25 +72,25 @@ namespace mikodev::binary
         template <typename T>
         static void encode_little_endian(void* target, T item)
         {
-            __encode<T, true>(target, item);
+            __encode<T, __is_little_endian>(target, item);
         }
 
         template <typename T>
         static T decode_little_endian(const void* source)
         {
-            return  __decode<T, true>(source);
+            return  __decode<T, __is_little_endian>(source);
         }
 
         template <typename T>
         static void encode_big_endian(void* target, T item)
         {
-            __encode<T, false>(target, item);
+            __encode<T, __is_little_endian == false>(target, item);
         }
 
         template <typename T>
         static T decode_big_endian(const void* source)
         {
-            return  __decode<T, false>(source);
+            return  __decode<T, __is_little_endian == false>(source);
         }
     };
 }
