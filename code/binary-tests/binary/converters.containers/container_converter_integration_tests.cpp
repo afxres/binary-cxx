@@ -1,5 +1,5 @@
-#include "../../../models/test_type.hpp"
-#include "../../../models/test_type_converter.hpp"
+#include "../../models/test_type.hpp"
+#include "../../models/test_type_converter.hpp"
 
 #include <boost/test/unit_test.hpp>
 #include <boost/mpl/list.hpp>
