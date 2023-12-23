@@ -20,7 +20,7 @@ namespace mikodev::binary::implementations
         {
             if (buffer_ == nullptr)
                 return;
-            std::free(reinterpret_cast<void*>(buffer_));
+            std::free(static_cast<void*>(buffer_));
             buffer_ = nullptr;
         }
 
@@ -28,7 +28,7 @@ namespace mikodev::binary::implementations
         {
             if (length == 0)
                 return std::make_shared<simple_heap_buffer>();
-            byte_ptr buffer = reinterpret_cast<byte_ptr>(std::malloc(length));
+            byte_ptr buffer = static_cast<byte_ptr>(std::malloc(length));
             if (buffer == nullptr)
                 exceptions::throw_helper::throw_out_of_memory();
             return std::shared_ptr<simple_heap_buffer>(new simple_heap_buffer(buffer, length));

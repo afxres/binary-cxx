@@ -24,7 +24,7 @@ namespace mikodev::binary
 
         virtual ~abstract_buffer() { length_ = 0; }
 
-        length_t length() { return length_; }
+        length_t length() const { return length_; }
 
         virtual byte_ptr buffer() = 0;
 
