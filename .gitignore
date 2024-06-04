@@ -330,11 +330,13 @@ ASALocalRun/
 .mfractor/
 
 # Custom files
-CMakeCache.txt
-CMakeFiles/
-CMakeSettings.json
-cmake_install.cmake
-Makefile
+.vscode/
+build/
 out/
 cmake-build-debug/
 cmake-build-release/
+CMakeFiles/
+CMakeCache.txt
+CMakeSettings.json
+cmake_install.cmake
+Makefile
