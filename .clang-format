@@ -4,7 +4,7 @@ AllowShortFunctionsOnASingleLine: Empty
 AlwaysBreakTemplateDeclarations: true
 BasedOnStyle: LLVM
 BreakAfterAttributes: Always
-ColumnLimit: 160
+ColumnLimit: 0
 FixNamespaceComments: false
 IndentAccessModifiers: false
 IndentWidth: 4

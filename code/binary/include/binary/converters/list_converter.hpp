@@ -6,8 +6,9 @@
 
 #include <list>
 
-namespace mikodev::binary::converters
-{
-    template <typename Container, typename Allocator = std::allocator<Container>>
-    using list_converter = basic_container_converter<std::list<Container, Allocator>, Container, basic_push_back_adder, basic_empty_counter>;
+namespace mikodev::binary::converters {
+template <
+    typename Container,
+    typename Allocator = std::allocator<Container>>
+using list_converter = basic_container_converter<std::list<Container, Allocator>, Container, basic_push_back_adder, basic_empty_counter>;
 }

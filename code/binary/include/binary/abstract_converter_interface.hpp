@@ -6,29 +6,30 @@
 #include <memory>
 #include <typeindex>
 
-namespace mikodev::binary
-{
-    class abstract_converter_interface;
+namespace mikodev::binary {
+class abstract_converter_interface;
 
-    using abstract_converter_interface_ptr = std::shared_ptr<abstract_converter_interface>;
+using abstract_converter_interface_ptr = std::shared_ptr<abstract_converter_interface>;
 
-    class abstract_converter_interface
-    {
-        friend class converter;
+class abstract_converter_interface {
+    friend class converter;
 
-        template <typename T>
-        friend class abstract_converter;
+    template <typename T>
+    friend class abstract_converter;
 
-    private:
-        length_t length_;
+private:
+    length_t length_;
 
-        abstract_converter_interface(length_t length) : length_(length) {}
+    abstract_converter_interface(length_t length)
+        : length_(length) {}
 
-        virtual std::type_index argument__() = 0;
+    virtual std::type_index argument__() = 0;
 
-    public:
-        virtual ~abstract_converter_interface() {};
+public:
+    virtual ~abstract_converter_interface(){};
 
-        length_t length() const noexcept { return length_; }
-    };
+    length_t length() const noexcept {
+        return length_;
+    }
+};
 }

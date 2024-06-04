@@ -6,8 +6,9 @@
 
 #include <vector>
 
-namespace mikodev::binary::converters
-{
-    template <typename T, typename Allocator = std::allocator<T>>
-    using vector_converter = basic_container_converter<std::vector<T, Allocator>, T, basic_push_back_adder, basic_counter>;
+namespace mikodev::binary::converters {
+template <
+    typename T,
+    typename Allocator = std::allocator<T>>
+using vector_converter = basic_container_converter<std::vector<T, Allocator>, T, basic_push_back_adder, basic_counter>;
 }
