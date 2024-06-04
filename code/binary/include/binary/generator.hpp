@@ -46,7 +46,8 @@ public:
     }
 
     template <
-        typename Converter, typename... TArgs,
+        typename Converter,
+        typename... TArgs,
         typename std::enable_if<std::is_base_of<abstract_converter_interface, Converter>::value>::type* = nullptr>
     void add() {
         key_t v = std::make_shared<Converter>(get<TArgs>()...);
@@ -55,8 +56,7 @@ public:
     }
 
     template <
-        template <typename...>
-        typename Converter,
+        template <typename...> typename Converter,
         typename... TArgs,
         typename std::enable_if<std::is_base_of<abstract_converter_interface, Converter<TArgs...>>::value>::type* = nullptr>
     void add() {
