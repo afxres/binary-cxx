@@ -8,6 +8,8 @@ ColumnLimit: 0
 FixNamespaceComments: false
 IndentAccessModifiers: false
 IndentWidth: 4
+InsertBraces: true
 InsertNewlineAtEOF: true
 Language: Cpp
+PackConstructorInitializers: NextLine
 PointerAlignment: Left
