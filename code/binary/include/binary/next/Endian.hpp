@@ -46,19 +46,27 @@ uint64_t __binary_swap64__(uint64_t x) {
 #error "platform not supported"
 #endif
 
-template <size_t N, typename std::enable_if<N == 1 || N == 2 || N == 4 || N == 8>::type* = nullptr>
-void __binary_swap__(void* target, const void* source) {
-    if constexpr (N == 1) {
-        *reinterpret_cast<uint8_t*>(target) = *reinterpret_cast<const uint8_t*>(source);
-    } else if constexpr (N == 2) {
-        *reinterpret_cast<uint16_t*>(target) = __binary_swap16__(*reinterpret_cast<const uint16_t*>(source));
-    } else if constexpr (N == 4) {
-        *reinterpret_cast<uint32_t*>(target) = __binary_swap32__(*reinterpret_cast<const uint32_t*>(source));
-    } else if constexpr (N == 8) {
-        *reinterpret_cast<uint64_t*>(target) = __binary_swap64__(*reinterpret_cast<const uint64_t*>(source));
-    } else {
-        static_assert(false, "invalid type size");
-    }
+template <size_t Size>
+void __binary_swap__(void* target, const void* source);
+
+template <>
+void __binary_swap__<1>(void* target, const void* source) {
+    *reinterpret_cast<uint8_t*>(target) = *reinterpret_cast<const uint8_t*>(source);
+}
+
+template <>
+void __binary_swap__<2>(void* target, const void* source) {
+    *reinterpret_cast<uint16_t*>(target) = __binary_swap16__(*reinterpret_cast<const uint16_t*>(source));
+}
+
+template <>
+void __binary_swap__<4>(void* target, const void* source) {
+    *reinterpret_cast<uint32_t*>(target) = __binary_swap32__(*reinterpret_cast<const uint32_t*>(source));
+}
+
+template <>
+void __binary_swap__<8>(void* target, const void* source) {
+    *reinterpret_cast<uint64_t*>(target) = __binary_swap64__(*reinterpret_cast<const uint64_t*>(source));
 }
 
 template <typename T, bool Is>
