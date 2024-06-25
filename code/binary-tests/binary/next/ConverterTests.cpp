@@ -16,7 +16,7 @@ class FakeEmptyConverter : public binary::Converter<T> {
 
 BOOST_AUTO_TEST_SUITE(ConverterTests)
 BOOST_AUTO_TEST_CASE(ConverterDefaultLengthTest) {
-    FakeEmptyConverter<int> emptyConverter{};
+    FakeEmptyConverter<int32_t> emptyConverter{};
     BOOST_REQUIRE_EQUAL(emptyConverter.Length(), 0);
 }
 BOOST_AUTO_TEST_SUITE_END()

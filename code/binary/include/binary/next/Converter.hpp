@@ -8,12 +8,11 @@
 #include <span>
 #include <stdexcept>
 
+#include "Allocator.hpp"
 #include "Define.hpp"
 #include "Endian.hpp"
 
 namespace binary {
-class Allocator;
-
 template <typename T>
 class Converter {
 private:
@@ -47,7 +46,9 @@ public:
     }
 
     virtual void EncodeWithLengthPrefix(Allocator& allocator, const T& item) {
-        // TODO: wait for Allocator
+        int32_t anchor = allocator.Anchor();
+        Encode(allocator, item);
+        allocator.FinishAnchor(anchor);
     }
 
     virtual T Decode(const std::span<std::byte> span) = 0;
