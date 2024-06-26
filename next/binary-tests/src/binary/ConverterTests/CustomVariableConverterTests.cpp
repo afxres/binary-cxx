@@ -1,7 +1,7 @@
 #include <boost/test/data/test_case.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "binary/next/Converter.hpp"
+#include "binary/Converter.hpp"
 
 namespace binary::tests::ConverterTests {
 class CustomVariableConverter : public Converter<int32_t> {

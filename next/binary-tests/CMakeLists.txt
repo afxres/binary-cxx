@@ -1,0 +1,8 @@
+cmake_minimum_required(VERSION 3.8)
+set(CMAKE_CXX_STANDARD 20)
+project("binary-tests")
+find_package(Boost REQUIRED COMPONENTS unit_test_framework)
+include_directories(${Boost_INCLUDE_DIRS} "${binary_SOURCE_DIR}/include")
+file(GLOB_RECURSE SOURCE_FILES "src/binary/*.cpp")
+add_executable(${PROJECT_NAME} "src/main.cpp" ${SOURCE_FILES})
+target_link_libraries(${PROJECT_NAME} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} "binary")
