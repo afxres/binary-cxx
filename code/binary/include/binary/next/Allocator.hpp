@@ -136,13 +136,20 @@ public:
     }
 
     void Ensure(int32_t length) {
-        assert(this->offset > 0);
-        assert(this->bounds > 0);
+        assert(this->offset >= 0);
+        assert(this->bounds >= 0);
         if (static_cast<uint64_t>(static_cast<uint32_t>(this->offset)) + static_cast<uint32_t>(length) > static_cast<uint32_t>(this->bounds)) {
             Resize(length);
         }
         assert(this->bounds <= this->limits);
         assert(this->bounds >= this->offset + length);
+    }
+
+    void Expand(int32_t length) {
+        Ensure(length);
+        this->offset += length;
+        assert(this->offset >= 0);
+        assert(this->offset <= this->bounds);
     }
 
     void Append(const std::span<std::byte>& span) {
