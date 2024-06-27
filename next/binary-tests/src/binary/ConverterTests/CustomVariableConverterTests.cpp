@@ -9,7 +9,7 @@ class CustomVariableConverter : public Converter<int32_t> {
         allocator.Expand(item);
     }
 
-    virtual int32_t Decode(std::span<std::byte> span) {
+    virtual int32_t Decode(std::span<std::byte> span) override {
         return EnsureLength(span.size());
     }
 };
@@ -25,6 +25,7 @@ BOOST_DATA_TEST_CASE(CustomVariableConverterEncodeAutoTest, CustomVariableConver
     CustomVariableConverter converter;
     Allocator allocator;
     BOOST_REQUIRE_EQUAL(allocator.Length(), 0);
+    BOOST_REQUIRE_EQUAL(converter.Length(), 0);
     converter.EncodeAuto(allocator, dataLength);
     BOOST_REQUIRE_EQUAL(allocator.Length(), outputLength);
 }

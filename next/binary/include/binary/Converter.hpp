@@ -6,38 +6,21 @@
 #include <cstddef>
 #include <cstdint>
 #include <span>
-#include <stdexcept>
 
 #include "Allocator.hpp"
 #include "Define.hpp"
-#include "Endian.hpp"
+#include "IConverter.hpp"
 
 namespace binary {
 template <typename T>
-class Converter {
-private:
-    int32_t length;
-
+class Converter : public IConverter {
 public:
-    Converter() {
-        this->length = 0;
-    }
-
-    Converter(int32_t length) {
-        if (length < 0) {
-            throw std::out_of_range("length < 0");
-        }
-        this->length = length;
-    }
-
-    int32_t Length() {
-        return this->length;
-    }
+    using IConverter::IConverter;
 
     virtual void Encode(Allocator& allocator, const T& item) = 0;
 
     virtual void EncodeAuto(Allocator& allocator, const T& item) {
-        int32_t length = this->length;
+        int32_t length = Length();
         if (length != 0) {
             Encode(allocator, item);
         } else {
@@ -54,7 +37,7 @@ public:
     virtual T Decode(const std::span<std::byte> span) = 0;
 
     virtual T DecodeAuto(std::span<std::byte>& span) {
-        int32_t length = this->length;
+        int32_t length = Length();
         if (length != 0) {
             T result = Decode(span);
             span = span.subspan(static_cast<size_t>(length));
