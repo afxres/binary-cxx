@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
   <Type Name="binary::Allocator">
-    <DisplayString>{{Allocator Length={offset} Capacity={bounds}}}</DisplayString>
+    <DisplayString>Length = {offset}, Capacity = {bounds}</DisplayString>
     <Expand>
       <Item Name="[MaxCapacity]">limits</Item>
       <Synthetic Name="[Length (bytes written)]">
@@ -23,5 +23,8 @@
         </Expand>
       </Synthetic>
     </Expand>
+  </Type>
+  <Type Name="binary::Converter&lt;*&gt;">
+    <DisplayString>Length = {length}, T = {"$T1"}</DisplayString>
   </Type>
 </AutoVisualizer>

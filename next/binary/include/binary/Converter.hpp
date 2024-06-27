@@ -15,7 +15,11 @@ namespace binary {
 template <typename T>
 class Converter : public IConverter {
 public:
-    using IConverter::IConverter;
+    Converter()
+        : IConverter(typeid(T)) {}
+
+    Converter(int32_t length)
+        : IConverter(typeid(T), length) {}
 
     virtual void Encode(Allocator& allocator, const T& item) = 0;
 
