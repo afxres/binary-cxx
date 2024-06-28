@@ -8,8 +8,8 @@
 #include <span>
 
 #include "Allocator.hpp"
-#include "Define.hpp"
 #include "IConverter.hpp"
+#include "Memory.hpp"
 
 namespace binary {
 template <typename T>

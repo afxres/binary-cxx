@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef BINARY_DEFINE_HPP
-#define BINARY_DEFINE_HPP
+#ifndef BINARY_MEMORY_HPP
+#define BINARY_MEMORY_HPP
 
 #include <cstddef>
 #include <cstdint>

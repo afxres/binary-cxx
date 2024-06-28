@@ -1,4 +1,4 @@
-#include "binary/Define.hpp"
+#include "binary/Memory.hpp"
 
 #include <cassert>
 #include <cstddef>

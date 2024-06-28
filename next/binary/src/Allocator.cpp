@@ -5,7 +5,7 @@
 #include <limits>
 #include <stdexcept>
 
-#include "binary/Define.hpp"
+#include "binary/Memory.hpp"
 
 namespace binary {
 Allocator::Allocator() {
