@@ -1,6 +1,8 @@
 #include "binary/Allocator.hpp"
 
 #include <cassert>
+#include <cstring>
+#include <limits>
 #include <stdexcept>
 
 #include "binary/Define.hpp"
