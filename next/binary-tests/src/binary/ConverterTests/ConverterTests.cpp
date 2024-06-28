@@ -4,6 +4,8 @@
 #include "binary/Converter.hpp"
 
 namespace binary::tests::ConverterTests {
+BOOST_AUTO_TEST_SUITE(ConverterTests)
+
 template <typename T>
 class FakeEmptyConverter : public binary::Converter<T> {
     using Converter<T>::Converter;
@@ -16,8 +18,6 @@ class FakeEmptyConverter : public binary::Converter<T> {
         throw std::exception();
     }
 };
-
-BOOST_AUTO_TEST_SUITE(ConverterTests)
 
 BOOST_AUTO_TEST_CASE(ConverterDefaultLengthTest) {
     FakeEmptyConverter<int32_t> converter{};

@@ -6,6 +6,8 @@
 #include "binary/Converter.hpp"
 
 namespace binary::tests::ConverterTests {
+BOOST_AUTO_TEST_SUITE(CustomConstantConverterTests)
+
 class CustomConstantConverter : public Converter<int8_t> {
     using Converter::Converter;
 
@@ -21,8 +23,6 @@ class CustomConstantConverter : public Converter<int8_t> {
         return static_cast<int8_t>(span[0]);
     }
 };
-
-BOOST_AUTO_TEST_SUITE(CustomConstantConverterTests)
 
 std::vector<std::tuple<int32_t, int32_t, int8_t>> CustomConstantConverterEncodeAutoDecodeAutoData = {
     {1, 1, 0x77},

@@ -4,6 +4,8 @@
 #include "binary/Converter.hpp"
 
 namespace binary::tests::ConverterTests {
+BOOST_AUTO_TEST_SUITE(CustomVariableConverterTests)
+
 class CustomVariableConverter : public Converter<int32_t> {
     virtual void Encode(Allocator& allocator, const int32_t& item) override {
         allocator.Expand(item);
@@ -13,8 +15,6 @@ class CustomVariableConverter : public Converter<int32_t> {
         return EnsureLength(span.size());
     }
 };
-
-BOOST_AUTO_TEST_SUITE(CustomVariableConverterTests)
 
 std::vector<std::tuple<int32_t, int32_t>> CustomVariableConverterEncodeAutoData = {
     {0, 1},
