@@ -14,7 +14,7 @@ class FakeEmptyConverter : public binary::Converter<T> {
         throw std::exception();
     }
 
-    virtual T Decode(std::span<std::byte> span) {
+    virtual T Decode(const std::span<std::byte>& span) override {
         throw std::exception();
     }
 };

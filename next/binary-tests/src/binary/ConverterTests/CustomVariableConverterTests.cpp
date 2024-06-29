@@ -11,7 +11,7 @@ class CustomVariableConverter : public Converter<int32_t> {
         allocator.Expand(item);
     }
 
-    virtual int32_t Decode(std::span<std::byte> span) override {
+    virtual int32_t Decode(const std::span<std::byte>& span) override {
         return EnsureLength(span.size());
     }
 };

@@ -56,11 +56,18 @@ int32_t DecodeLengthPrefix(const std::byte* buffer, int32_t& offset, const int32
     return static_cast<int32_t>(result & 0x7FFF'FFFU);
 }
 
-int32_t EnsureLength(size_t length) {
+int32_t EnsureLength(const size_t length) {
     if (length > std::numeric_limits<int32_t>::max()) {
         throw std::overflow_error("length overflow");
     }
     return static_cast<int32_t>(length);
+}
+
+std::byte* EnsureLength(const std::span<std::byte>& span, const int32_t length) {
+    if (span.size() < length) {
+        throw std::length_error("not enough bytes");
+    }
+    return span.data();
 }
 
 std::span<std::byte> DecodeWithLengthPrefix(std::span<std::byte>& span) {
@@ -68,7 +75,7 @@ std::span<std::byte> DecodeWithLengthPrefix(std::span<std::byte>& span) {
     int32_t offset = 0;
     int32_t intent = DecodeLengthPrefix(source, offset, EnsureLength(span.size()));
     std::span<std::byte> result = span.first(intent);
-    span = span.subspan(offset + intent);
+    span = span.subspan(static_cast<size_t>(offset) + intent);
     return result;
 }
 }

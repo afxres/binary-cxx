@@ -5,6 +5,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <functional>
 #include <memory>
 #include <span>
 
@@ -43,6 +44,7 @@ public:
     void Ensure(int32_t length);
     void Expand(int32_t length);
     void Append(const std::span<std::byte>& span);
+    void Append(int32_t length, std::function<void(std::span<std::byte>)> action);
 };
 }
 

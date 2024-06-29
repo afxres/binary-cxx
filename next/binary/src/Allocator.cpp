@@ -134,4 +134,13 @@ void Allocator::Append(const std::span<std::byte>& span) {
     }
     memcpy(Assign(length), span.data(), length);
 }
+
+void Allocator::Append(int32_t length, std::function<void(std::span<std::byte>)> action) {
+    if (length == 0) {
+        return;
+    }
+    void* source = Assign(length);
+    std::span<std::byte> memory(static_cast<std::byte*>(source), length);
+    action(memory);
+}
 }

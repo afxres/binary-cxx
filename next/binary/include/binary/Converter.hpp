@@ -38,7 +38,7 @@ public:
         allocator.FinishAnchor(anchor);
     }
 
-    virtual T Decode(const std::span<std::byte> span) = 0;
+    virtual T Decode(const std::span<std::byte>& span) = 0;
 
     virtual T DecodeAuto(std::span<std::byte>& span) {
         int32_t length = Length();
