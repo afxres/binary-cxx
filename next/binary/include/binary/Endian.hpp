@@ -31,7 +31,7 @@ inline T __binary_load__(const void* source) {
     if constexpr (Is) {
         result = *static_cast<const T*>(source);
     } else {
-        __binary_swap__<sizeof(T)>(&result, &source);
+        __binary_swap__<sizeof(T)>(&result, source);
     }
     return result;
 }

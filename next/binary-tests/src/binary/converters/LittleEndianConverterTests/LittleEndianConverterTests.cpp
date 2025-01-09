@@ -4,9 +4,11 @@
 
 #include <binary/converters/LittleEndianConverter.hpp>
 
-namespace binary::converters::tests::LittleEndianConverterTests {
+namespace tests::binary::converters::LittleEndianConverterTests {
 BOOST_AUTO_TEST_SUITE(LittleEndianConverterTests)
 
+using ::binary::Allocator;
+using ::binary::converters::LittleEndianConverter;
 using LittleEndianConverterLengthData = boost::mpl::list<int8_t, int16_t, int32_t, int64_t>;
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(LittleEndianConverterLengthTest, T, LittleEndianConverterLengthData) {
@@ -30,7 +32,7 @@ void TestEncodeAutoDecodeAutoMethods(const T& item) {
     LittleEndianConverter<T> converter;
     converter.EncodeAuto(allocator, item);
     BOOST_REQUIRE_EQUAL(allocator.Length(), sizeof(T));
-    std::span<std::byte> memory = allocator.AsSpan();
+    std::span<const std::byte> memory = allocator.AsSpan();
     T result = converter.DecodeAuto(memory);
     BOOST_REQUIRE_EQUAL(memory.size(), 0);
     BOOST_REQUIRE_EQUAL(result, item);

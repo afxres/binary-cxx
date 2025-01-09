@@ -3,16 +3,19 @@
 
 #include "binary/Converter.hpp"
 
-namespace binary::tests::ConverterTests {
+namespace tests::binary::ConverterTests {
 BOOST_AUTO_TEST_SUITE(CustomVariableConverterTests)
+
+using ::binary::Allocator;
+using ::binary::Converter;
 
 class CustomVariableConverter : public Converter<int32_t> {
     virtual void Encode(Allocator& allocator, const int32_t& item) override {
         allocator.Expand(item);
     }
 
-    virtual int32_t Decode(const std::span<std::byte>& span) override {
-        return EnsureLength(span.size());
+    virtual int32_t Decode(const std::span<const std::byte>& span) override {
+        return ::binary::EnsureLength(span.size());
     }
 };
 

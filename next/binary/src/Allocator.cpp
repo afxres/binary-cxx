@@ -25,8 +25,8 @@ Allocator::Allocator(int32_t maxCapacity) {
     this->limits = maxCapacity;
 }
 
-std::span<std::byte> Allocator::AsSpan() {
-    return std::span<std::byte>(static_cast<std::byte*>(this->buffer.get()), this->offset);
+std::span<const std::byte> Allocator::AsSpan() {
+    return std::span<const std::byte>(this->buffer.get(), this->offset);
 }
 
 void Allocator::Resize(int32_t length) {
@@ -60,7 +60,7 @@ void Allocator::Resize(int32_t length) {
     assert(cursor <= this->limits);
 
     int32_t bounds = static_cast<int32_t>(cursor);
-    std::shared_ptr<void> target(malloc(bounds), free);
+    std::shared_ptr<std::byte> target(static_cast<std::byte*>(malloc(bounds)), free);
     if (target == nullptr) {
         throw std::bad_alloc();
     }
@@ -73,12 +73,12 @@ void Allocator::Resize(int32_t length) {
     assert(offset <= this->bounds);
 }
 
-void* Allocator::Assign(int32_t length) {
+std::byte* Allocator::Assign(int32_t length) {
     assert(length != 0);
     Ensure(length);
     int32_t offset = this->offset;
     this->offset = offset + length;
-    return static_cast<std::byte*>(this->buffer.get()) + offset;
+    return this->buffer.get() + offset;
 }
 
 int32_t Allocator::Anchor() {
@@ -96,7 +96,7 @@ void Allocator::FinishAnchor(int32_t anchor) {
         throw std::logic_error("allocator has been modified unexpectedly");
     }
     int32_t length = static_cast<int32_t>(result);
-    std::byte* target = static_cast<std::byte*>(this->buffer.get()) + anchor;
+    std::byte* target = this->buffer.get() + anchor;
     if (length <= Limits) {
         this->offset = offset - 3;
         EncodeLengthPrefix(target, length, 1);
@@ -127,7 +127,7 @@ void Allocator::Expand(int32_t length) {
     assert(this->offset <= this->bounds);
 }
 
-void Allocator::Append(const std::span<std::byte>& span) {
+void Allocator::Append(const std::span<const std::byte>& span) {
     int32_t length = EnsureLength(span.size());
     if (length == 0) {
         return;
@@ -139,8 +139,21 @@ void Allocator::Append(int32_t length, std::function<void(std::span<std::byte>)>
     if (length == 0) {
         return;
     }
-    void* source = Assign(length);
-    std::span<std::byte> memory(static_cast<std::byte*>(source), length);
-    action(memory);
+    action(std::span<std::byte>(Assign(length), length));
+}
+
+void Allocator::AppendWithLengthPrefix(const std::span<const std::byte>& span) {
+    int32_t number = EnsureLength(span.size());
+    int32_t prefixLength = EncodeLengthPrefixLength(number);
+    std::byte* source = Assign(EnsureLength(span.size() + prefixLength));
+    EncodeLengthPrefix(source, number, prefixLength);
+    memcpy(source + prefixLength, span.data(), span.size());
+}
+
+std::vector<std::byte> Allocator::Invoke(std::function<void(Allocator&)> action) {
+    Allocator allocator;
+    action(allocator);
+    auto span = allocator.AsSpan();
+    return std::vector(span.begin(), span.end());
 }
 }

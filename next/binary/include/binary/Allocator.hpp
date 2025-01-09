@@ -15,13 +15,13 @@ class Allocator {
     friend class Converter;
 
 private:
-    std::shared_ptr<void> buffer;
+    std::shared_ptr<std::byte> buffer;
     int32_t offset;
     int32_t bounds;
     int32_t limits;
 
     void Resize(int32_t length);
-    void* Assign(int32_t length);
+    std::byte* Assign(int32_t length);
     int32_t Anchor();
     void FinishAnchor(int32_t anchor);
 
@@ -40,11 +40,14 @@ public:
 
     Allocator();
     Allocator(int32_t maxCapacity);
-    std::span<std::byte> AsSpan();
+    std::span<const std::byte> AsSpan();
     void Ensure(int32_t length);
     void Expand(int32_t length);
-    void Append(const std::span<std::byte>& span);
+    void Append(const std::span<const std::byte>& span);
     void Append(int32_t length, std::function<void(std::span<std::byte>)> action);
+    void AppendWithLengthPrefix(const std::span<const std::byte>& span);
+
+    static std::vector<std::byte> Invoke(std::function<void(Allocator&)> action);
 };
 }
 

@@ -3,18 +3,21 @@
 
 #include "binary/Converter.hpp"
 
-namespace binary::tests::ConverterTests {
+namespace tests::binary::ConverterTests {
 BOOST_AUTO_TEST_SUITE(ConverterTests)
 
+using ::binary::Allocator;
+using ::binary::Converter;
+
 template <typename T>
-class FakeEmptyConverter : public binary::Converter<T> {
+class FakeEmptyConverter : public Converter<T> {
     using Converter<T>::Converter;
 
     virtual void Encode(Allocator& allocator, const T& item) override {
         throw std::exception();
     }
 
-    virtual T Decode(const std::span<std::byte>& span) override {
+    virtual T Decode(const std::span<const std::byte>& span) override {
         throw std::exception();
     }
 };

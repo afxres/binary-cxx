@@ -5,8 +5,11 @@
 
 #include "binary/Converter.hpp"
 
-namespace binary::tests::ConverterTests {
+namespace tests::binary::ConverterTests {
 BOOST_AUTO_TEST_SUITE(CustomConstantConverterTests)
+
+using ::binary::Allocator;
+using ::binary::Converter;
 
 class CustomConstantConverter : public Converter<int8_t> {
     using Converter::Converter;
@@ -19,7 +22,7 @@ class CustomConstantConverter : public Converter<int8_t> {
         allocator.Append(span);
     }
 
-    virtual int8_t Decode(const std::span<std::byte>& span) override {
+    virtual int8_t Decode(const std::span<const std::byte>& span) override {
         return static_cast<int8_t>(span[0]);
     }
 };
@@ -36,7 +39,7 @@ BOOST_DATA_TEST_CASE(CustomConstantConverterEncodeAutoDecodeAutoTest, CustomCons
     BOOST_REQUIRE_EQUAL(converter.Length(), converterLength);
     converter.EncodeAuto(allocator, data);
     BOOST_REQUIRE_EQUAL(allocator.Length(), converterLength);
-    std::span<std::byte> span = allocator.AsSpan();
+    std::span<const std::byte> span = allocator.AsSpan();
     BOOST_REQUIRE_EQUAL(span.size(), converterLength);
     BOOST_REQUIRE_EQUAL(static_cast<int8_t>(span[0]), data);
 

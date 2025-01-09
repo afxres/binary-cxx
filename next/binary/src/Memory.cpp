@@ -36,7 +36,7 @@ void EncodeLengthPrefix(std::byte* buffer, const int32_t number, const int32_t l
     }
 }
 
-int32_t DecodeLengthPrefix(const std::byte* buffer, int32_t& offset, const int32_t limits) {
+size_t DecodeLengthPrefix(const std::byte* buffer, size_t& offset, const size_t limits) {
     assert(limits >= offset);
     if (limits == offset) {
         throw std::out_of_range("not enough bytes");
@@ -45,7 +45,7 @@ int32_t DecodeLengthPrefix(const std::byte* buffer, int32_t& offset, const int32
     uint32_t header = static_cast<uint32_t>(DecodeBigEndian<uint8_t>(source));
     offset += 1;
     if ((header & 0x80U) == 0) {
-        return static_cast<int32_t>(header);
+        return header;
     }
     assert(limits >= offset);
     if (limits - offset < 3U) {
@@ -53,7 +53,7 @@ int32_t DecodeLengthPrefix(const std::byte* buffer, int32_t& offset, const int32
     }
     uint32_t result = DecodeBigEndian<uint32_t>(source);
     offset += 3;
-    return static_cast<int32_t>(result & 0x7FFF'FFFU);
+    return result & 0x7FFF'FFFU;
 }
 
 int32_t EnsureLength(const size_t length) {
@@ -63,19 +63,19 @@ int32_t EnsureLength(const size_t length) {
     return static_cast<int32_t>(length);
 }
 
-std::byte* EnsureLength(const std::span<std::byte>& span, const int32_t length) {
+const std::byte* EnsureLength(const std::span<const std::byte>& span, const int32_t length) {
     if (span.size() < length) {
         throw std::length_error("not enough bytes");
     }
     return span.data();
 }
 
-std::span<std::byte> DecodeWithLengthPrefix(std::span<std::byte>& span) {
+std::span<const std::byte> DecodeWithLengthPrefix(std::span<const std::byte>& span) {
     const std::byte* source = span.data();
-    int32_t offset = 0;
-    int32_t intent = DecodeLengthPrefix(source, offset, EnsureLength(span.size()));
-    std::span<std::byte> result = span.first(intent);
-    span = span.subspan(static_cast<size_t>(offset) + intent);
+    size_t offset = 0;
+    size_t intent = DecodeLengthPrefix(source, offset, span.size());
+    std::span<const std::byte> result = span.subspan(offset, intent);
+    span = span.subspan(offset + intent);
     return result;
 }
 }

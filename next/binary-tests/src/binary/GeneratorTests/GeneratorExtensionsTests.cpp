@@ -3,8 +3,13 @@
 
 #include <binary/GeneratorExtensions.hpp>
 
-namespace binary::tests::GeneratorTests {
+namespace tests::binary::GeneratorTests {
 BOOST_AUTO_TEST_SUITE(GeneratorExtensionsTests)
+
+using ::binary::Allocator;
+using ::binary::Converter;
+using ::binary::IConverter;
+using ::binary::IGenerator;
 
 class FakeGenerator : public IGenerator {
 private:
@@ -32,7 +37,7 @@ class FakeConverter : public Converter<T> {
         throw std::logic_error("");
     }
 
-    virtual T Decode(const std::span<std::byte>& span) override {
+    virtual T Decode(const std::span<const std::byte>& span) override {
         throw std::logic_error("");
     }
 };
