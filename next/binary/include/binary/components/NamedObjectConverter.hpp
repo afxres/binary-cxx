@@ -22,9 +22,9 @@ public:
     struct MemberInfo {
         bool IsOptional = false;
         std::string Name;
-        EncodeWithLengthPrefixFunction EncodeWithLengthPrefixFunction;
-        DecodeFunction DecodeFunction;
-        GetConverterFunction GetConverterFunction;
+        EncodeWithLengthPrefixFunction EncodeWithLengthPrefix;
+        DecodeFunction Decode;
+        GetConverterFunction GetConverter;
     };
 
     NamedObjectConverter(IGenerator& generator, const std::vector<MemberInfo>& contexts)
@@ -36,7 +36,7 @@ public:
             auto head = Allocator::Invoke([&encoding, &name](auto& allocator) { encoding->Encode(allocator, name); });
             this->names.emplace_back(name);
             this->headers.emplace_back(head);
-            this->converters.emplace_back(info.GetConverterFunction(generator));
+            this->converters.emplace_back(info.GetConverter(generator));
         }
         this->decoder = std::make_unique<NamedObjectDecoder>(this->names, this->headers);
     }
@@ -48,7 +48,7 @@ public:
             const auto& head = this->headers.at(i);
             const auto& converter = this->converters.at(i);
             allocator.AppendWithLengthPrefix(head);
-            info.EncodeWithLengthPrefixFunction(*converter, allocator, item);
+            info.EncodeWithLengthPrefix(*converter, allocator, item);
         }
     }
 
@@ -61,7 +61,7 @@ public:
         for (size_t i = 0; i < contexts.size(); i++) {
             const auto& info = contexts.at(i);
             const auto& converter = this->converters.at(i);
-            info.DecodeFunction(result, *converter, std::get<1>(slices.at(i)));
+            info.Decode(result, *converter, std::get<1>(slices.at(i)));
         }
         return result;
     }

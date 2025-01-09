@@ -1,8 +1,8 @@
 #include "binary/components/NamedObjectDecoder.hpp"
 
 #include <cassert>
-#include <exception>
 #include <format>
+#include <stdexcept>
 
 #include "binary/Memory.hpp"
 
@@ -51,10 +51,10 @@ void NamedObjectDecoder::Invoke(const std::span<const std::byte>& span, std::vec
 }
 
 void NamedObjectDecoder::ExceptKeyFound(size_t index) {
-    throw std::exception(std::format("object key '%s' already exists", this->names.at(index)).c_str());
+    throw std::invalid_argument(std::format("object key '%s' already exists", this->names.at(index)).c_str());
 }
 
 void NamedObjectDecoder::ExceptNotFound(size_t index) {
-    throw std::exception(std::format("object key '%s' does not exist", this->names.at(index)).c_str());
+    throw std::invalid_argument(std::format("object key '%s' does not exist", this->names.at(index)).c_str());
 }
 }

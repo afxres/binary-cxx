@@ -39,13 +39,13 @@
         MemberInfo info{};                                                                                                                      \
         info.Name = #ARG_NAME;                                                                                                                  \
         info.IsOptional = ARG_IS_OPTIONAL;                                                                                                      \
-        info.EncodeWithLengthPrefixFunction = [](auto& converter, auto& allocator, const auto& item) {                                          \
+        info.EncodeWithLengthPrefix = [](auto& converter, auto& allocator, const auto& item) {                                                  \
             static_cast<::binary::Converter<ARG_TYPE>&>(converter).EncodeWithLengthPrefix(allocator, (ARG_GET_MEMBER_LAMBDA)(item));            \
         };                                                                                                                                      \
-        info.DecodeFunction = [](auto& item, auto& converter, const auto& span) {                                                               \
+        info.Decode = [](auto& item, auto& converter, const auto& span) {                                                                       \
             (ARG_SET_MEMBER_LAMBDA)(item, static_cast<::binary::Converter<ARG_TYPE>&>(converter).Decode(span));                                 \
         };                                                                                                                                      \
-        info.GetConverterFunction = [](auto& generator) {                                                                                       \
+        info.GetConverter = [](auto& generator) {                                                                                               \
             return (ARG_GET_CONVERTER_LAMBDA)(generator);                                                                                       \
         };                                                                                                                                      \
         return info;                                                                                                                            \

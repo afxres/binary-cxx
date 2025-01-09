@@ -14,7 +14,7 @@
 
 namespace binary::internal {
 template <size_t Size>
-inline void __binary_swap__(void* target, const void* source);
+void __binary_swap__(void* target, const void* source);
 
 template <typename T, bool Is>
 inline void __binary_save__(void* target, T item) {
