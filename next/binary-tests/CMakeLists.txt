@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
-set(CMAKE_CXX_STANDARD 20)
 project("binary-tests")
+set(CMAKE_CXX_STANDARD 20)
 if(POLICY CMP0167)
     cmake_policy(SET CMP0167 NEW)
 endif()
