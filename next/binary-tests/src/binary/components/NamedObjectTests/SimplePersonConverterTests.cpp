@@ -3,11 +3,11 @@
 
 #include <binary/Generator.hpp>
 #include <binary/GeneratorExtensions.hpp>
-#include <binary/components/NamedObjectDefine.hpp>
+#include <binary/components/NamedObject.hpp>
 #include <binary/converters/LittleEndianConverter.hpp>
 #include <binary/converters/StringConverter.hpp>
 
-namespace tests::binary::components::NamedObjectDefineTests {
+namespace tests::binary::components::NamedObjectTests {
 BOOST_AUTO_TEST_SUITE(SimplePersonConverterTests)
 
 struct SimplePerson {
