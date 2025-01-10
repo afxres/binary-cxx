@@ -33,11 +33,11 @@ class FakeType {};
 
 template <typename T>
 class FakeConverter : public Converter<T> {
-    virtual void Encode(Allocator& allocator, const T& item) override {
+    virtual void Encode([[maybe_unused]] Allocator& allocator, [[maybe_unused]] const T& item) override {
         throw std::logic_error("");
     }
 
-    virtual T Decode(const std::span<const std::byte>& span) override {
+    virtual T Decode([[maybe_unused]] const std::span<const std::byte>& span) override {
         throw std::logic_error("");
     }
 };

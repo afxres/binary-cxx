@@ -113,11 +113,11 @@ void Allocator::FinishAnchor(size_t anchor) {
 void Allocator::Ensure(size_t length) {
     assert(this->offset >= 0);
     assert(this->bounds >= 0);
-    if (length > INT32_MAX || static_cast<uint64_t>(this->offset) + length > this->bounds) {
+    if (length > INT32_MAX || static_cast<uint64_t>(this->offset) + length > static_cast<uint64_t>(this->bounds)) {
         Resize(length);
     }
     assert(this->bounds <= this->limits);
-    assert(this->bounds >= this->offset + length);
+    assert(this->bounds >= this->offset + static_cast<int32_t>(length));
 }
 
 void Allocator::Expand(size_t length) {
@@ -128,11 +128,10 @@ void Allocator::Expand(size_t length) {
 }
 
 void Allocator::Append(const std::span<const std::byte>& span) {
-    int32_t length = EnsureLength(span.size());
-    if (length == 0) {
+    if (span.size() == 0) {
         return;
     }
-    memcpy(Assign(length), span.data(), length);
+    memcpy(Assign(span.size()), span.data(), span.size());
 }
 
 void Allocator::Append(size_t length, std::function<void(std::span<std::byte>)> action) {
@@ -143,8 +142,8 @@ void Allocator::Append(size_t length, std::function<void(std::span<std::byte>)> 
 }
 
 void Allocator::AppendWithLengthPrefix(const std::span<const std::byte>& span) {
-    int32_t number = EnsureLength(span.size());
-    int32_t prefixLength = EncodeLengthPrefixLength(number);
+    size_t number = EnsureLength(span.size());
+    size_t prefixLength = EncodeLengthPrefixLength(number);
     std::byte* source = Assign(EnsureLength(span.size() + prefixLength));
     EncodeLengthPrefix(source, number, prefixLength);
     memcpy(source + prefixLength, span.data(), span.size());

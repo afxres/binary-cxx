@@ -3,14 +3,14 @@
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
-#include <limits>
 #include <span>
 #include <stdexcept>
 
 #include "binary/Endian.hpp"
 
 namespace binary {
-int32_t EncodeLengthPrefixLength(const int32_t number) {
+size_t EncodeLengthPrefixLength(const size_t number) {
+    assert(number <= INT32_MAX);
     if ((static_cast<uint32_t>(number) >> 7) == 0) {
         return 1;
     } else {
@@ -18,7 +18,7 @@ int32_t EncodeLengthPrefixLength(const int32_t number) {
     }
 }
 
-int32_t DecodeLengthPrefixLength(const std::byte header) {
+size_t DecodeLengthPrefixLength(const std::byte header) {
     if ((static_cast<uint32_t>(header) & 0x80U) == 0) {
         return 1;
     } else {
@@ -26,7 +26,8 @@ int32_t DecodeLengthPrefixLength(const std::byte header) {
     }
 }
 
-void EncodeLengthPrefix(std::byte* buffer, const int32_t number, const int32_t length) {
+void EncodeLengthPrefix(std::byte* buffer, const size_t number, const size_t length) {
+    assert(number <= INT32_MAX);
     assert(length == 1 || length == 4);
     assert(length >= EncodeLengthPrefixLength(number));
     if (length == 1) {
@@ -56,14 +57,14 @@ size_t DecodeLengthPrefix(const std::byte* buffer, size_t& offset, const size_t 
     return result & 0x7FFF'FFFU;
 }
 
-int32_t EnsureLength(const size_t length) {
-    if (length > std::numeric_limits<int32_t>::max()) {
-        throw std::overflow_error("length overflow");
+size_t EnsureLength(const size_t length) {
+    if (length > INT32_MAX) {
+        throw std::length_error("length overflow");
     }
-    return static_cast<int32_t>(length);
+    return length;
 }
 
-const std::byte* EnsureLength(const std::span<const std::byte>& span, const int32_t length) {
+const std::byte* EnsureLength(const std::span<const std::byte>& span, const size_t length) {
     if (span.size() < length) {
         throw std::length_error("not enough bytes");
     }

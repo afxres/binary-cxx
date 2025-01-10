@@ -27,12 +27,12 @@ class CustomConstantConverter : public Converter<int8_t> {
     }
 };
 
-std::vector<std::tuple<int32_t, int32_t, int8_t>> CustomConstantConverterEncodeAutoDecodeAutoData = {
-    {1, 1, 0x77},
-    {8, 8, 0x6A},
+std::vector<std::tuple<int32_t, int8_t>> CustomConstantConverterEncodeAutoDecodeAutoData = {
+    {1, 0x77},
+    {8, 0x6A},
 };
 
-BOOST_DATA_TEST_CASE(CustomConstantConverterEncodeAutoDecodeAutoTest, CustomConstantConverterEncodeAutoDecodeAutoData, converterLength, outputLength, data) {
+BOOST_DATA_TEST_CASE(CustomConstantConverterEncodeAutoDecodeAutoTest, CustomConstantConverterEncodeAutoDecodeAutoData, converterLength, data) {
     CustomConstantConverter converter{converterLength};
     Allocator allocator;
     BOOST_REQUIRE_EQUAL(allocator.Length(), 0);

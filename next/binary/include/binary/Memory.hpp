@@ -8,12 +8,12 @@
 #include <span>
 
 namespace binary {
-int32_t EncodeLengthPrefixLength(const int32_t number);
-int32_t DecodeLengthPrefixLength(const std::byte header);
-void EncodeLengthPrefix(std::byte* buffer, const int32_t number, const int32_t length);
+size_t EncodeLengthPrefixLength(const size_t number);
+size_t DecodeLengthPrefixLength(const std::byte header);
+void EncodeLengthPrefix(std::byte* buffer, const size_t number, const size_t length);
 size_t DecodeLengthPrefix(const std::byte* buffer, size_t& offset, const size_t limits);
-int32_t EnsureLength(const size_t length);
-const std::byte* EnsureLength(const std::span<const std::byte>& span, const int32_t length);
+size_t EnsureLength(const size_t length);
+const std::byte* EnsureLength(const std::span<const std::byte>& span, const size_t length);
 std::span<const std::byte> DecodeWithLengthPrefix(std::span<const std::byte>& span);
 }
 
