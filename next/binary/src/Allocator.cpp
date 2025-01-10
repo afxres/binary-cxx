@@ -2,7 +2,6 @@
 
 #include <cassert>
 #include <cstring>
-#include <limits>
 #include <stdexcept>
 
 #include "binary/Memory.hpp"
@@ -12,12 +11,12 @@ Allocator::Allocator() {
     this->buffer = nullptr;
     this->offset = 0;
     this->bounds = 0;
-    this->limits = std::numeric_limits<int32_t>::max();
+    this->limits = INT32_MAX;
 }
 
-Allocator::Allocator(int32_t maxCapacity) {
-    if (maxCapacity < 0) {
-        throw std::out_of_range("maxCapacity < 0");
+Allocator::Allocator(size_t maxCapacity) {
+    if (maxCapacity > INT32_MAX) {
+        throw std::out_of_range("maxCapacity > INT32_MAX");
     }
     this->buffer = nullptr;
     this->offset = 0;
@@ -29,7 +28,7 @@ std::span<const std::byte> Allocator::AsSpan() {
     return std::span<const std::byte>(this->buffer.get(), this->offset);
 }
 
-void Allocator::Resize(int32_t length) {
+void Allocator::Resize(size_t length) {
     assert(this->limits >= 0);
     assert(this->bounds >= 0);
     assert(this->offset >= 0);
@@ -40,10 +39,9 @@ void Allocator::Resize(int32_t length) {
     int32_t offset = this->offset;
     int32_t limits = this->limits;
     int64_t amount = static_cast<int64_t>(offset) + length;
-    if (amount > limits) {
+    if (length > INT32_MAX || amount > limits) {
         throw std::length_error("maximum allowed capacity reached");
     }
-
     int32_t source = this->bounds;
     int64_t cursor = static_cast<int64_t>(source);
     constexpr int32_t Capacity = 128;
@@ -73,7 +71,7 @@ void Allocator::Resize(int32_t length) {
     assert(offset <= this->bounds);
 }
 
-std::byte* Allocator::Assign(int32_t length) {
+std::byte* Allocator::Assign(size_t length) {
     assert(length != 0);
     Ensure(length);
     int32_t offset = this->offset;
@@ -81,18 +79,20 @@ std::byte* Allocator::Assign(int32_t length) {
     return this->buffer.get() + offset;
 }
 
-int32_t Allocator::Anchor() {
+size_t Allocator::Anchor() {
     Ensure(sizeof(int32_t));
     int32_t offset = this->offset;
     this->offset = offset + sizeof(int32_t);
     return offset;
 }
 
-void Allocator::FinishAnchor(int32_t anchor) {
+void Allocator::FinishAnchor(size_t anchor) {
+    assert(this->offset >= 0);
+    assert(this->offset <= this->bounds);
     constexpr int32_t Limits = 16;
     int32_t offset = this->offset;
-    int64_t result = static_cast<int64_t>(static_cast<uint32_t>(offset)) - static_cast<uint32_t>(anchor) - sizeof(int32_t);
-    if (result < 0) {
+    int64_t result = static_cast<int64_t>(offset) - anchor - sizeof(int32_t);
+    if (anchor > INT32_MAX || result < 0) {
         throw std::logic_error("allocator has been modified unexpectedly");
     }
     int32_t length = static_cast<int32_t>(result);
@@ -110,17 +110,17 @@ void Allocator::FinishAnchor(int32_t anchor) {
     }
 }
 
-void Allocator::Ensure(int32_t length) {
+void Allocator::Ensure(size_t length) {
     assert(this->offset >= 0);
     assert(this->bounds >= 0);
-    if (static_cast<uint64_t>(static_cast<uint32_t>(this->offset)) + static_cast<uint32_t>(length) > static_cast<uint32_t>(this->bounds)) {
+    if (length > INT32_MAX || static_cast<uint64_t>(this->offset) + length > this->bounds) {
         Resize(length);
     }
     assert(this->bounds <= this->limits);
     assert(this->bounds >= this->offset + length);
 }
 
-void Allocator::Expand(int32_t length) {
+void Allocator::Expand(size_t length) {
     Ensure(length);
     this->offset += length;
     assert(this->offset >= 0);
@@ -135,7 +135,7 @@ void Allocator::Append(const std::span<const std::byte>& span) {
     memcpy(Assign(length), span.data(), length);
 }
 
-void Allocator::Append(int32_t length, std::function<void(std::span<std::byte>)> action) {
+void Allocator::Append(size_t length, std::function<void(std::span<std::byte>)> action) {
     if (length == 0) {
         return;
     }

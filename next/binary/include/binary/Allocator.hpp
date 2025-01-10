@@ -3,6 +3,7 @@
 #ifndef BINARY_ALLOCATOR_HPP
 #define BINARY_ALLOCATOR_HPP
 
+#include <cassert>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
@@ -20,31 +21,34 @@ private:
     int32_t bounds;
     int32_t limits;
 
-    void Resize(int32_t length);
-    std::byte* Assign(int32_t length);
-    int32_t Anchor();
-    void FinishAnchor(int32_t anchor);
+    void Resize(size_t length);
+    std::byte* Assign(size_t length);
+    size_t Anchor();
+    void FinishAnchor(size_t anchor);
 
 public:
-    int32_t Length() const {
+    size_t Length() const {
+        assert(this->offset >= 0);
         return this->offset;
     }
 
-    int32_t Capacity() const {
+    size_t Capacity() const {
+        assert(this->bounds >= 0);
         return this->bounds;
     }
 
-    int32_t MaxCapacity() const {
+    size_t MaxCapacity() const {
+        assert(this->limits >= 0);
         return this->limits;
     }
 
     Allocator();
-    Allocator(int32_t maxCapacity);
+    Allocator(size_t maxCapacity);
     std::span<const std::byte> AsSpan();
-    void Ensure(int32_t length);
-    void Expand(int32_t length);
+    void Ensure(size_t length);
+    void Expand(size_t length);
     void Append(const std::span<const std::byte>& span);
-    void Append(int32_t length, std::function<void(std::span<std::byte>)> action);
+    void Append(size_t length, std::function<void(std::span<std::byte>)> action);
     void AppendWithLengthPrefix(const std::span<const std::byte>& span);
 
     static std::vector<std::byte> Invoke(std::function<void(Allocator&)> action);
