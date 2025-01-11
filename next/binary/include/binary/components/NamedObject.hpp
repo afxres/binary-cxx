@@ -1,11 +1,11 @@
 #pragma once
 
-#ifndef BINARY_COMPONENTS_NAMEDOBJECTDEFINE_HPP
-#define BINARY_COMPONENTS_NAMEDOBJECTDEFINE_HPP
+#ifndef BINARY_COMPONENTS_NAMEDOBJECT_HPP
+#define BINARY_COMPONENTS_NAMEDOBJECT_HPP
 
 #include "binary/components/NamedObjectConverter.hpp"
 
-#define BINARY_NAMED_OBJECT_CONVERTER_BEGIN(ARG_TYPE, ARG_CONVERTER_NAME)                    \
+#define BINARY_NAMED_OBJECT_CONVERTER(ARG_TYPE, ARG_CONVERTER_NAME)                          \
     class ARG_CONVERTER_NAME : public ::binary::components::NamedObjectConverter<ARG_TYPE> { \
     public:                                                                                  \
         ARG_CONVERTER_NAME(::binary::IGenerator& generator)                                  \
@@ -19,12 +19,12 @@
             static std::vector<MemberInfo> contexts;                                         \
             if (!initialized) {
 
-#define BINARY_NAMED_OBJECT_CONVERTER_END \
-    }                                     \
-    initialized = true;                   \
-    return contexts;                      \
-    }                                     \
-    }                                     \
+#define BINARY_NAMED_OBJECT_CONVERTER_END() \
+    }                                       \
+    initialized = true;                     \
+    return contexts;                        \
+    }                                       \
+    }                                       \
     ;
 
 #define BINARY_NAMED_MEMBER(ARG_NAME)                              \

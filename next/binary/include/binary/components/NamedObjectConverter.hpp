@@ -7,7 +7,6 @@
 #include <vector>
 
 #include "binary/Converter.hpp"
-#include "binary/GeneratorExtensions.hpp"
 #include "binary/IGenerator.hpp"
 #include "binary/components/NamedObjectDecoder.hpp"
 
@@ -15,14 +14,14 @@ namespace binary::components {
 template <typename T>
 class NamedObjectConverter : public Converter<T> {
 public:
-    using EncodeWithLengthPrefixFunction = std::function<void(IConverter&, Allocator&, const T&)>;
+    using EncodeFunction = std::function<void(IConverter&, Allocator&, const T&)>;
     using DecodeFunction = std::function<void(T&, IConverter&, const std::span<const std::byte>&)>;
     using GetConverterFunction = std::function<std::shared_ptr<IConverter>(IGenerator&)>;
 
     struct MemberInfo {
         bool IsOptional = false;
         std::string Name;
-        EncodeWithLengthPrefixFunction EncodeWithLengthPrefix;
+        EncodeFunction EncodeWithLengthPrefix;
         DecodeFunction Decode;
         GetConverterFunction GetConverter;
     };

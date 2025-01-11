@@ -3,22 +3,22 @@
 
 #include <binary/Generator.hpp>
 #include <binary/GeneratorExtensions.hpp>
-#include <binary/components/NamedObject.hpp>
+#include <binary/components/TupleObject.hpp>
 #include <binary/converters/LittleEndianConverter.hpp>
 #include <binary/converters/StringConverter.hpp>
 
-namespace tests::binary::components::NamedObjectTests {
-BOOST_AUTO_TEST_SUITE(SimplePersonConverterTests)
+namespace tests::binary::components::TupleObjectTests {
+BOOST_AUTO_TEST_SUITE(SimplePersonTupleObjectConverterTests)
 
 struct SimplePerson {
     int8_t age{};
     std::string name;
 };
 
-BINARY_NAMED_OBJECT_CONVERTER_BEGIN(SimplePerson, SimplePersonConverter)
-BINARY_NAMED_MEMBER(age)
-BINARY_NAMED_MEMBER(name)
-BINARY_NAMED_OBJECT_CONVERTER_END
+BINARY_TUPLE_OBJECT_CONVERTER_BEGIN(SimplePerson, SimplePersonConverter)
+BINARY_TUPLE_MEMBER(age)
+BINARY_TUPLE_MEMBER(name)
+BINARY_TUPLE_OBJECT_CONVERTER_END()
 
 BOOST_AUTO_TEST_CASE(SimplePersonConverterLengthTest) {
     ::binary::Generator generator;
@@ -31,8 +31,8 @@ BOOST_AUTO_TEST_CASE(SimplePersonConverterLengthTest) {
 }
 
 std::vector<std::tuple<int8_t, std::string, int32_t>> SimplePersonTestData = {
-    {18, "Alice", 17},
-    {20, "Bob", 15},
+    {18, "Alice", 6},
+    {20, "Bob", 4},
 };
 
 BOOST_DATA_TEST_CASE(SimplePersonConverterEncodeDecodeTest, SimplePersonTestData, age, name, outputLength) {

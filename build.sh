@@ -8,4 +8,4 @@ fi
 cd "$build_dir"
 cmake "../next/"
 cmake --build . --config Debug
-ctest
+ctest --output-on-failure
