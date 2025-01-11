@@ -5,10 +5,10 @@
 
 #include <cassert>
 #include <cstddef>
-#include <cstdint>
 #include <functional>
 #include <memory>
 #include <span>
+#include <vector>
 
 namespace binary {
 class Allocator {
@@ -17,9 +17,9 @@ class Allocator {
 
 private:
     std::shared_ptr<std::byte> buffer;
-    int32_t offset;
-    int32_t bounds;
-    int32_t limits;
+    size_t offset;
+    size_t bounds;
+    size_t limits;
 
     void Resize(size_t length);
     std::byte* Assign(size_t length);
@@ -28,17 +28,14 @@ private:
 
 public:
     size_t Length() const {
-        assert(this->offset >= 0);
         return this->offset;
     }
 
     size_t Capacity() const {
-        assert(this->bounds >= 0);
         return this->bounds;
     }
 
     size_t MaxCapacity() const {
-        assert(this->limits >= 0);
         return this->limits;
     }
 

@@ -11,11 +11,11 @@ using ::binary::Converter;
 
 class CustomVariableConverter : public Converter<int32_t> {
     virtual void Encode(Allocator& allocator, const int32_t& item) override {
-        allocator.Expand(item);
+        allocator.Expand(static_cast<uint32_t>(item));
     }
 
-    virtual int32_t Decode(const std::span<const std::byte>& span) override {
-        return ::binary::EnsureLength(span.size());
+    virtual int32_t Decode([[maybe_unused]] const std::span<const std::byte>& span) override {
+        throw std::logic_error("");
     }
 };
 

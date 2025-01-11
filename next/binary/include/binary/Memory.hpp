@@ -4,7 +4,6 @@
 #define BINARY_MEMORY_HPP
 
 #include <cstddef>
-#include <cstdint>
 #include <span>
 
 namespace binary {

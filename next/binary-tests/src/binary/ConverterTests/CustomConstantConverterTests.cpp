@@ -15,7 +15,7 @@ class CustomConstantConverter : public Converter<int8_t> {
     using Converter::Converter;
 
     virtual void Encode(Allocator& allocator, const int8_t& item) override {
-        int32_t length = Length();
+        size_t length = Length();
         std::unique_ptr<std::byte[]> buffer(new std::byte[length], std::default_delete<std::byte[]>());
         std::span<std::byte> span(buffer.get(), length);
         span[0] = static_cast<std::byte>(item);
@@ -27,7 +27,7 @@ class CustomConstantConverter : public Converter<int8_t> {
     }
 };
 
-std::vector<std::tuple<int32_t, int8_t>> CustomConstantConverterEncodeAutoDecodeAutoData = {
+std::vector<std::tuple<size_t, int8_t>> CustomConstantConverterEncodeAutoDecodeAutoData = {
     {1, 0x77},
     {8, 0x6A},
 };

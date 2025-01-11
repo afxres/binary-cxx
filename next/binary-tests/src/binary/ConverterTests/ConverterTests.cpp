@@ -27,21 +27,21 @@ BOOST_AUTO_TEST_CASE(ConverterDefaultLengthTest) {
     BOOST_REQUIRE_EQUAL(converter.Length(), 0);
 }
 
-std::vector<int32_t> ConverterCustomLengthData = {0, 1, 4, 128, 1024};
+std::vector<size_t> ConverterCustomLengthData = {0, 1, 4, 128, 1024};
 
 BOOST_DATA_TEST_CASE(ConverterCustomLengthTests, ConverterCustomLengthData) {
     FakeEmptyConverter<int32_t> converter{sample};
     BOOST_REQUIRE_EQUAL(converter.Length(), sample);
 }
 
-std::vector<int32_t> ConverterInvalidLengthData = {-1, -300, -65537};
+std::vector<size_t> ConverterInvalidLengthData = {0x8000'0000, 0x8000'0001, 0xFFFF'FFFF};
 
 BOOST_DATA_TEST_CASE(ConverterInvalidLengthTest, ConverterInvalidLengthData) {
     BOOST_REQUIRE_EXCEPTION(
         FakeEmptyConverter<int32_t> ignore{sample},
         std::out_of_range,
         ([](const std::out_of_range& e) {
-            return std::string(e.what()) == "length < 0";
+            return std::string(e.what()) == "length > INT32_MAX";
         }));
 }
 

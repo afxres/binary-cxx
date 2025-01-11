@@ -6,6 +6,10 @@
 
 #include "binary/Memory.hpp"
 
+#define ALLOCATOR_ANCHOR_SIZE (4)
+#define ALLOCATOR_ANCHOR_SHRINK_LIMITS (16)
+#define ALLOCATOR_CAPACITY_SEED (128)
+
 namespace binary {
 Allocator::Allocator() {
     this->buffer = nullptr;
@@ -29,24 +33,23 @@ std::span<const std::byte> Allocator::AsSpan() {
 }
 
 void Allocator::Resize(size_t length) {
-    assert(this->limits >= 0);
-    assert(this->bounds >= 0);
-    assert(this->offset >= 0);
+    assert(this->limits <= INT32_MAX);
+    assert(this->bounds <= INT32_MAX);
+    assert(this->offset <= INT32_MAX);
     assert(this->offset <= this->bounds);
     assert(this->bounds <= this->limits);
     assert(length != 0);
 
-    int32_t offset = this->offset;
-    int32_t limits = this->limits;
-    int64_t amount = static_cast<int64_t>(offset) + length;
+    size_t offset = this->offset;
+    size_t limits = this->limits;
+    uint64_t amount = static_cast<uint64_t>(offset) + length;
     if (length > INT32_MAX || amount > limits) {
         throw std::length_error("maximum allowed capacity reached");
     }
-    int32_t source = this->bounds;
-    int64_t cursor = static_cast<int64_t>(source);
-    constexpr int32_t Capacity = 128;
+    size_t source = this->bounds;
+    uint64_t cursor = static_cast<uint64_t>(source);
     if (cursor == 0) {
-        cursor = Capacity;
+        cursor = ALLOCATOR_CAPACITY_SEED;
     }
     do {
         cursor *= 2;
@@ -57,7 +60,7 @@ void Allocator::Resize(size_t length) {
     assert(amount <= cursor);
     assert(cursor <= this->limits);
 
-    int32_t bounds = static_cast<int32_t>(cursor);
+    size_t bounds = static_cast<size_t>(cursor);
     std::shared_ptr<std::byte> target(static_cast<std::byte*>(malloc(bounds)), free);
     if (target == nullptr) {
         throw std::bad_alloc();
@@ -74,30 +77,29 @@ void Allocator::Resize(size_t length) {
 std::byte* Allocator::Assign(size_t length) {
     assert(length != 0);
     Ensure(length);
-    int32_t offset = this->offset;
+    size_t offset = this->offset;
     this->offset = offset + length;
     return this->buffer.get() + offset;
 }
 
 size_t Allocator::Anchor() {
-    Ensure(sizeof(int32_t));
-    int32_t offset = this->offset;
-    this->offset = offset + sizeof(int32_t);
+    Ensure(ALLOCATOR_ANCHOR_SIZE);
+    size_t offset = this->offset;
+    this->offset = offset + ALLOCATOR_ANCHOR_SIZE;
     return offset;
 }
 
 void Allocator::FinishAnchor(size_t anchor) {
-    assert(this->offset >= 0);
+    assert(this->bounds <= INT32_MAX);
     assert(this->offset <= this->bounds);
-    constexpr int32_t Limits = 16;
-    int32_t offset = this->offset;
-    int64_t result = static_cast<int64_t>(offset) - anchor - sizeof(int32_t);
-    if (anchor > INT32_MAX || result < 0) {
+    size_t offset = this->offset;
+    uint64_t refers = static_cast<uint64_t>(anchor) + ALLOCATOR_ANCHOR_SIZE;
+    if (anchor > INT32_MAX || refers > offset) {
         throw std::logic_error("allocator has been modified unexpectedly");
     }
-    int32_t length = static_cast<int32_t>(result);
+    size_t length = offset - static_cast<size_t>(refers);
     std::byte* target = this->buffer.get() + anchor;
-    if (length <= Limits) {
+    if (length <= ALLOCATOR_ANCHOR_SHRINK_LIMITS) {
         this->offset = offset - 3;
         EncodeLengthPrefix(target, length, 1);
         std::memmove(target + 1, target + 4, length);
@@ -111,19 +113,19 @@ void Allocator::FinishAnchor(size_t anchor) {
 }
 
 void Allocator::Ensure(size_t length) {
-    assert(this->offset >= 0);
-    assert(this->bounds >= 0);
-    if (length > INT32_MAX || static_cast<uint64_t>(this->offset) + length > static_cast<uint64_t>(this->bounds)) {
+    assert(this->bounds <= INT32_MAX);
+    assert(this->offset <= this->bounds);
+    if (length > INT32_MAX || static_cast<uint64_t>(this->offset) + length > this->bounds) {
         Resize(length);
     }
     assert(this->bounds <= this->limits);
-    assert(this->bounds >= this->offset + static_cast<int32_t>(length));
+    assert(this->bounds >= this->offset + length);
 }
 
 void Allocator::Expand(size_t length) {
     Ensure(length);
     this->offset += length;
-    assert(this->offset >= 0);
+    assert(this->bounds <= INT32_MAX);
     assert(this->offset <= this->bounds);
 }
 
