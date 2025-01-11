@@ -51,10 +51,10 @@ void NamedObjectDecoder::Invoke(const std::span<const std::byte>& span, std::vec
 }
 
 void NamedObjectDecoder::ExceptKeyFound(size_t index) {
-    throw std::invalid_argument(std::format("object key '%s' already exists", this->names.at(index)).c_str());
+    throw std::invalid_argument(std::format("named key '{}' already exists", this->names.at(index)).c_str());
 }
 
 void NamedObjectDecoder::ExceptNotFound(size_t index) {
-    throw std::invalid_argument(std::format("object key '%s' does not exist", this->names.at(index)).c_str());
+    throw std::invalid_argument(std::format("named key '{}' does not exist", this->names.at(index)).c_str());
 }
 }

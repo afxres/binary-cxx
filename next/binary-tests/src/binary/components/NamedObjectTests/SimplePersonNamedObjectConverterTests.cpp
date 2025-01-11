@@ -54,5 +54,27 @@ BOOST_DATA_TEST_CASE(SimplePersonConverterEncodeDecodeTest, SimplePersonTestData
     BOOST_REQUIRE_EQUAL(name, result.name);
 }
 
+std::vector<std::tuple<std::string, std::string>> SimplePersonDecodeKeyNotFoundTestData = {
+    {std::string() + "\x03" + "age\x01\x10", "name"},
+    {std::string() + "\x04" + "name\x05" + "Alice", "age"},
+};
+
+BOOST_DATA_TEST_CASE(SimplePersonDecodeKeyNotFoundTest, SimplePersonDecodeKeyNotFoundTestData, buffer, keyNotFound) {
+    std::span<const std::byte> span(reinterpret_cast<const std::byte*>(buffer.data()), buffer.size());
+    std::string output = "named key '" + keyNotFound + "' does not exist";
+    ::binary::Generator generator;
+    ::binary::AddConverter<::binary::converters::LittleEndianConverter<int8_t>>(generator);
+    ::binary::AddConverter<::binary::converters::StringConverter>(generator);
+    ::binary::AddConverter<SimplePersonConverter>(generator);
+    auto converter = ::binary::GetConverter<SimplePerson>(generator);
+    BOOST_REQUIRE_EXCEPTION(
+        converter->Decode(span),
+        std::invalid_argument,
+        ([output](const std::invalid_argument& e) {
+            BOOST_REQUIRE_EQUAL(e.what(), output);
+            return true;
+        }));
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 }

@@ -41,7 +41,8 @@ BOOST_DATA_TEST_CASE(ConverterInvalidLengthTest, ConverterInvalidLengthData) {
         FakeEmptyConverter<int32_t> ignore{sample},
         std::out_of_range,
         ([](const std::out_of_range& e) {
-            return std::string(e.what()) == "length > INT32_MAX";
+            BOOST_REQUIRE_EQUAL(e.what(), "length > INT32_MAX");
+            return true;
         }));
 }
 

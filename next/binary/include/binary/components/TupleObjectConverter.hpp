@@ -10,20 +10,19 @@ namespace binary::components {
 template <typename T>
 class TupleObjectConverter : public Converter<T> {
 public:
-    using EncodeFunction = std::function<void(bool, IConverter&, Allocator&, const T&)>;
-    using DecodeFunction = std::function<void(bool, T&, IConverter&, std::span<const std::byte>&)>;
-    using GetConverterFunction = std::function<std::shared_ptr<IConverter>(IGenerator&)>;
+    struct MemberInfo;
+    using EncodeFunction = std::function<void(bool, Allocator&, const T&)>;
+    using DecodeFunction = std::function<void(bool, T&, std::span<const std::byte>&)>;
+    using MemberInfoInitializer = std::function<MemberInfo(IGenerator&)>;
 
     struct MemberInfo {
         EncodeFunction Encode;
         DecodeFunction Decode;
-        GetConverterFunction GetConverter;
     };
 
-    TupleObjectConverter(IGenerator& generator, const std::vector<MemberInfo>& contexts)
-        : contexts(contexts) {
-        for (const auto& info : contexts) {
-            this->converters.emplace_back(info.GetConverter(generator));
+    TupleObjectConverter(IGenerator& generator, const std::vector<MemberInfoInitializer>& initializers) {
+        for (const auto& initializer : initializers) {
+            this->contexts.emplace_back(initializer(generator));
         }
     }
 
@@ -49,8 +48,7 @@ private:
         const auto& contexts = this->contexts;
         for (size_t i = 0; i < contexts.size(); i++) {
             const auto& info = contexts.at(i);
-            const auto& converter = this->converters.at(i);
-            info.Encode(automatic || i != contexts.size() - 1, *converter, allocator, item);
+            info.Encode(automatic || i != contexts.size() - 1, allocator, item);
         }
     }
 
@@ -59,14 +57,12 @@ private:
         const auto& contexts = this->contexts;
         for (size_t i = 0; i < contexts.size(); i++) {
             const auto& info = contexts.at(i);
-            const auto& converter = this->converters.at(i);
-            info.Decode(automatic || i != contexts.size() - 1, result, *converter, span);
+            info.Decode(automatic || i != contexts.size() - 1, result, span);
         }
         return result;
     }
 
-    const std::vector<MemberInfo>& contexts;
-    std::vector<std::shared_ptr<IConverter>> converters;
+    std::vector<MemberInfo> contexts;
 };
 }
 

@@ -4,12 +4,13 @@
 #define BINARY_GENERATOREXTENSIONS_HPP
 
 #include "Converter.hpp"
+#include "ConverterExtensions.hpp"
 #include "IGenerator.hpp"
 
 namespace binary {
 template <typename T>
 std::shared_ptr<Converter<T>> GetConverter(const IGenerator& generator) {
-    return std::dynamic_pointer_cast<Converter<T>>(generator.GetConverter(typeid(T)));
+    return GetConverter<T>(generator.GetConverter(typeid(T)));
 }
 
 template <
