@@ -5,7 +5,7 @@
 
 #include "binary/components/TupleObjectConverter.hpp"
 
-#define BINARY_TUPLE_OBJECT_CONVERTER_BEGIN(ARG_TYPE, ARG_CONVERTER_NAME)                    \
+#define BINARY_TUPLE_OBJECT_CONVERTER(ARG_TYPE, ARG_CONVERTER_NAME)                          \
     class ARG_CONVERTER_NAME : public ::binary::components::TupleObjectConverter<ARG_TYPE> { \
     public:                                                                                  \
         ARG_CONVERTER_NAME(::binary::IGenerator& generator)                                  \

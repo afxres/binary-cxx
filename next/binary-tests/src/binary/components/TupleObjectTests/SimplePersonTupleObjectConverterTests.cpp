@@ -15,7 +15,7 @@ struct SimplePerson {
     std::string name;
 };
 
-BINARY_TUPLE_OBJECT_CONVERTER_BEGIN(SimplePerson, SimplePersonConverter)
+BINARY_TUPLE_OBJECT_CONVERTER(SimplePerson, SimplePersonConverter)
 BINARY_TUPLE_MEMBER(age)
 BINARY_TUPLE_MEMBER(name)
 BINARY_TUPLE_OBJECT_CONVERTER_END()
