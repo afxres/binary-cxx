@@ -6,6 +6,6 @@ if [ ! -e "$build_dir" ]; then
 fi
 
 cd "$build_dir"
-cmake "../next/"
-cmake --build . --config Debug
+cmake -DCMAKE_BUILD_TYPE=Debug "../next/"
+cmake --build .
 ctest --output-on-failure

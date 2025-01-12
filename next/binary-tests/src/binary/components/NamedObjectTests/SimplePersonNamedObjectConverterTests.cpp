@@ -59,9 +59,9 @@ std::vector<std::tuple<std::string, std::string>> SimplePersonDecodeKeyNotFoundT
     {std::string() + "\x04" + "name\x05" + "Alice", "age"},
 };
 
-BOOST_DATA_TEST_CASE(SimplePersonDecodeKeyNotFoundTest, SimplePersonDecodeKeyNotFoundTestData, buffer, keyNotFound) {
+BOOST_DATA_TEST_CASE(SimplePersonDecodeKeyNotFoundTest, SimplePersonDecodeKeyNotFoundTestData, buffer, key) {
     std::span<const std::byte> span(reinterpret_cast<const std::byte*>(buffer.data()), buffer.size());
-    std::string output = "named key '" + keyNotFound + "' does not exist";
+    std::string output = "named key '" + key + "' does not exist";
     ::binary::Generator generator;
     ::binary::AddConverter<::binary::converters::LittleEndianConverter<int8_t>>(generator);
     ::binary::AddConverter<::binary::converters::StringConverter>(generator);

@@ -30,17 +30,17 @@
 
 #define BINARY_NAMED_MEMBER(ARG_NAME) \
     BINARY_NAMED_MEMBER_CUSTOM(       \
-        ARG_NAME, false,              \
+        #ARG_NAME, false,             \
         item.ARG_NAME,                \
         item.ARG_NAME = result,       \
         ::binary::GetConverter<decltype(GenericArgument::ARG_NAME)>(generator))
 
 #define BINARY_NAMED_MEMBER_CUSTOM(ARG_NAME, ARG_IS_OPTIONAL, ARG_GET_MEMBER_EXPRESSION, ARG_SET_MEMBER_EXPRESSION, ARG_GET_CONVERTER_EXPRESSION) \
     initializers.push_back(([]() {                                                                                                                \
-        return [](auto& generator) {                                                                                                              \
+        return []([[maybe_unused]] auto& generator) {                                                                                             \
             auto converter = ARG_GET_CONVERTER_EXPRESSION;                                                                                        \
             MemberInfo info{};                                                                                                                    \
-            info.Name = #ARG_NAME;                                                                                                                \
+            info.Name = ARG_NAME;                                                                                                                 \
             info.IsOptional = ARG_IS_OPTIONAL;                                                                                                    \
             info.EncodeWithLengthPrefix = [converter](auto& allocator, const auto& item) {                                                        \
                 converter->EncodeWithLengthPrefix(allocator, ARG_GET_MEMBER_EXPRESSION);                                                          \

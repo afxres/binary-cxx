@@ -1,5 +1,6 @@
 #include "binary/components/NamedObjectDecoder.hpp"
 
+#include <algorithm>
 #include <cassert>
 #include <format>
 #include <stdexcept>
@@ -7,29 +8,32 @@
 #include "binary/Memory.hpp"
 
 namespace binary::components {
-NamedObjectDecoder::NamedObjectDecoder(const std::vector<std::string>& names, const std::vector<std::vector<std::byte>>& headers)
-    : names(names) {
-    assert(names.size() == headers.size());
+NamedObjectDecoder::NamedObjectDecoder(const std::vector<bool>& optional, const std::vector<std::string>& names, const std::vector<std::vector<std::byte>>& headers)
+    : required(static_cast<size_t>(std::ranges::count(optional, false))), optional(optional), names(names) {
+    assert(headers.size() == names.size());
+    assert(headers.size() == optional.size());
     for (size_t i = 0; i < headers.size(); i++) {
         const auto& head = headers.at(i);
         std::string_view view(reinterpret_cast<const char*>(head.data()), head.size());
-        if (this->indexes.contains(view)) {
+        if (!this->record.try_emplace(view, i).second) {
             ExceptKeyFound(i);
         }
-        this->indexes.emplace(view, i);
     }
 }
 
 void NamedObjectDecoder::Invoke(const std::span<const std::byte>& span, std::vector<std::tuple<bool, std::span<const std::byte>>>& slices) {
-    const auto& indexes = this->indexes;
-    size_t remain = indexes.size();
-    slices.resize(remain);
+    const auto& record = this->record;
+    const auto& optional = this->optional;
+    slices.resize(record.size());
+    size_t remain = this->required;
+    assert(remain <= record.size());
     std::span<const std::byte> intent = span;
     while (!intent.empty()) {
         auto head = DecodeWithLengthPrefix(intent);
         auto tail = DecodeWithLengthPrefix(intent);
-        auto iterator = indexes.find(std::string_view(reinterpret_cast<const char*>(head.data()), head.size()));
-        if (iterator == indexes.end()) {
+        std::string_view view(reinterpret_cast<const char*>(head.data()), head.size());
+        auto iterator = record.find(view);
+        if (iterator == record.end()) {
             continue;
         }
 
@@ -38,12 +42,16 @@ void NamedObjectDecoder::Invoke(const std::span<const std::byte>& span, std::vec
             ExceptKeyFound(cursor);
         }
         slices.at(cursor) = std::make_tuple(true, tail);
+        if (optional.at(cursor)) {
+            continue;
+        }
         remain--;
     }
 
+    assert(remain <= record.size());
     if (remain != 0) {
         for (size_t i = 0; i < slices.size(); i++) {
-            if (!std::get<0>(slices.at(i))) {
+            if (!std::get<0>(slices.at(i)) && !optional.at(i)) {
                 ExceptNotFound(i);
             }
         }
@@ -51,10 +59,10 @@ void NamedObjectDecoder::Invoke(const std::span<const std::byte>& span, std::vec
 }
 
 void NamedObjectDecoder::ExceptKeyFound(size_t index) {
-    throw std::invalid_argument(std::format("named key '{}' already exists", this->names.at(index)).c_str());
+    throw std::invalid_argument(std::format("named key '{}' already exists", this->names.at(index)));
 }
 
 void NamedObjectDecoder::ExceptNotFound(size_t index) {
-    throw std::invalid_argument(std::format("named key '{}' does not exist", this->names.at(index)).c_str());
+    throw std::invalid_argument(std::format("named key '{}' does not exist", this->names.at(index)));
 }
 }

@@ -35,18 +35,18 @@ public:
             auto head = Allocator::Invoke([&encoding, &name](auto& allocator) { encoding->Encode(allocator, name); });
             this->names.emplace_back(name);
             this->headers.emplace_back(head);
+            this->optional.emplace_back(info.IsOptional);
             this->contexts.emplace_back(info);
         }
-        this->decoder = std::make_unique<NamedObjectDecoder>(this->names, this->headers);
+        this->decoder = std::make_unique<NamedObjectDecoder>(this->optional, this->names, this->headers);
     }
 
     virtual void Encode(Allocator& allocator, const T& item) override {
+        const auto& headers = this->headers;
         const auto& contexts = this->contexts;
         for (size_t i = 0; i < contexts.size(); i++) {
-            const auto& info = contexts.at(i);
-            const auto& head = this->headers.at(i);
-            allocator.AppendWithLengthPrefix(head);
-            info.EncodeWithLengthPrefix(allocator, item);
+            allocator.AppendWithLengthPrefix(headers.at(i));
+            contexts.at(i).EncodeWithLengthPrefix(allocator, item);
         }
     }
 
@@ -56,14 +56,17 @@ public:
 
         T result{};
         const auto& contexts = this->contexts;
-        for (size_t i = 0; i < contexts.size(); i++) {
-            const auto& info = contexts.at(i);
-            info.Decode(result, std::get<1>(slices.at(i)));
+        for (size_t i = 0; i < slices.size(); i++) {
+            assert(std::get<0>(slices.at(i)) || this->optional.at(i));
+            if (std::get<0>(slices.at(i))) {
+                contexts.at(i).Decode(result, std::get<1>(slices.at(i)));
+            }
         }
         return result;
     }
 
 private:
+    std::vector<bool> optional;
     std::vector<MemberInfo> contexts;
     std::vector<std::string> names;
     std::vector<std::vector<std::byte>> headers;
