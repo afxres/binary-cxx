@@ -144,11 +144,11 @@ void Allocator::Append(size_t length, std::function<void(std::span<std::byte>)> 
 }
 
 void Allocator::AppendWithLengthPrefix(const std::span<const std::byte>& span) {
-    size_t number = EnsureLength(span.size());
+    size_t number = EnsureLengthPrefixLength(span.size());
     size_t prefixLength = EncodeLengthPrefixLength(number);
-    std::byte* source = Assign(EnsureLength(span.size() + prefixLength));
+    std::byte* source = Assign(number + prefixLength);
     EncodeLengthPrefix(source, number, prefixLength);
-    memcpy(source + prefixLength, span.data(), span.size());
+    memcpy(source + prefixLength, span.data(), number);
 }
 
 std::vector<std::byte> Allocator::Invoke(std::function<void(Allocator&)> action) {

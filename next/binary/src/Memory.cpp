@@ -57,7 +57,7 @@ size_t DecodeLengthPrefix(const std::byte* buffer, size_t& offset, const size_t 
     return result & 0x7FFF'FFFU;
 }
 
-size_t EnsureLength(const size_t length) {
+size_t EnsureLengthPrefixLength(const size_t length) {
     if (length > INT32_MAX) {
         throw std::length_error("length overflow");
     }
