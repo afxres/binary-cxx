@@ -1,6 +1,5 @@
 #include "binary/components/NamedObjectDecoder.hpp"
 
-#include <algorithm>
 #include <cassert>
 #include <format>
 #include <stdexcept>
@@ -9,7 +8,7 @@
 
 namespace binary::components {
 NamedObjectDecoder::NamedObjectDecoder(const std::vector<bool>& optional, const std::vector<std::string>& names, const std::vector<std::vector<std::byte>>& headers)
-    : required(static_cast<size_t>(std::ranges::count(optional, false))), optional(optional), names(names) {
+    : optional(optional), names(names) {
     assert(headers.size() == names.size());
     assert(headers.size() == optional.size());
     for (size_t i = 0; i < headers.size(); i++) {
@@ -25,8 +24,6 @@ void NamedObjectDecoder::Invoke(const std::span<const std::byte>& span, std::vec
     const auto& record = this->record;
     const auto& optional = this->optional;
     slices.resize(record.size());
-    size_t remain = this->required;
-    assert(remain <= record.size());
     std::span<const std::byte> intent = span;
     while (!intent.empty()) {
         auto head = DecodeWithLengthPrefix(intent);
@@ -42,18 +39,11 @@ void NamedObjectDecoder::Invoke(const std::span<const std::byte>& span, std::vec
             ExceptKeyFound(cursor);
         }
         slices.at(cursor) = std::make_tuple(true, tail);
-        if (optional.at(cursor)) {
-            continue;
-        }
-        remain--;
     }
 
-    assert(remain <= record.size());
-    if (remain != 0) {
-        for (size_t i = 0; i < slices.size(); i++) {
-            if (!std::get<0>(slices.at(i)) && !optional.at(i)) {
-                ExceptNotFound(i);
-            }
+    for (size_t i = 0; i < slices.size(); i++) {
+        if (!std::get<0>(slices.at(i)) && !optional.at(i)) {
+            ExceptNotFound(i);
         }
     }
 }
