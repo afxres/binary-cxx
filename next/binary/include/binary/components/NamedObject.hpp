@@ -10,10 +10,19 @@
     class ARG_CONVERTER_NAME : public ::binary::components::NamedObjectConverter<ARG_TYPE> { \
     public:                                                                                  \
         ARG_CONVERTER_NAME(::binary::IGenerator& generator)                                  \
-            : NamedObjectConverter<ARG_TYPE>(generator, GetInitializers()) {}                \
+            : NamedObjectConverter<ARG_TYPE>(GetContexts(generator)) {}                      \
                                                                                              \
     private:                                                                                 \
         using GenericArgument = ARG_TYPE;                                                    \
+        using MemberInfoInitializer = std::function<MemberInfo(::binary::IGenerator&)>;      \
+                                                                                             \
+        static std::vector<MemberInfo> GetContexts(::binary::IGenerator& generator) {        \
+            std::vector<MemberInfo> contexts;                                                \
+            for (const auto initializer : GetInitializers()) {                               \
+                contexts.emplace_back(initializer(generator));                               \
+            }                                                                                \
+            return contexts;                                                                 \
+        }                                                                                    \
                                                                                              \
         static const std::vector<MemberInfoInitializer>& GetInitializers() {                 \
             static bool initialized = false;                                                 \
@@ -33,14 +42,16 @@
         #ARG_NAME, false,             \
         item.ARG_NAME,                \
         item.ARG_NAME = result,       \
-        ::binary::GetConverter<decltype(GenericArgument::ARG_NAME)>(generator))
+        GetConverter<decltype(GenericArgument::ARG_NAME)>(generator))
 
 #define BINARY_NAMED_MEMBER_CUSTOM(ARG_NAME, ARG_IS_OPTIONAL, ARG_GET_MEMBER_EXPRESSION, ARG_SET_MEMBER_EXPRESSION, ARG_GET_CONVERTER_EXPRESSION) \
     initializers.push_back(([]() {                                                                                                                \
         return []([[maybe_unused]] auto& generator) {                                                                                             \
+            auto encoding = GetConverter<std::string>(generator);                                                                                 \
             auto converter = ARG_GET_CONVERTER_EXPRESSION;                                                                                        \
             MemberInfo info{};                                                                                                                    \
             info.Name = ARG_NAME;                                                                                                                 \
+            info.Header = ::binary::Allocator::Invoke([&encoding](auto& allocator) { encoding->Encode(allocator, ARG_NAME); });                   \
             info.IsOptional = ARG_IS_OPTIONAL;                                                                                                    \
             info.EncodeWithLengthPrefix = [converter](auto& allocator, const auto& item) {                                                        \
                 converter->EncodeWithLengthPrefix(allocator, ARG_GET_MEMBER_EXPRESSION);                                                          \

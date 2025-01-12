@@ -14,31 +14,25 @@ namespace binary::components {
 template <typename T>
 class NamedObjectConverter : public Converter<T> {
 public:
-    struct MemberInfo;
     using EncodeFunction = std::function<void(Allocator&, const T&)>;
     using DecodeFunction = std::function<void(T&, const std::span<const std::byte>&)>;
-    using MemberInfoInitializer = std::function<MemberInfo(IGenerator&)>;
 
     struct MemberInfo {
         bool IsOptional = false;
         std::string Name;
+        std::vector<std::byte> Header;
         EncodeFunction EncodeWithLengthPrefix;
         DecodeFunction Decode;
     };
 
-    NamedObjectConverter(IGenerator& generator, const std::vector<MemberInfoInitializer>& initializers) {
-        auto encoding = GetConverter<std::string>(generator);
-        for (size_t i = 0; i < initializers.size(); i++) {
-            const auto& initializer = initializers.at(i);
-            auto info = initializer(generator);
-            const auto& name = info.Name;
-            auto head = Allocator::Invoke([&encoding, &name](auto& allocator) { encoding->Encode(allocator, name); });
-            this->names.emplace_back(name);
-            this->headers.emplace_back(head);
+    NamedObjectConverter(std::vector<MemberInfo>&& contexts) {
+        for (const auto& info : contexts) {
+            this->names.emplace_back(info.Name);
+            this->headers.emplace_back(info.Header);
             this->optional.emplace_back(info.IsOptional);
-            this->contexts.emplace_back(info);
         }
         this->decoder = std::make_unique<NamedObjectDecoder>(this->optional, this->names, this->headers);
+        this->contexts = contexts;
     }
 
     virtual void Encode(Allocator& allocator, const T& item) override {

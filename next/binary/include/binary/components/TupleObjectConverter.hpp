@@ -10,21 +10,17 @@ namespace binary::components {
 template <typename T>
 class TupleObjectConverter : public Converter<T> {
 public:
-    struct MemberInfo;
     using EncodeFunction = std::function<void(bool, Allocator&, const T&)>;
     using DecodeFunction = std::function<void(bool, T&, std::span<const std::byte>&)>;
-    using MemberInfoInitializer = std::function<MemberInfo(IGenerator&)>;
 
     struct MemberInfo {
+        size_t Length;
         EncodeFunction Encode;
         DecodeFunction Decode;
     };
 
-    TupleObjectConverter(IGenerator& generator, const std::vector<MemberInfoInitializer>& initializers) {
-        for (const auto& initializer : initializers) {
-            this->contexts.emplace_back(initializer(generator));
-        }
-    }
+    TupleObjectConverter(std::vector<MemberInfo>&& contexts)
+        : Converter<T>(GetConverterLength(contexts | std::views::transform([](const auto& info) { return info.Length; }))), contexts(contexts) {}
 
     virtual void Encode(Allocator& allocator, const T& item) override {
         EncodeInternal(allocator, item, false);

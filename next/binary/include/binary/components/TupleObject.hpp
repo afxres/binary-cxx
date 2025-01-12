@@ -10,10 +10,19 @@
     class ARG_CONVERTER_NAME : public ::binary::components::TupleObjectConverter<ARG_TYPE> { \
     public:                                                                                  \
         ARG_CONVERTER_NAME(::binary::IGenerator& generator)                                  \
-            : TupleObjectConverter<ARG_TYPE>(generator, GetInitializers()) {}                \
+            : TupleObjectConverter<ARG_TYPE>(GetContexts(generator)) {}                      \
                                                                                              \
     private:                                                                                 \
         using GenericArgument = ARG_TYPE;                                                    \
+        using MemberInfoInitializer = std::function<MemberInfo(::binary::IGenerator&)>;      \
+                                                                                             \
+        static std::vector<MemberInfo> GetContexts(::binary::IGenerator& generator) {        \
+            std::vector<MemberInfo> contexts;                                                \
+            for (const auto initializer : GetInitializers()) {                               \
+                contexts.emplace_back(initializer(generator));                               \
+            }                                                                                \
+            return contexts;                                                                 \
+        }                                                                                    \
                                                                                              \
         static const std::vector<MemberInfoInitializer>& GetInitializers() {                 \
             static bool initialized = false;                                                 \
@@ -32,13 +41,14 @@
     BINARY_TUPLE_MEMBER_CUSTOM(       \
         item.ARG_NAME,                \
         item.ARG_NAME = result,       \
-        ::binary::GetConverter<decltype(GenericArgument::ARG_NAME)>(generator))
+        GetConverter<decltype(GenericArgument::ARG_NAME)>(generator))
 
 #define BINARY_TUPLE_MEMBER_CUSTOM(ARG_GET_MEMBER_EXPRESSION, ARG_SET_MEMBER_EXPRESSION, ARG_GET_CONVERTER_EXPRESSION) \
     initializers.push_back(([]() {                                                                                     \
-        return [](auto& generator) {                                                                                   \
+        return []([[maybe_unused]] auto& generator) {                                                                  \
             auto converter = ARG_GET_CONVERTER_EXPRESSION;                                                             \
             MemberInfo info{};                                                                                         \
+            info.Length = converter->Length();                                                                         \
             info.Encode = [converter](bool automatic, auto& allocator, const auto& item) {                             \
                 if (!automatic) {                                                                                      \
                     converter->Encode(allocator, ARG_GET_MEMBER_EXPRESSION);                                           \

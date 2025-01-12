@@ -1,6 +1,6 @@
 AccessModifierOffset: -4
 AllowShortBlocksOnASingleLine: Empty
-AllowShortFunctionsOnASingleLine: Empty
+AllowShortFunctionsOnASingleLine: Inline
 AlwaysBreakTemplateDeclarations: true
 BasedOnStyle: LLVM
 BreakAfterAttributes: Leave
