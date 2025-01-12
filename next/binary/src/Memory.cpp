@@ -74,9 +74,14 @@ const std::byte* EnsureLength(const std::span<const std::byte>& span, const size
 std::span<const std::byte> DecodeWithLengthPrefix(std::span<const std::byte>& span) {
     const std::byte* source = span.data();
     size_t offset = 0;
-    size_t intent = DecodeLengthPrefix(source, offset, span.size());
-    std::span<const std::byte> result = span.subspan(offset, intent);
-    span = span.subspan(offset + intent);
+    size_t length = DecodeLengthPrefix(source, offset, span.size());
+    assert(offset == 1 || offset == 4);
+    assert(offset <= span.size());
+    if (span.size() - offset < length) {
+        throw std::length_error("not enough bytes");
+    }
+    std::span<const std::byte> result = span.subspan(offset, length);
+    span = span.subspan(offset + length);
     return result;
 }
 }
