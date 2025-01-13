@@ -27,21 +27,13 @@ private:
     void FinishAnchor(size_t anchor);
 
 public:
-    size_t Length() const {
-        return this->offset;
-    }
-
-    size_t Capacity() const {
-        return this->bounds;
-    }
-
-    size_t MaxCapacity() const {
-        return this->limits;
-    }
+    size_t Length() const { return this->offset; }
+    size_t Capacity() const { return this->bounds; }
+    size_t MaxCapacity() const { return this->limits; }
 
     Allocator();
     Allocator(size_t maxCapacity);
-    std::span<const std::byte> AsSpan();
+    std::span<const std::byte> AsSpan() const;
     void Ensure(size_t length);
     void Expand(size_t length);
     void Append(const std::span<const std::byte>& span);

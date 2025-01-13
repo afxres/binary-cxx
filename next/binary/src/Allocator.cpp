@@ -28,7 +28,7 @@ Allocator::Allocator(size_t maxCapacity) {
     this->limits = maxCapacity;
 }
 
-std::span<const std::byte> Allocator::AsSpan() {
+std::span<const std::byte> Allocator::AsSpan() const {
     return std::span<const std::byte>(this->buffer.get(), this->offset);
 }
 

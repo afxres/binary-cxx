@@ -40,17 +40,17 @@ void EncodeLengthPrefix(std::byte* buffer, const size_t number, const size_t len
 size_t DecodeLengthPrefix(const std::byte* buffer, size_t& offset, const size_t limits) {
     assert(limits >= offset);
     if (limits == offset) {
-        throw std::out_of_range("not enough bytes");
+        throw std::length_error("not enough bytes");
     }
     const std::byte* source = buffer + offset;
     uint32_t header = static_cast<uint32_t>(DecodeBigEndian<uint8_t>(source));
     offset += 1;
-    if ((header & 0x80U) == 0) {
+    if ((header & 0x80U) == 0U) {
         return header;
     }
     assert(limits >= offset);
-    if (limits - offset < 3U) {
-        throw std::out_of_range("not enough bytes");
+    if (limits < offset + 3U) {
+        throw std::length_error("not enough bytes");
     }
     uint32_t result = DecodeBigEndian<uint32_t>(source);
     offset += 3;
@@ -77,7 +77,7 @@ std::span<const std::byte> DecodeWithLengthPrefix(std::span<const std::byte>& sp
     size_t length = DecodeLengthPrefix(source, offset, span.size());
     assert(offset == 1 || offset == 4);
     assert(offset <= span.size());
-    if (span.size() - offset < length) {
+    if (span.size() < offset + length) {
         throw std::length_error("not enough bytes");
     }
     std::span<const std::byte> result = span.subspan(offset, length);
