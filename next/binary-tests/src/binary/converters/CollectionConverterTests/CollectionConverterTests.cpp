@@ -24,7 +24,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(CollectionConverterLengthTest, T, CollectionConver
     ::binary::Generator generator;
     ::binary::AddConverter<::binary::converters::LittleEndianConverter<int32_t>>(generator);
     ::binary::AddConverter<::binary::converters::StringConverter>(generator);
-    ::binary::AddConverter<::binary::converters::CollectionConverter<T>, std::ranges::range_value_t<T>>(generator);
+    ::binary::AddConverter<::binary::converters::CollectionConverter<T>>(generator);
     auto converter = ::binary::GetConverter<T>(generator);
     BOOST_REQUIRE_EQUAL(0, converter->Length());
 }
@@ -33,7 +33,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(CollectionConverterEncodeDecodeEmptyCollectionTest
     ::binary::Generator generator;
     ::binary::AddConverter<::binary::converters::LittleEndianConverter<int32_t>>(generator);
     ::binary::AddConverter<::binary::converters::StringConverter>(generator);
-    ::binary::AddConverter<::binary::converters::CollectionConverter<T>, std::ranges::range_value_t<T>>(generator);
+    ::binary::AddConverter<::binary::converters::CollectionConverter<T>>(generator);
     auto converter = ::binary::GetConverter<T>(generator);
     T source;
     BOOST_REQUIRE_EQUAL(0, source.size());
@@ -47,7 +47,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(CollectionConverterEncodeDecodeSingleDefaultValueC
     ::binary::Generator generator;
     ::binary::AddConverter<::binary::converters::LittleEndianConverter<int32_t>>(generator);
     ::binary::AddConverter<::binary::converters::StringConverter>(generator);
-    ::binary::AddConverter<::binary::converters::CollectionConverter<T>, std::ranges::range_value_t<T>>(generator);
+    ::binary::AddConverter<::binary::converters::CollectionConverter<T>>(generator);
     auto converter = ::binary::GetConverter<T>(generator);
     T source{{}};
     BOOST_REQUIRE_EQUAL(1, source.size());

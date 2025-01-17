@@ -5,20 +5,16 @@
 
 namespace binary::converters::internals {
 template <typename T>
-concept CollectionWithEmplace = std::ranges::input_range<T> && requires(T& collection, std::ranges::range_value_t<T>&& result) { collection.emplace(result); };
-
-template <typename T>
-concept CollectionWithEmplaceBack = std::ranges::input_range<T> && requires(T& collection, std::ranges::range_value_t<T>&& result) { collection.emplace_back(result); };
-
-template <typename T>
 struct CollectionEmplaceFunction;
 
-template <CollectionWithEmplace T>
+template <std::ranges::input_range T>
+    requires requires(T& collection, std::ranges::range_value_t<T>&& result) { collection.emplace(result); }
 struct CollectionEmplaceFunction<T> {
     void operator()(T& collection, std::ranges::range_value_t<T>&& result) { collection.emplace(result); }
 };
 
-template <CollectionWithEmplaceBack T>
+template <std::ranges::input_range T>
+    requires requires(T& collection, std::ranges::range_value_t<T>&& result) { collection.emplace_back(result); }
 struct CollectionEmplaceFunction<T> {
     void operator()(T& collection, std::ranges::range_value_t<T>&& result) { collection.emplace_back(result); }
 };
