@@ -29,11 +29,11 @@ struct GeneratorAddConverterFunction<TConverter> {
     }
 };
 
-template <template <typename> typename TConverter, std::ranges::range TRange>
-    requires std::derived_from<TConverter<TRange>, IConverter> && std::constructible_from<TConverter<TRange>, std::shared_ptr<Converter<std::ranges::range_value_t<TRange>>>>
-struct GeneratorAddConverterFunction<TConverter<TRange>> {
+template <template <typename...> typename TConverter, std::ranges::range TRange, typename... TIgnore>
+    requires std::derived_from<TConverter<TRange, TIgnore...>, IConverter> && std::constructible_from<TConverter<TRange, TIgnore...>, std::shared_ptr<Converter<std::ranges::range_value_t<TRange>>>>
+struct GeneratorAddConverterFunction<TConverter<TRange, TIgnore...>> {
     void operator()(IGenerator& generator) {
-        std::shared_ptr<IConverter> converter = std::make_shared<TConverter<TRange>>(GetConverter<std::ranges::range_value_t<TRange>>(generator));
+        std::shared_ptr<IConverter> converter = std::make_shared<TConverter<TRange, TIgnore...>>(GetConverter<std::ranges::range_value_t<TRange>>(generator));
         generator.AddConverter(converter);
     }
 };
