@@ -9,15 +9,15 @@
 namespace binary {
 class IConverter {
 private:
-    std::type_index argument;
-    size_t length;
+    const std::type_index type;
+    const size_t length;
 
 public:
     size_t Length() const { return this->length; }
-    std::type_index GetGenericArgument() const { return this->argument; }
+    std::type_index GetConverterType() const { return this->type; }
 
-    IConverter(std::type_index argument);
-    IConverter(std::type_index argument, size_t length);
+    IConverter(std::type_index type);
+    IConverter(std::type_index type, size_t length);
     virtual ~IConverter() = 0;
 };
 }

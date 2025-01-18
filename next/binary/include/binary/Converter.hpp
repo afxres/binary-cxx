@@ -15,10 +15,10 @@ template <typename T>
 class Converter : public IConverter {
 public:
     Converter()
-        : IConverter(typeid(T)) {}
+        : IConverter(typeid(Converter<T>)) {}
 
     Converter(size_t length)
-        : IConverter(typeid(T), length) {}
+        : IConverter(typeid(Converter<T>), length) {}
 
     virtual void Encode(Allocator& allocator, const T& item) = 0;
 

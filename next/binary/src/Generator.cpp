@@ -4,7 +4,7 @@
 
 namespace binary {
 void Generator::AddConverter(std::shared_ptr<IConverter> converter) {
-    this->converters.emplace(converter->GetGenericArgument(), converter);
+    this->converters.emplace(converter->GetConverterType(), converter);
 }
 
 std::shared_ptr<IConverter> Generator::GetConverter(std::type_index type) const {
@@ -13,6 +13,6 @@ std::shared_ptr<IConverter> Generator::GetConverter(std::type_index type) const 
     if (iterator != converters.end()) {
         return iterator->second;
     }
-    throw std::out_of_range(std::format("converter not found, type: {}", type.name()));
+    return nullptr;
 }
 }

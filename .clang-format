@@ -4,6 +4,7 @@ AllowShortFunctionsOnASingleLine: Inline
 AlwaysBreakTemplateDeclarations: true
 BasedOnStyle: LLVM
 BreakAfterAttributes: Leave
+BreakConstructorInitializers: BeforeComma
 ColumnLimit: 0
 FixNamespaceComments: false
 IndentAccessModifiers: false

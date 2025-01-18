@@ -16,7 +16,8 @@ template <template <typename...> typename T, typename... E>
 class TupleConverter<T<E...>> : public Converter<T<E...>> {
 public:
     TupleConverter(std::shared_ptr<Converter<E>>... converter)
-        : Converter<T<E...>>(GetConverterLength(std::vector<std::shared_ptr<IConverter>>({converter...}) | std::views::transform([](const auto& converter) { return converter->Length(); }))), converter({converter...}) {}
+        : Converter<T<E...>>(GetConverterLength(std::vector<std::shared_ptr<IConverter>>({converter...}) | std::views::transform([](const auto& converter) { return converter->Length(); })))
+        , converter({converter...}) {}
 
     virtual void Encode(Allocator& allocator, const T<E...>& item) override {
         Invoke<0, false>::Encode(this->converter, allocator, item);
@@ -49,17 +50,20 @@ private:
             }
         }
 
-        static auto Decode(const std::tuple<std::shared_ptr<Converter<E>>...>& converter, std::span<const std::byte>& span) {
-            std::tuple_element_t<Index, T<E...>> result;
+        static auto Detach(const std::tuple<std::shared_ptr<Converter<E>>...>& converter, std::span<const std::byte>& span) {
             if constexpr (Index == std::tuple_size_v<T<E...>> - 1 && !IsAuto) {
-                result = std::get<Index>(converter)->Decode(span);
+                return std::get<Index>(converter)->Decode(span);
             } else {
-                result = std::get<Index>(converter)->DecodeAuto(span);
+                return std::get<Index>(converter)->DecodeAuto(span);
             }
+        }
+
+        static auto Decode(const std::tuple<std::shared_ptr<Converter<E>>...>& converter, std::span<const std::byte>& span) {
+            auto result = std::make_tuple(Detach(converter, span));
             if constexpr (Index != std::tuple_size_v<T<E...>> - 1) {
-                return std::tuple_cat(std::make_tuple(result), Invoke<Index + 1, IsAuto>::Decode(converter, span));
+                return std::tuple_cat(result, Invoke<Index + 1, IsAuto>::Decode(converter, span));
             } else {
-                return std::make_tuple(result);
+                return result;
             }
         }
     };
