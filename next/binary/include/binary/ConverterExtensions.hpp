@@ -7,7 +7,7 @@
 #include <memory>
 #include <ranges>
 
-#include "Converter.hpp"
+#include "binary/Converter.hpp"
 
 namespace binary {
 template <typename T>

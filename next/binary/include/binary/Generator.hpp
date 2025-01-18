@@ -6,7 +6,7 @@
 #include <map>
 #include <typeindex>
 
-#include "IGenerator.hpp"
+#include "binary/IGenerator.hpp"
 
 namespace binary {
 class Generator : public IGenerator {

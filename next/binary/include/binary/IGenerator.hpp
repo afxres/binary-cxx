@@ -5,7 +5,7 @@
 
 #include <memory>
 
-#include "IConverter.hpp"
+#include "binary/IConverter.hpp"
 
 namespace binary {
 class IGenerator {

@@ -7,5 +7,5 @@ fi
 
 cd "$build_dir"
 cmake -DCMAKE_BUILD_TYPE=Debug "../next/"
-cmake --build .
+cmake --build . --parallel
 ctest --output-on-failure

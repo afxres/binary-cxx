@@ -3,11 +3,11 @@
 #ifndef BINARY_GENERATOREXTENSIONS_HPP
 #define BINARY_GENERATOREXTENSIONS_HPP
 
-#include "Converter.hpp"
-#include "ConverterExtensions.hpp"
-#include "IGenerator.hpp"
+#include "binary/Converter.hpp"
+#include "binary/ConverterExtensions.hpp"
+#include "binary/IGenerator.hpp"
 
-namespace binary::internals {
+namespace binary::internal {
 template <typename TConverter>
 struct GeneratorAddConverterFunction;
 
@@ -62,9 +62,9 @@ void AddConverter(IGenerator& generator) {
 }
 
 template <typename TConverter>
-    requires requires(IGenerator& generator) { internals::GeneratorAddConverterFunction<TConverter>()(generator); }
+    requires requires(IGenerator& generator) { internal::GeneratorAddConverterFunction<TConverter>()(generator); }
 void AddConverter(IGenerator& generator) {
-    internals::GeneratorAddConverterFunction<TConverter>()(generator);
+    internal::GeneratorAddConverterFunction<TConverter>()(generator);
 }
 }
 
