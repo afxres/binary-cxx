@@ -1,5 +1,3 @@
-#pragma once
-
 #ifndef BINARY_ENDIAN_HPP
 #define BINARY_ENDIAN_HPP
 

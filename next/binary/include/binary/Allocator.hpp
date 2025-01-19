@@ -1,5 +1,3 @@
-#pragma once
-
 #ifndef BINARY_ALLOCATOR_HPP
 #define BINARY_ALLOCATOR_HPP
 

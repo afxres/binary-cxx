@@ -1,5 +1,3 @@
-#pragma once
-
 #ifndef BINARY_MEMORY_HPP
 #define BINARY_MEMORY_HPP
 

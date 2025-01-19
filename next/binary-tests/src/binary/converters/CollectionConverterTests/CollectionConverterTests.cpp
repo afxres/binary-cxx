@@ -6,7 +6,7 @@
 #include <binary/GeneratorExtensions.hpp>
 #include <binary/converters/CollectionConverter.hpp>
 #include <binary/converters/LittleEndianConverter.hpp>
-#include <binary/converters/StringConverter.hpp>
+#include <binary/converters/LittleEndianStringConverter.hpp>
 #include <binary/converters/TupleConverter.hpp>
 
 #include <map>
@@ -29,7 +29,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(CollectionConverterLengthTest, T, CollectionConver
     ::binary::Generator generator;
     ::binary::AddConverter<::binary::converters::LittleEndianConverter<int32_t>>(generator);
     ::binary::AddConverter<::binary::converters::LittleEndianConverter<int64_t>>(generator);
-    ::binary::AddConverter<::binary::converters::StringConverter>(generator);
+    ::binary::AddConverter<::binary::converters::LittleEndianStringConverter<std::string>>(generator);
     ::binary::AddConverter<::binary::converters::TupleConverter<std::pair<const int32_t, int64_t>>>(generator);
     ::binary::AddConverter<::binary::converters::TupleConverter<std::pair<const int32_t, std::string>>>(generator);
     ::binary::AddConverter<::binary::converters::TupleConverter<std::pair<const std::string, int64_t>>>(generator);
@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(CollectionConverterEncodeDecodeEmptyCollectionTest
     ::binary::Generator generator;
     ::binary::AddConverter<::binary::converters::LittleEndianConverter<int32_t>>(generator);
     ::binary::AddConverter<::binary::converters::LittleEndianConverter<int64_t>>(generator);
-    ::binary::AddConverter<::binary::converters::StringConverter>(generator);
+    ::binary::AddConverter<::binary::converters::LittleEndianStringConverter<std::string>>(generator);
     ::binary::AddConverter<::binary::converters::TupleConverter<std::pair<const int32_t, int64_t>>>(generator);
     ::binary::AddConverter<::binary::converters::TupleConverter<std::pair<const int32_t, std::string>>>(generator);
     ::binary::AddConverter<::binary::converters::TupleConverter<std::pair<const std::string, int64_t>>>(generator);
@@ -60,7 +60,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(CollectionConverterEncodeDecodeSingleDefaultValueC
     ::binary::Generator generator;
     ::binary::AddConverter<::binary::converters::LittleEndianConverter<int32_t>>(generator);
     ::binary::AddConverter<::binary::converters::LittleEndianConverter<int64_t>>(generator);
-    ::binary::AddConverter<::binary::converters::StringConverter>(generator);
+    ::binary::AddConverter<::binary::converters::LittleEndianStringConverter<std::string>>(generator);
     ::binary::AddConverter<::binary::converters::TupleConverter<std::pair<const int32_t, int64_t>>>(generator);
     ::binary::AddConverter<::binary::converters::TupleConverter<std::pair<const int32_t, std::string>>>(generator);
     ::binary::AddConverter<::binary::converters::TupleConverter<std::pair<const std::string, int64_t>>>(generator);

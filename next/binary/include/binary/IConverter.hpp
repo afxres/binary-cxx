@@ -1,5 +1,3 @@
-#pragma once
-
 #ifndef BINARY_ICONVERTER_HPP
 #define BINARY_ICONVERTER_HPP
 

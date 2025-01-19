@@ -2,7 +2,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include <binary/ConverterExtensions.hpp>
-#include <binary/converters/StringConverter.hpp>
+#include <binary/converters/LittleEndianStringConverter.hpp>
 
 template <>
 struct boost::test_tools::tt_detail::print_log_value<std::vector<size_t>> {
@@ -32,7 +32,7 @@ BOOST_AUTO_TEST_CASE(CastFromNullToStringConverterTest) {
 BOOST_AUTO_TEST_CASE(CastFromStringConverterToByteConverterTest) {
     std::string output = std::string() + "cast converter pointer error, source type: '" + typeid(::binary::Converter<std::string>).name() + "', target type: '" + typeid(::binary::Converter<std::byte>).name() + "'";
     BOOST_REQUIRE_EXCEPTION(
-        ::binary::GetConverter<std::byte>(std::make_shared<::binary::converters::StringConverter>()),
+        ::binary::GetConverter<std::byte>(std::make_shared<::binary::converters::LittleEndianStringConverter<std::string>>()),
         std::invalid_argument,
         ([output](const std::invalid_argument& e) {
             BOOST_REQUIRE_EQUAL(e.what(), output);

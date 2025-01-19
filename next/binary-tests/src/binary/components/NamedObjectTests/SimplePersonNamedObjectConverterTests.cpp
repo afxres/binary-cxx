@@ -5,7 +5,7 @@
 #include <binary/GeneratorExtensions.hpp>
 #include <binary/components/NamedObject.hpp>
 #include <binary/converters/LittleEndianConverter.hpp>
-#include <binary/converters/StringConverter.hpp>
+#include <binary/converters/LittleEndianStringConverter.hpp>
 
 namespace tests::binary::components::NamedObjectTests {
 BOOST_AUTO_TEST_SUITE(SimplePersonNamedObjectConverterTests)
@@ -34,13 +34,13 @@ BINARY_NAMED_OBJECT_CONVERTER_END()
 
 BINARY_NAMED_OBJECT_CONVERTER(SimplePersonCustom, SimplePersonCustomNamedObjectConverter)
 BINARY_NAMED_MEMBER_CUSTOM("Age", true, item.GetAge(), item.SetAge(result), std::make_shared<::binary::converters::LittleEndianConverter<int8_t>>())
-BINARY_NAMED_MEMBER_CUSTOM("Name", true, item.GetName(), item.SetName(result), std::make_shared<::binary::converters::StringConverter>())
+BINARY_NAMED_MEMBER_CUSTOM("Name", true, item.GetName(), item.SetName(result), std::make_shared<::binary::converters::LittleEndianStringConverter<std::string>>())
 BINARY_NAMED_OBJECT_CONVERTER_END()
 
 BOOST_AUTO_TEST_CASE(SimplePersonNamedObjectConverterLengthTest) {
     ::binary::Generator generator;
     ::binary::AddConverter<::binary::converters::LittleEndianConverter<int8_t>>(generator);
-    ::binary::AddConverter<::binary::converters::StringConverter>(generator);
+    ::binary::AddConverter<::binary::converters::LittleEndianStringConverter<std::string>>(generator);
     ::binary::AddConverter<SimplePersonNamedObjectConverter>(generator);
     ::binary::AddConverter<SimplePersonCustomNamedObjectConverter>(generator);
     auto a = ::binary::GetConverter<SimplePerson>(generator);
@@ -59,7 +59,7 @@ std::vector<std::tuple<int8_t, std::string, int32_t>> SimplePersonTestData = {
 BOOST_DATA_TEST_CASE(SimplePersonConverterEncodeDecodeTest, SimplePersonTestData, age, name, outputLength) {
     ::binary::Generator generator;
     ::binary::AddConverter<::binary::converters::LittleEndianConverter<int8_t>>(generator);
-    ::binary::AddConverter<::binary::converters::StringConverter>(generator);
+    ::binary::AddConverter<::binary::converters::LittleEndianStringConverter<std::string>>(generator);
     ::binary::AddConverter<SimplePersonNamedObjectConverter>(generator);
     ::binary::AddConverter<SimplePersonCustomNamedObjectConverter>(generator);
     auto a = ::binary::GetConverter<SimplePerson>(generator);
@@ -94,7 +94,7 @@ BOOST_DATA_TEST_CASE(SimplePersonDecodeKeyNotFoundTest, SimplePersonDecodeKeyNot
     std::string output = "named key '" + key + "' does not exist";
     ::binary::Generator generator;
     ::binary::AddConverter<::binary::converters::LittleEndianConverter<int8_t>>(generator);
-    ::binary::AddConverter<::binary::converters::StringConverter>(generator);
+    ::binary::AddConverter<::binary::converters::LittleEndianStringConverter<std::string>>(generator);
     ::binary::AddConverter<SimplePersonNamedObjectConverter>(generator);
     auto converter = ::binary::GetConverter<SimplePerson>(generator);
     BOOST_REQUIRE_EXCEPTION(
@@ -115,7 +115,7 @@ std::vector<std::tuple<std::string, int8_t, std::string>> SimplePersonDecodeOpti
 BOOST_DATA_TEST_CASE(SimplePersonDecodeOptionalMemberTest, SimplePersonDecodeOptionalMemberTestData, buffer, age, name) {
     std::span<const std::byte> span(reinterpret_cast<const std::byte*>(buffer.data()), buffer.size());
     ::binary::Generator generator;
-    ::binary::AddConverter<::binary::converters::StringConverter>(generator);
+    ::binary::AddConverter<::binary::converters::LittleEndianStringConverter<std::string>>(generator);
     ::binary::AddConverter<SimplePersonCustomNamedObjectConverter>(generator);
     auto converter = ::binary::GetConverter<SimplePersonCustom>(generator);
     auto result = converter->Decode(span);

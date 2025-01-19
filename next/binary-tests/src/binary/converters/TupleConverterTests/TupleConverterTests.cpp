@@ -5,7 +5,7 @@
 #include <binary/Generator.hpp>
 #include <binary/GeneratorExtensions.hpp>
 #include <binary/converters/LittleEndianConverter.hpp>
-#include <binary/converters/StringConverter.hpp>
+#include <binary/converters/LittleEndianStringConverter.hpp>
 #include <binary/converters/TupleConverter.hpp>
 
 namespace tests::binary::converters::TupleConverterTests {
@@ -41,7 +41,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(VariableLengthTupleConverterTest, T, VariableLengt
     ::binary::AddConverter<::binary::converters::LittleEndianConverter<int16_t>>(generator);
     ::binary::AddConverter<::binary::converters::LittleEndianConverter<int32_t>>(generator);
     ::binary::AddConverter<::binary::converters::LittleEndianConverter<int64_t>>(generator);
-    ::binary::AddConverter<::binary::converters::StringConverter>(generator);
+    ::binary::AddConverter<::binary::converters::LittleEndianStringConverter<std::string>>(generator);
     ::binary::AddConverter<::binary::converters::TupleConverter<T>>(generator);
     auto converter = ::binary::GetConverter<T>(generator);
     BOOST_REQUIRE_EQUAL(typeid(::binary::converters::TupleConverter<T>).name(), typeid(*converter).name());
@@ -76,7 +76,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(VariableLengthTupleConverterEncodeDecodeBothMethod
     ::binary::AddConverter<::binary::converters::LittleEndianConverter<int16_t>>(generator);
     ::binary::AddConverter<::binary::converters::LittleEndianConverter<int32_t>>(generator);
     ::binary::AddConverter<::binary::converters::LittleEndianConverter<int64_t>>(generator);
-    ::binary::AddConverter<::binary::converters::StringConverter>(generator);
+    ::binary::AddConverter<::binary::converters::LittleEndianStringConverter<std::string>>(generator);
     ::binary::AddConverter<::binary::converters::TupleConverter<T>>(generator);
     auto converter = ::binary::GetConverter<T>(generator);
     auto dataBuffer = ::binary::Allocator::Invoke([converter](auto& allocator) { converter->Encode(allocator, T()); });

@@ -1,5 +1,3 @@
-#pragma once
-
 #ifndef BINARY_GENERATOR_HPP
 #define BINARY_GENERATOR_HPP
 

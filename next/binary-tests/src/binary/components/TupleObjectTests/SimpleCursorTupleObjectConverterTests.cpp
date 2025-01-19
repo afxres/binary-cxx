@@ -5,7 +5,7 @@
 #include <binary/GeneratorExtensions.hpp>
 #include <binary/components/TupleObject.hpp>
 #include <binary/converters/LittleEndianConverter.hpp>
-#include <binary/converters/StringConverter.hpp>
+#include <binary/converters/LittleEndianStringConverter.hpp>
 
 namespace tests::binary::components::TupleObjectTests {
 BOOST_AUTO_TEST_SUITE(SimpleCursorTupleObjectConverterTests)
