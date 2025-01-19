@@ -50,8 +50,8 @@ struct CollectionReserveFunction<T> {
 namespace binary::converters {
 template <
     typename T,
-    typename Emplace = internal::CollectionEmplaceFunction<T>,
-    typename Reserve = internal::CollectionReserveFunction<T>>
+    typename Emplace = internal::CollectionEmplaceFunction<std::remove_const_t<T>>,
+    typename Reserve = internal::CollectionReserveFunction<std::remove_const_t<T>>>
     requires std::ranges::input_range<T>
 class CollectionConverter : public Converter<T> {
 public:
@@ -71,7 +71,7 @@ public:
             return {};
         }
 
-        T result;
+        std::remove_const_t<T> result;
         auto copy = span;
         auto converter = this->converter;
         if constexpr (Reserve::IsEnable) {

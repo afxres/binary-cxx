@@ -23,7 +23,13 @@ using CollectionConverterTestTypeData = boost::mpl::list<
     std::set<int32_t>, std::set<std::string>,
     std::unordered_set<int32_t>, std::unordered_set<std::string>,
     std::map<int32_t, int64_t>, std::map<int32_t, std::string>, std::map<std::string, int64_t>,
-    std::unordered_map<int32_t, int64_t>, std::unordered_map<int32_t, std::string>, std::unordered_map<std::string, int64_t>>;
+    std::unordered_map<int32_t, int64_t>, std::unordered_map<int32_t, std::string>, std::unordered_map<std::string, int64_t>,
+    const std::vector<int32_t>,
+    const std::list<std::string>,
+    const std::set<int32_t>,
+    const std::unordered_set<std::string>,
+    const std::map<int32_t, int64_t>,
+    const std::unordered_map<std::string, int64_t>>;
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(CollectionConverterLengthTest, T, CollectionConverterTestTypeData) {
     ::binary::Generator generator;
