@@ -9,39 +9,27 @@ BOOST_AUTO_TEST_SUITE(LittleEndianConverterTests)
 
 using ::binary::Allocator;
 using ::binary::converters::LittleEndianConverter;
-using LittleEndianConverterLengthData = boost::mpl::list<int8_t, int16_t, int32_t, int64_t>;
+using LittleEndianConverterTestTypeData = boost::mpl::list<int8_t, int16_t, int32_t, int64_t>;
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(LittleEndianConverterLengthTest, T, LittleEndianConverterLengthData) {
-    LittleEndianConverter<T> converter;
-    BOOST_REQUIRE_EQUAL(converter.Length(), sizeof(T));
-}
-
-template <typename T>
-void TestEncodeDecodeMethods(const T& item) {
-    Allocator allocator;
-    LittleEndianConverter<T> converter;
-    converter.Encode(allocator, item);
-    BOOST_REQUIRE_EQUAL(allocator.Length(), sizeof(T));
-    T result = converter.Decode(allocator.AsSpan());
-    BOOST_REQUIRE_EQUAL(result, item);
-}
-
-template <typename T>
-void TestEncodeAutoDecodeAutoMethods(const T& item) {
-    Allocator allocator;
-    LittleEndianConverter<T> converter;
-    converter.EncodeAuto(allocator, item);
-    BOOST_REQUIRE_EQUAL(allocator.Length(), sizeof(T));
-    std::span<const std::byte> memory = allocator.AsSpan();
-    T result = converter.DecodeAuto(memory);
-    BOOST_REQUIRE_EQUAL(memory.size(), 0);
-    BOOST_REQUIRE_EQUAL(result, item);
+BOOST_AUTO_TEST_CASE_TEMPLATE(LittleEndianConverterLengthTest, T, LittleEndianConverterTestTypeData) {
+    auto a = LittleEndianConverter<std::add_const_t<T>>();
+    auto b = LittleEndianConverter<std::remove_const_t<T>>();
+    BOOST_REQUIRE_EQUAL(a.Length(), sizeof(T));
+    BOOST_REQUIRE_EQUAL(b.Length(), sizeof(T));
 }
 
 template <typename T>
 void TestAllMethods(const T& item) {
-    TestEncodeDecodeMethods<T>(item);
-    TestEncodeAutoDecodeAutoMethods<T>(item);
+    auto a = LittleEndianConverter<std::add_const_t<T>>();
+    auto b = LittleEndianConverter<std::remove_const_t<T>>();
+    auto x = Allocator::Invoke([&a, item](auto& allocator) { a.Encode(allocator, item); });
+    auto y = Allocator::Invoke([&a, item](auto& allocator) { a.Encode(allocator, item); });
+    BOOST_REQUIRE_EQUAL(sizeof(T), x.size());
+    BOOST_REQUIRE_EQUAL(sizeof(T), y.size());
+    auto p = a.Decode(x);
+    auto q = b.Decode(y);
+    BOOST_REQUIRE_EQUAL(item, p);
+    BOOST_REQUIRE_EQUAL(item, q);
 }
 
 template <typename T>

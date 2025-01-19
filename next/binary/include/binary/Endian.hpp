@@ -3,6 +3,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <type_traits>
 
 #if defined(__linux__)
 #include <endian.h>
@@ -25,7 +26,7 @@ inline void __binary_save__(void* target, T item) {
 
 template <typename T, bool Is>
 inline T __binary_load__(const void* source) {
-    T result;
+    std::remove_const_t<T> result;
     if constexpr (Is) {
         result = *static_cast<const T*>(source);
     } else {
