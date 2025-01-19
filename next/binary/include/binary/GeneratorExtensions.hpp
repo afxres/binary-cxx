@@ -86,8 +86,8 @@ std::shared_ptr<Converter<T>> GetConverter(IGenerator& generator) {
     throw std::out_of_range(std::format("converter not found, type: {}", typeid(Converter<T>).name()));
 }
 
-template <typename TConverter, typename... TArguments, std::enable_if_t<std::is_same_v<std::tuple<>, std::tuple<TArguments...>> == false, bool> = true>
-    requires std::derived_from<TConverter, IConverter> && std::constructible_from<TConverter, std::shared_ptr<Converter<TArguments>>...>
+template <typename TConverter, typename... TArguments>
+    requires std::derived_from<TConverter, IConverter> && std::constructible_from<TConverter, std::shared_ptr<Converter<TArguments>>...> && (sizeof...(TArguments) != 0)
 void AddConverter(IGenerator& generator) {
     std::shared_ptr<IConverter> converter = std::make_shared<TConverter>(GetConverter<TArguments>(generator)...);
     generator.AddConverter(converter);
