@@ -8,12 +8,12 @@
 namespace binary::internal {
 template <typename T>
     requires std::is_same_v<std::add_const_t<T>, T>
-class ConstantsBoxConverter : public Converter<T> {
+class ConstantsConverter : public Converter<T> {
 private:
     std::shared_ptr<Converter<std::remove_const_t<T>>> converter;
 
 public:
-    ConstantsBoxConverter(std::shared_ptr<Converter<std::remove_const_t<T>>> converter)
+    ConstantsConverter(std::shared_ptr<Converter<std::remove_const_t<T>>> converter)
         : Converter<T>(converter->Length())
         , converter(converter) {}
 
@@ -76,7 +76,7 @@ std::shared_ptr<Converter<T>> GetConverter(IGenerator& generator) {
         auto remove = generator.GetConverter(typeid(Converter<std::remove_const_t<T>>));
         if (remove != nullptr) {
             auto intent = GetConverter<std::remove_const_t<T>>(remove);
-            auto bridge = std::make_shared<internal::ConstantsBoxConverter<T>>(intent);
+            auto bridge = std::make_shared<internal::ConstantsConverter<T>>(intent);
             generator.AddConverter(bridge);
             return bridge;
         }
