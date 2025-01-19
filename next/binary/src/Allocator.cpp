@@ -130,7 +130,7 @@ void Allocator::Expand(size_t length) {
 }
 
 void Allocator::Append(const std::span<const std::byte>& span) {
-    if (span.size() == 0) {
+    if (span.empty()) {
         return;
     }
     memcpy(Assign(span.size()), span.data(), span.size());

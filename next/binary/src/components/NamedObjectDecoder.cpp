@@ -24,10 +24,10 @@ void NamedObjectDecoder::Invoke(const std::span<const std::byte>& span, std::vec
     const auto& record = this->record;
     const auto& optional = this->optional;
     slices.resize(record.size());
-    std::span<const std::byte> intent = span;
-    while (!intent.empty()) {
-        auto head = DecodeWithLengthPrefix(intent);
-        auto tail = DecodeWithLengthPrefix(intent);
+    std::span<const std::byte> copy = span;
+    while (!copy.empty()) {
+        auto head = DecodeWithLengthPrefix(copy);
+        auto tail = DecodeWithLengthPrefix(copy);
         std::string_view view(reinterpret_cast<const char*>(head.data()), head.size());
         auto iterator = record.find(view);
         if (iterator == record.end()) {

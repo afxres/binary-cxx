@@ -72,7 +72,7 @@ public:
         }
 
         T result;
-        auto intent = span;
+        auto copy = span;
         auto converter = this->converter;
         if constexpr (Reserve::IsEnable) {
             if (converter->Length() != 0) {
@@ -80,8 +80,8 @@ public:
                 Reserve()(result, capacity);
             }
         }
-        while (!intent.empty()) {
-            Emplace()(result, converter->DecodeAuto(intent));
+        while (!copy.empty()) {
+            Emplace()(result, converter->DecodeAuto(copy));
         }
         return result;
     }

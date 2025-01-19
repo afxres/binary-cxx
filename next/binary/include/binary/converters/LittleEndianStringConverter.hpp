@@ -11,7 +11,7 @@ template <typename T>
 class LittleEndianStringConverter : public Converter<T> {
 public:
     virtual void Encode(Allocator& allocator, const T& item) override {
-        if (item.size() == 0) {
+        if (item.empty()) {
             return;
         }
         constexpr size_t size = sizeof(typename T::value_type);
@@ -30,7 +30,7 @@ public:
     }
 
     virtual T Decode(const std::span<const std::byte>& span) override {
-        if (span.size() == 0) {
+        if (span.empty()) {
             return {};
         }
         constexpr size_t size = sizeof(typename T::value_type);
