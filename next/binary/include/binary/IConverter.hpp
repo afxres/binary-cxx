@@ -12,7 +12,7 @@ private:
 
 public:
     size_t Length() const { return this->length; }
-    std::type_index GetConverterType() const { return this->type; }
+    std::type_index GetGenericArgument() const { return this->type; }
 
     IConverter(std::type_index type);
     IConverter(std::type_index type, size_t length);

@@ -9,11 +9,12 @@
 
 namespace binary {
 template <typename T>
+    requires std::same_as<T, std::remove_cv_t<T>>
 std::shared_ptr<Converter<T>> GetConverter(std::shared_ptr<IConverter> converter) {
     std::shared_ptr<Converter<T>> result = std::dynamic_pointer_cast<Converter<T>>(converter);
     if (result == nullptr) {
-        std::string source = converter == nullptr ? "source is null" : std::format("source type: '{}'", converter->GetConverterType().name());
-        std::string output = std::format("cast converter pointer error, {}, target type: '{}'", source, typeid(Converter<T>).name());
+        std::string source = converter == nullptr ? "source is null" : std::format("source argument type: '{}'", converter->GetGenericArgument().name());
+        std::string output = std::format("cast converter pointer error, {}, target argument type: '{}'", source, typeid(Converter<T>).name());
         throw std::invalid_argument(output);
     }
     return result;

@@ -1,9 +1,9 @@
 #ifndef BINARY_ENDIAN_HPP
 #define BINARY_ENDIAN_HPP
 
+#include <concepts>
 #include <cstddef>
 #include <cstdint>
-#include <type_traits>
 
 #if defined(__linux__)
 #include <endian.h>
@@ -25,8 +25,9 @@ inline void __binary_save__(void* target, T item) {
 }
 
 template <typename T, bool Is>
+    requires std::same_as<T, std::remove_cv_t<T>>
 inline T __binary_load__(const void* source) {
-    std::remove_const_t<T> result;
+    T result;
     if constexpr (Is) {
         result = *static_cast<const T*>(source);
     } else {

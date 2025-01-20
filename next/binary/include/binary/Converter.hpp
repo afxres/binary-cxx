@@ -10,6 +10,7 @@
 
 namespace binary {
 template <typename T>
+    requires std::same_as<T, std::remove_cv_t<T>>
 class Converter : public IConverter {
 public:
     Converter()

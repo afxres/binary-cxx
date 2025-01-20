@@ -8,6 +8,7 @@
 
 namespace binary::converters {
 template <typename T>
+    requires std::same_as<T, std::remove_cv_t<T>>
 class LittleEndianStringConverter : public Converter<T> {
 public:
     virtual void Encode(Allocator& allocator, const T& item) override {
@@ -40,7 +41,7 @@ public:
             if ((span.size() % size) != 0) {
                 throw std::length_error(std::format("not enough bytes for string character, byte length: {}, character type: {}", span.size(), typeid(typename T::value_type).name()));
             }
-            std::remove_const_t<T> result;
+            T result;
             result.resize(span.size() / size);
             auto source = reinterpret_cast<const typename T::value_type*>(span.data());
             auto target = result.data();

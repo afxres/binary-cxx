@@ -11,6 +11,7 @@
 namespace binary {
 class Allocator {
     template <typename T>
+        requires std::same_as<T, std::remove_cv_t<T>>
     friend class Converter;
 
 private:

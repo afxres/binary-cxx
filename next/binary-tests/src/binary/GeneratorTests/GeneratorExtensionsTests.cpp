@@ -20,7 +20,7 @@ public:
         : map(map) {}
 
     virtual void AddConverter(std::shared_ptr<IConverter> converter) override {
-        map.emplace(converter->GetConverterType(), converter);
+        map.emplace(converter->GetGenericArgument(), converter);
     }
 
     virtual std::shared_ptr<IConverter> GetConverter(std::type_index type) const override {
