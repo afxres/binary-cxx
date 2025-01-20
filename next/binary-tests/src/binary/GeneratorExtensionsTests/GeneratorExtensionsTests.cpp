@@ -3,7 +3,7 @@
 
 #include <binary/GeneratorExtensions.hpp>
 
-namespace tests::binary::GeneratorTests {
+namespace tests::binary::GeneratorExtensionsTests {
 BOOST_AUTO_TEST_SUITE(GeneratorExtensionsTests)
 
 using ::binary::Allocator;

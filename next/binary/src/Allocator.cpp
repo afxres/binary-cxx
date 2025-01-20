@@ -20,7 +20,7 @@ Allocator::Allocator() {
 
 Allocator::Allocator(size_t maxCapacity) {
     if (maxCapacity > INT32_MAX) {
-        throw std::out_of_range("maxCapacity > INT32_MAX");
+        throw std::invalid_argument("maxCapacity > INT32_MAX");
     }
     this->buffer = nullptr;
     this->offset = 0;
@@ -44,7 +44,7 @@ void Allocator::Resize(size_t length) {
     size_t limits = this->limits;
     uint64_t amount = static_cast<uint64_t>(offset) + length;
     if (length > INT32_MAX || amount > limits) {
-        throw std::length_error("maximum allowed capacity reached");
+        throw std::length_error("maximum capacity reached");
     }
     size_t source = this->bounds;
     uint64_t cursor = static_cast<uint64_t>(source);
