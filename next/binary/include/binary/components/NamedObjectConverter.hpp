@@ -6,6 +6,7 @@
 
 #include "binary/Converter.hpp"
 #include "binary/IGenerator.hpp"
+#include "binary/Memory.hpp"
 #include "binary/components/NamedObjectDecoder.hpp"
 
 namespace binary::components {
@@ -37,7 +38,7 @@ public:
         const auto& headers = this->headers;
         const auto& contexts = this->contexts;
         for (size_t i = 0; i < contexts.size(); i++) {
-            allocator.AppendWithLengthPrefix(headers.at(i));
+            EncodeWithLengthPrefix(allocator, headers.at(i));
             contexts.at(i).EncodeWithLengthPrefix(allocator, item);
         }
     }

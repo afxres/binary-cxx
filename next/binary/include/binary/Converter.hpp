@@ -31,9 +31,9 @@ public:
     }
 
     virtual void EncodeWithLengthPrefix(Allocator& allocator, const T& item) {
-        size_t anchor = allocator.Anchor();
+        size_t anchor = internal::AllocatorUnsafeAccessor::Anchor(allocator);
         Encode(allocator, item);
-        allocator.FinishAnchor(anchor);
+        internal::AllocatorUnsafeAccessor::FinishAnchor(allocator, anchor);
     }
 
     virtual T Decode(const std::span<const std::byte>& span) = 0;

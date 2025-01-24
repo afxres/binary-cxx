@@ -22,7 +22,7 @@ public:
     }
 
     virtual T Decode(const std::span<const std::byte>& span) override {
-        const std::byte* source = EnsureLength(span, sizeof(T));
+        const std::byte* source = binary::internal::EnsureLength(span, sizeof(T));
         return DecodeLittleEndian<T>(source);
     }
 };

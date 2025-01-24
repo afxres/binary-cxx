@@ -8,11 +8,13 @@
 #include <span>
 #include <vector>
 
+namespace binary::internal {
+class AllocatorUnsafeAccessor;
+}
+
 namespace binary {
 class Allocator {
-    template <typename T>
-        requires std::same_as<T, std::remove_cv_t<T>>
-    friend class Converter;
+    friend class internal::AllocatorUnsafeAccessor;
 
 private:
     std::shared_ptr<std::byte> buffer;
@@ -37,7 +39,6 @@ public:
     void Expand(size_t length);
     void Append(const std::span<const std::byte>& span);
     void Append(size_t length, std::function<void(std::span<std::byte>)> action);
-    void AppendWithLengthPrefix(const std::span<const std::byte>& span);
 
     static std::vector<std::byte> Invoke(std::function<void(Allocator&)> action);
 };

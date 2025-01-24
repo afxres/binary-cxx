@@ -3,12 +3,81 @@
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
+#include <cstring>
 #include <span>
 #include <stdexcept>
 
+#include "binary/Allocator.hpp"
 #include "binary/Endian.hpp"
 
 namespace binary {
+void Encode(Allocator& allocator, size_t number) {
+    internal::EnsureLengthPrefixLength(number);
+    size_t prefixLength = internal::EncodeLengthPrefixLength(number);
+    std::byte* source = internal::AllocatorUnsafeAccessor::Assign(allocator, prefixLength);
+    internal::EncodeLengthPrefix(source, number, prefixLength);
+}
+
+void Encode(std::span<std::byte> span, size_t number, size_t& bytesWritten) {
+    internal::EnsureLengthPrefixLength(number);
+    size_t prefixLength = internal::EncodeLengthPrefixLength(number);
+    if (span.size() < prefixLength) {
+        throw std::length_error("not enough bytes to write");
+    }
+    internal::EncodeLengthPrefix(span.data(), number, prefixLength);
+    bytesWritten = prefixLength;
+}
+
+void EncodeWithLengthPrefix(Allocator& allocator, const std::span<const std::byte>& span) {
+    size_t number = span.size();
+    internal::EnsureLengthPrefixLength(number);
+    size_t prefixLength = internal::EncodeLengthPrefixLength(number);
+    std::byte* source = internal::AllocatorUnsafeAccessor::Assign(allocator, number + prefixLength);
+    internal::EncodeLengthPrefix(source, number, prefixLength);
+    memcpy(source + prefixLength, span.data(), number);
+}
+
+std::span<const std::byte> DecodeWithLengthPrefix(std::span<const std::byte>& span) {
+    const std::byte* source = span.data();
+    size_t offset = 0;
+    size_t length = internal::DecodeLengthPrefix(source, offset, span.size());
+    assert(offset == 1 || offset == 4);
+    assert(offset <= span.size());
+    if (span.size() < offset + length) {
+        throw std::length_error("not enough bytes");
+    }
+    std::span<const std::byte> result = span.subspan(offset, length);
+    span = span.subspan(offset + length);
+    return result;
+}
+}
+
+namespace binary::internal {
+std::byte* AllocatorUnsafeAccessor::Assign(Allocator& allocator, size_t length) {
+    return allocator.Assign(length);
+}
+
+size_t AllocatorUnsafeAccessor::Anchor(Allocator& allocator) {
+    return allocator.Anchor();
+}
+
+void AllocatorUnsafeAccessor::FinishAnchor(Allocator& allocator, size_t anchor) {
+    allocator.FinishAnchor(anchor);
+}
+
+const std::byte* EnsureLength(const std::span<const std::byte>& span, const size_t length) {
+    if (span.size() < length) {
+        throw std::length_error("not enough bytes");
+    }
+    return span.data();
+}
+
+void EnsureLengthPrefixLength(const size_t number) {
+    if (number > INT32_MAX) {
+        throw std::invalid_argument("number > INT32_MAX");
+    }
+}
+
 size_t EncodeLengthPrefixLength(const size_t number) {
     assert(number <= INT32_MAX);
     if ((static_cast<uint32_t>(number) >> 7) == 0) {
@@ -55,33 +124,5 @@ size_t DecodeLengthPrefix(const std::byte* buffer, size_t& offset, const size_t 
     uint32_t result = DecodeBigEndian<uint32_t>(source);
     offset += 3;
     return result & 0x7FFF'FFFU;
-}
-
-size_t EnsureLengthPrefixLength(const size_t length) {
-    if (length > INT32_MAX) {
-        throw std::length_error("length overflow");
-    }
-    return length;
-}
-
-const std::byte* EnsureLength(const std::span<const std::byte>& span, const size_t length) {
-    if (span.size() < length) {
-        throw std::length_error("not enough bytes");
-    }
-    return span.data();
-}
-
-std::span<const std::byte> DecodeWithLengthPrefix(std::span<const std::byte>& span) {
-    const std::byte* source = span.data();
-    size_t offset = 0;
-    size_t length = DecodeLengthPrefix(source, offset, span.size());
-    assert(offset == 1 || offset == 4);
-    assert(offset <= span.size());
-    if (span.size() < offset + length) {
-        throw std::length_error("not enough bytes");
-    }
-    std::span<const std::byte> result = span.subspan(offset, length);
-    span = span.subspan(offset + length);
-    return result;
 }
 }

@@ -101,12 +101,12 @@ void Allocator::FinishAnchor(size_t anchor) {
     std::byte* target = this->buffer.get() + anchor;
     if (length <= ALLOCATOR_ANCHOR_SHRINK_LIMITS) {
         this->offset = offset - 3;
-        EncodeLengthPrefix(target, length, 1);
+        internal::EncodeLengthPrefix(target, length, 1);
         std::memmove(target + 1, target + 4, length);
         assert(this->offset >= 1);
         assert(this->offset <= this->bounds);
     } else {
-        EncodeLengthPrefix(target, length, 4);
+        internal::EncodeLengthPrefix(target, length, 4);
         assert(this->offset >= 4);
         assert(this->offset <= this->bounds);
     }
@@ -141,14 +141,6 @@ void Allocator::Append(size_t length, std::function<void(std::span<std::byte>)> 
         return;
     }
     action(std::span<std::byte>(Assign(length), length));
-}
-
-void Allocator::AppendWithLengthPrefix(const std::span<const std::byte>& span) {
-    size_t number = EnsureLengthPrefixLength(span.size());
-    size_t prefixLength = EncodeLengthPrefixLength(number);
-    std::byte* source = Assign(number + prefixLength);
-    EncodeLengthPrefix(source, number, prefixLength);
-    memcpy(source + prefixLength, span.data(), number);
 }
 
 std::vector<std::byte> Allocator::Invoke(std::function<void(Allocator&)> action) {
