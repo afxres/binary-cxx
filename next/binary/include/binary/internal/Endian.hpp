@@ -1,5 +1,5 @@
-#ifndef BINARY_ENDIAN_HPP
-#define BINARY_ENDIAN_HPP
+#ifndef BINARY_INTERNAL_ENDIAN_HPP
+#define BINARY_INTERNAL_ENDIAN_HPP
 
 #include <concepts>
 #include <cstddef>
@@ -16,6 +16,7 @@ template <size_t Size>
 void __binary_swap__(void* target, const void* source);
 
 template <typename T, bool Is>
+    requires std::same_as<T, std::remove_cv_t<T>>
 inline void __binary_save__(void* target, T item) {
     if constexpr (Is) {
         *static_cast<T*>(target) = item;
@@ -27,17 +28,15 @@ inline void __binary_save__(void* target, T item) {
 template <typename T, bool Is>
     requires std::same_as<T, std::remove_cv_t<T>>
 inline T __binary_load__(const void* source) {
-    T result;
     if constexpr (Is) {
-        result = *static_cast<const T*>(source);
+        return *static_cast<const T*>(source);
     } else {
+        T result;
         __binary_swap__<sizeof(T)>(&result, source);
+        return result;
     }
-    return result;
-}
 }
 
-namespace binary {
 #if defined(__linux__) && (__BYTE_ORDER == __LITTLE_ENDIAN || __BYTE_ORDER == __BIG_ENDIAN)
 constexpr bool IsLittleEndian = __BYTE_ORDER == __LITTLE_ENDIAN;
 #elif defined(_WIN32)
@@ -48,22 +47,22 @@ constexpr bool IsLittleEndian = true;
 
 template <typename T>
 inline void EncodeLittleEndian(void* target, T item) {
-    internal::__binary_save__<T, IsLittleEndian>(target, item);
+    __binary_save__<T, IsLittleEndian>(target, item);
 }
 
 template <typename T>
 inline T DecodeLittleEndian(const void* source) {
-    return internal::__binary_load__<T, IsLittleEndian>(source);
+    return __binary_load__<T, IsLittleEndian>(source);
 }
 
 template <typename T>
 inline void EncodeBigEndian(void* target, T item) {
-    internal::__binary_save__<T, IsLittleEndian == false>(target, item);
+    __binary_save__<T, IsLittleEndian == false>(target, item);
 }
 
 template <typename T>
 inline T DecodeBigEndian(const void* source) {
-    return internal::__binary_load__<T, IsLittleEndian == false>(source);
+    return __binary_load__<T, IsLittleEndian == false>(source);
 }
 }
 

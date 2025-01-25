@@ -26,8 +26,8 @@ void TestAllMethods(const T& item) {
 }
 
 template <typename T>
-void TestAll(const std::vector<T>& collection, std::function<void(const T&)> action) {
-    for (const T& i : collection) {
+void TestAll(const std::vector<T>& container, std::function<void(const T&)> action) {
+    for (const T& i : container) {
         action(i);
     }
 }

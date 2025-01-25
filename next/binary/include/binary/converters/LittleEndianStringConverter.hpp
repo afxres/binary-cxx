@@ -4,7 +4,7 @@
 #include <format>
 
 #include "binary/Converter.hpp"
-#include "binary/Endian.hpp"
+#include "binary/internal/Endian.hpp"
 
 namespace binary::converters {
 template <typename T>
@@ -24,7 +24,7 @@ public:
                 auto target = reinterpret_cast<typename T::value_type*>(span.data());
                 auto source = item.data();
                 for (size_t i = 0; i < item.size(); i++) {
-                    EncodeLittleEndian(&target[i], source[i]);
+                    internal::EncodeLittleEndian(&target[i], source[i]);
                 }
             });
         }
@@ -46,7 +46,7 @@ public:
             auto source = reinterpret_cast<const typename T::value_type*>(span.data());
             auto target = result.data();
             for (size_t i = 0; i < result.size(); i++) {
-                target[i] = DecodeLittleEndian<typename T::value_type>(&source[i]);
+                target[i] = internal::DecodeLittleEndian<typename T::value_type>(&source[i]);
             }
             return result;
         }

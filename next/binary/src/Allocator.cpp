@@ -4,7 +4,7 @@
 #include <cstring>
 #include <stdexcept>
 
-#include "binary/Memory.hpp"
+#include "binary/internal/Length.hpp"
 
 #define ALLOCATOR_ANCHOR_SIZE (4)
 #define ALLOCATOR_ANCHOR_SHRINK_LIMITS (16)

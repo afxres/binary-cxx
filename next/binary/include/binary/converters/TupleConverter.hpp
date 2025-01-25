@@ -16,32 +16,33 @@ template <template <typename...> typename T, typename... E>
 class TupleConverter<T<E...>> : public Converter<T<E...>> {
 private:
     using GenericArgument = T<E...>;
-    using GenericArgumentConverter = std::tuple<std::shared_ptr<Converter<std::remove_cv_t<E>>>...>;
+    using ElementConverter = std::tuple<std::shared_ptr<Converter<std::remove_cv_t<E>>>...>;
+    static constexpr size_t TupleSize = std::tuple_size_v<GenericArgument>;
 
     template <size_t Index, bool IsAuto = false>
     struct Invoke {
-        static void Encode(const GenericArgumentConverter& converter, Allocator& allocator, const GenericArgument& item) {
-            if constexpr (Index == std::tuple_size_v<GenericArgument> - 1 && !IsAuto) {
+        static void Encode(const ElementConverter& converter, Allocator& allocator, const GenericArgument& item) {
+            if constexpr (Index == TupleSize - 1 && !IsAuto) {
                 std::get<Index>(converter)->Encode(allocator, std::get<Index>(item));
             } else {
                 std::get<Index>(converter)->EncodeAuto(allocator, std::get<Index>(item));
             }
-            if constexpr (Index != std::tuple_size_v<GenericArgument> - 1) {
+            if constexpr (Index != TupleSize - 1) {
                 Invoke<Index + 1, IsAuto>::Encode(converter, allocator, item);
             }
         }
 
-        static auto Detach(const GenericArgumentConverter& converter, std::span<const std::byte>& span) {
-            if constexpr (Index == std::tuple_size_v<GenericArgument> - 1 && !IsAuto) {
+        static auto Detach(const ElementConverter& converter, std::span<const std::byte>& span) {
+            if constexpr (Index == TupleSize - 1 && !IsAuto) {
                 return std::get<Index>(converter)->Decode(span);
             } else {
                 return std::get<Index>(converter)->DecodeAuto(span);
             }
         }
 
-        static auto Decode(const GenericArgumentConverter& converter, std::span<const std::byte>& span) {
+        static auto Decode(const ElementConverter& converter, std::span<const std::byte>& span) {
             auto result = std::make_tuple(Detach(converter, span));
-            if constexpr (Index != std::tuple_size_v<GenericArgument> - 1) {
+            if constexpr (Index != TupleSize - 1) {
                 return std::tuple_cat(result, Invoke<Index + 1, IsAuto>::Decode(converter, span));
             } else {
                 return result;
@@ -53,7 +54,7 @@ private:
         return {result...};
     }
 
-    GenericArgumentConverter converter;
+    ElementConverter converter;
 
 public:
     TupleConverter(std::shared_ptr<Converter<std::remove_cv_t<E>>>... converter)

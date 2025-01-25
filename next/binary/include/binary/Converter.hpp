@@ -7,6 +7,7 @@
 #include "binary/Allocator.hpp"
 #include "binary/IConverter.hpp"
 #include "binary/Memory.hpp"
+#include "binary/internal/AllocatorUnsafeAccessor.hpp"
 
 namespace binary {
 template <typename T>

@@ -1,6 +1,5 @@
-#include "binary/Endian.hpp"
+#include "binary/internal/Endian.hpp"
 
-#include <cstddef>
 #include <cstdint>
 
 namespace binary::internal {
