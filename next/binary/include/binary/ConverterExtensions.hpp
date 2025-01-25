@@ -1,5 +1,5 @@
-#ifndef BINARY_MEMORY_HPP
-#define BINARY_MEMORY_HPP
+#ifndef BINARY_CONVERTEREXTENSIONS_HPP
+#define BINARY_CONVERTEREXTENSIONS_HPP
 
 #include <cstddef>
 #include <span>

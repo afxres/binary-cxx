@@ -4,7 +4,7 @@
 #include <format>
 #include <stdexcept>
 
-#include "binary/Memory.hpp"
+#include "binary/ConverterExtensions.hpp"
 
 namespace binary::components {
 NamedObjectDecoder::NamedObjectDecoder(const std::vector<bool>& optional, const std::vector<std::string>& names, const std::vector<std::vector<std::byte>>& headers)

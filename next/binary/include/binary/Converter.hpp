@@ -5,8 +5,8 @@
 #include <span>
 
 #include "binary/Allocator.hpp"
+#include "binary/ConverterExtensions.hpp"
 #include "binary/IConverter.hpp"
-#include "binary/Memory.hpp"
 #include "binary/internal/AllocatorUnsafeAccessor.hpp"
 
 namespace binary {

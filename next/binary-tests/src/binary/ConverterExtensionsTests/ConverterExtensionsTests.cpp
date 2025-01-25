@@ -2,12 +2,12 @@
 #include <boost/test/unit_test.hpp>
 
 #include <binary/Allocator.hpp>
-#include <binary/Memory.hpp>
+#include <binary/ConverterExtensions.hpp>
 
 #include <array>
 
-namespace tests::binary::MemoryTests {
-BOOST_AUTO_TEST_SUITE(MemoryTests)
+namespace tests::binary::ConverterExtensionsTests {
+BOOST_AUTO_TEST_SUITE(ConverterExtensionsTests)
 
 std::vector<std::tuple<size_t, std::string>> EncodeNumberTestData = {
     {0, std::string("\x00", 1)},
