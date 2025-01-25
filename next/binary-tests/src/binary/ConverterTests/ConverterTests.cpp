@@ -1,7 +1,7 @@
 #include <boost/test/data/test_case.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "binary/Converter.hpp"
+#include <binary/Converter.hpp>
 
 namespace tests::binary::ConverterTests {
 BOOST_AUTO_TEST_SUITE(ConverterTests)

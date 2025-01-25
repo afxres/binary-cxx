@@ -3,7 +3,7 @@
 
 #include <memory>
 
-#include "binary/Converter.hpp"
+#include <binary/Converter.hpp>
 
 namespace tests::binary::ConverterTests {
 BOOST_AUTO_TEST_SUITE(CustomConstantConverterTests)

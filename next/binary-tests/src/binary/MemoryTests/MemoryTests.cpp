@@ -4,6 +4,8 @@
 #include <binary/Allocator.hpp>
 #include <binary/Memory.hpp>
 
+#include <array>
+
 namespace tests::binary::MemoryTests {
 BOOST_AUTO_TEST_SUITE(MemoryTests)
 
