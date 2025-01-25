@@ -2,15 +2,15 @@
 #define BINARY_GENERATOREXTENSIONS_HPP
 
 #include "binary/Converter.hpp"
-#include "binary/ConverterExtensions.hpp"
 #include "binary/IGenerator.hpp"
+#include "binary/internal/Converter.hpp"
 #include "binary/internal/GeneratorInsertFunction.hpp"
 
 namespace binary {
 template <typename T>
     requires std::same_as<T, std::remove_cv_t<T>>
 std::shared_ptr<Converter<T>> GetConverter(IGenerator& generator) {
-    return GetConverter<T>(generator.GetConverter(typeid(Converter<T>)));
+    return internal::GetConverter<T>(generator.GetConverter(typeid(Converter<T>)));
 }
 
 template <typename TConverter, typename... TArguments>

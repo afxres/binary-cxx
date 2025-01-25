@@ -1,5 +1,5 @@
-#ifndef BINARY_CONVERTEREXTENSIONS_HPP
-#define BINARY_CONVERTEREXTENSIONS_HPP
+#ifndef BINARY_INTERNAL_CONVERTER_HPP
+#define BINARY_INTERNAL_CONVERTER_HPP
 
 #include <format>
 #include <memory>
@@ -7,7 +7,7 @@
 
 #include "binary/Converter.hpp"
 
-namespace binary {
+namespace binary::internal {
 template <typename T>
     requires std::same_as<T, std::remove_cv_t<T>>
 std::shared_ptr<Converter<T>> GetConverter(std::shared_ptr<IConverter> converter) {

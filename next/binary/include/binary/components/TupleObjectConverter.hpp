@@ -3,6 +3,7 @@
 
 #include "binary/Converter.hpp"
 #include "binary/IGenerator.hpp"
+#include "binary/internal/Converter.hpp"
 
 namespace binary::components {
 template <typename T>
@@ -18,7 +19,7 @@ public:
     };
 
     TupleObjectConverter(std::vector<MemberInfo>&& contexts)
-        : Converter<T>(GetConverterLength(contexts | std::views::transform([](const auto& info) { return info.Length; }))), contexts(contexts) {}
+        : Converter<T>(::binary::internal::GetConverterLength(contexts | std::views::transform([](const auto& info) { return info.Length; }))), contexts(contexts) {}
 
     virtual void Encode(Allocator& allocator, const T& item) override {
         EncodeInternal(allocator, item, false);

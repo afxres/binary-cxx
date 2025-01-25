@@ -5,7 +5,7 @@
 #include <tuple>
 
 #include "binary/Converter.hpp"
-#include "binary/ConverterExtensions.hpp"
+#include "binary/internal/Converter.hpp"
 
 namespace binary::converters {
 template <typename T>
@@ -58,7 +58,7 @@ private:
 
 public:
     TupleConverter(std::shared_ptr<Converter<std::remove_cv_t<E>>>... converter)
-        : Converter<GenericArgument>(GetConverterLength(std::vector<std::shared_ptr<IConverter>>({converter...}) | std::views::transform([](const auto& converter) { return converter->Length(); })))
+        : Converter<GenericArgument>(internal::GetConverterLength(std::vector<std::shared_ptr<IConverter>>({converter...}) | std::views::transform([](const auto& converter) { return converter->Length(); })))
         , converter({converter...}) {}
 
     virtual void Encode(Allocator& allocator, const GenericArgument& item) override {
