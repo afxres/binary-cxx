@@ -37,6 +37,26 @@ void EncodeWithLengthPrefix(Allocator& allocator, const std::span<const std::byt
     memcpy(source + prefixLength, span.data(), number);
 }
 
+size_t Decode(std::span<const std::byte>& span) {
+    const std::byte* source = span.data();
+    size_t offset = 0;
+    size_t length = internal::DecodeLengthPrefix(source, offset, span.size());
+    assert(offset == 1 || offset == 4);
+    assert(offset <= span.size());
+    span = span.subspan(offset);
+    return length;
+}
+
+size_t Decode(const std::span<const std::byte>& span, size_t& bytesRead) {
+    const std::byte* source = span.data();
+    size_t offset = 0;
+    size_t length = internal::DecodeLengthPrefix(source, offset, span.size());
+    assert(offset == 1 || offset == 4);
+    assert(offset <= span.size());
+    bytesRead = offset;
+    return length;
+}
+
 std::span<const std::byte> DecodeWithLengthPrefix(std::span<const std::byte>& span) {
     const std::byte* source = span.data();
     size_t offset = 0;
@@ -44,7 +64,7 @@ std::span<const std::byte> DecodeWithLengthPrefix(std::span<const std::byte>& sp
     assert(offset == 1 || offset == 4);
     assert(offset <= span.size());
     if (span.size() < offset + length) {
-        throw std::length_error("not enough bytes");
+        throw std::length_error("not enough bytes or byte sequence invalid");
     }
     std::span<const std::byte> result = span.subspan(offset, length);
     span = span.subspan(offset + length);
