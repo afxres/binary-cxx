@@ -5,11 +5,12 @@
 #include <stdexcept>
 
 #include "binary/internal/Endian.hpp"
+#include "binary/internal/Exception.hpp"
 
 namespace binary::internal {
 const std::byte* EnsureLength(const std::span<const std::byte>& span, const size_t length) {
     if (span.size() < length) {
-        throw std::length_error("not enough bytes");
+        internal::ThrowNotEnoughBytes();
     }
     return span.data();
 }
@@ -51,7 +52,7 @@ void EncodeLengthPrefix(std::byte* buffer, const size_t number, const size_t len
 size_t DecodeLengthPrefix(const std::byte* buffer, size_t& offset, const size_t limits) {
     assert(limits >= offset);
     if (limits == offset) {
-        throw std::length_error("not enough bytes or byte sequence invalid");
+        internal::ThrowNotEnoughBytes();
     }
     const std::byte* source = buffer + offset;
     uint32_t header = static_cast<uint32_t>(DecodeBigEndian<uint8_t>(source));
@@ -61,7 +62,7 @@ size_t DecodeLengthPrefix(const std::byte* buffer, size_t& offset, const size_t 
     }
     assert(limits >= offset);
     if (limits < offset + 3U) {
-        throw std::length_error("not enough bytes or byte sequence invalid");
+        internal::ThrowNotEnoughBytes();
     }
     uint32_t result = DecodeBigEndian<uint32_t>(source);
     offset += 3;

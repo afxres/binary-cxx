@@ -4,9 +4,9 @@
 #include <ranges>
 
 #include "binary/Converter.hpp"
-#include "binary/internal/Container.hpp"
 #include "binary/internal/ContainerInsertFunction.hpp"
 #include "binary/internal/ContainerResizeFunction.hpp"
+#include "binary/internal/Converter.hpp"
 
 namespace binary::converters {
 template <
@@ -16,13 +16,10 @@ template <
     requires std::same_as<T, std::remove_cv_t<T>> && std::ranges::input_range<T>
 class ContainerConverter : public Converter<T> {
 private:
-    using Element = std::ranges::range_value_t<T>;
-    using ElementConverter = std::shared_ptr<Converter<Element>>;
-
-    ElementConverter converter;
+    std::shared_ptr<Converter<std::ranges::range_value_t<T>>> converter;
 
 public:
-    ContainerConverter(ElementConverter converter)
+    ContainerConverter(std::shared_ptr<Converter<std::ranges::range_value_t<T>>> converter)
         : converter(converter) {
     }
 
@@ -43,7 +40,7 @@ public:
         auto converter = this->converter;
         if constexpr (Reserve::IsEnable) {
             if (converter->Length() != 0) {
-                size_t capacity = internal::GetCapacity<Element>(span.size(), converter->Length());
+                size_t capacity = internal::GetCapacity(span.size(), converter->Length(), typeid(T));
                 Reserve()(result, capacity);
             }
         }

@@ -48,7 +48,7 @@ BOOST_AUTO_TEST_CASE(WideStringDecodeNotEnoughBytesTest) {
     auto a = ::binary::converters::LittleEndianStringConverter<std::wstring>();
     std::string source = "abc";
     std::span<const std::byte> buffer(reinterpret_cast<const std::byte*>(source.data()), source.size());
-    std::string output = std::string() + "not enough bytes for string character, byte length: 3, character type: " + typeid(wchar_t).name();
+    std::string output = std::string() + "not enough bytes or byte sequence invalid, byte length: 3, type: " + typeid(std::wstring).name();
     BOOST_REQUIRE_EXCEPTION(
         a.Decode(buffer),
         std::length_error,

@@ -34,6 +34,8 @@ size_t GetConverterLength(const Range& converters) {
     }
     return result;
 }
+
+size_t GetCapacity(size_t byteLength, size_t itemLength, std::type_index type);
 }
 
 #endif

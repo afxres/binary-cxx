@@ -4,10 +4,10 @@
 #include <cstddef>
 #include <cstring>
 #include <span>
-#include <stdexcept>
 
 #include "binary/Allocator.hpp"
 #include "binary/internal/AllocatorUnsafeAccessor.hpp"
+#include "binary/internal/Exception.hpp"
 #include "binary/internal/Length.hpp"
 
 namespace binary {
@@ -22,7 +22,7 @@ void Encode(std::span<std::byte> span, size_t number, size_t& bytesWritten) {
     internal::EnsureLengthPrefixLength(number);
     size_t prefixLength = internal::EncodeLengthPrefixLength(number);
     if (span.size() < prefixLength) {
-        throw std::length_error("not enough bytes to write");
+        internal::ThrowNotEnoughBytesToWrite();
     }
     internal::EncodeLengthPrefix(span.data(), number, prefixLength);
     bytesWritten = prefixLength;
@@ -64,7 +64,7 @@ std::span<const std::byte> DecodeWithLengthPrefix(std::span<const std::byte>& sp
     assert(offset == 1 || offset == 4);
     assert(offset <= span.size());
     if (span.size() < offset + length) {
-        throw std::length_error("not enough bytes or byte sequence invalid");
+        internal::ThrowNotEnoughBytes();
     }
     std::span<const std::byte> result = span.subspan(offset, length);
     span = span.subspan(offset + length);

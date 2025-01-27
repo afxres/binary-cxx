@@ -4,6 +4,7 @@
 #include <format>
 
 #include "binary/Converter.hpp"
+#include "binary/internal/Converter.hpp"
 #include "binary/internal/Endian.hpp"
 
 namespace binary::converters {
@@ -38,11 +39,9 @@ public:
         if constexpr (size == 1) {
             return T(reinterpret_cast<const typename T::value_type*>(span.data()), span.size());
         } else {
-            if ((span.size() % size) != 0) {
-                throw std::length_error(std::format("not enough bytes for string character, byte length: {}, character type: {}", span.size(), typeid(typename T::value_type).name()));
-            }
             T result;
-            result.resize(span.size() / size);
+            auto capacity = internal::GetCapacity(span.size(), size, typeid(T));
+            result.resize(capacity);
             auto source = reinterpret_cast<const typename T::value_type*>(span.data());
             auto target = result.data();
             for (size_t i = 0; i < result.size(); i++) {
