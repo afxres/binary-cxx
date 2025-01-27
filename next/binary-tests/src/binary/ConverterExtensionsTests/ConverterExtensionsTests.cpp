@@ -191,5 +191,26 @@ BOOST_DATA_TEST_CASE(DecodeWithLengthPrefixTest, DecodeWithLengthPrefixTestData,
     BOOST_REQUIRE_EQUAL(actual.size(), length);
 }
 
+std::vector<std::tuple<std::string>> DecodeWithLengthPrefixInvalidBytesTestData = {
+    {std::string("", 0)},
+    {std::string("\x01", 1)},
+    {std::string("\x02\x00", 2)},
+    {std::string("\x80\x00\x00", 3)},
+    {std::string("\x80\x00\x00\x01", 4)},
+    {std::string("\x80\x00\x00\x02\x00", 5)},
+};
+
+BOOST_DATA_TEST_CASE(DecodeWithLengthPrefixInvalidBytesTest, DecodeWithLengthPrefixInvalidBytesTestData, buffer) {
+    std::span<const std::byte> source(reinterpret_cast<const std::byte*>(buffer.data()), buffer.size());
+    BOOST_REQUIRE_EXCEPTION(
+        ::binary::DecodeWithLengthPrefix(source),
+        std::length_error,
+        [](const std::length_error& e) {
+            BOOST_REQUIRE_EQUAL(e.what(), "not enough bytes or byte sequence invalid");
+            return true;
+        });
+    BOOST_REQUIRE_EQUAL(buffer.size(), source.size());
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 }

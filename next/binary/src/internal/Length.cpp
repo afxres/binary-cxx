@@ -30,14 +30,6 @@ size_t EncodeLengthPrefixLength(const size_t number) {
     }
 }
 
-size_t DecodeLengthPrefixLength(const std::byte header) {
-    if ((static_cast<uint32_t>(header) & 0x80U) == 0) {
-        return 1;
-    } else {
-        return 4;
-    }
-}
-
 void EncodeLengthPrefix(std::byte* buffer, const size_t number, const size_t length) {
     assert(number <= INT32_MAX);
     assert(length == 1 || length == 4);

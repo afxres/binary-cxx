@@ -4,6 +4,8 @@
 
 #include <binary/converters/LittleEndianConverter.hpp>
 
+#include <array>
+
 namespace tests::binary::converters::LittleEndianConverterTests {
 BOOST_AUTO_TEST_SUITE(LittleEndianConverterTests)
 
@@ -35,6 +37,18 @@ void TestAll(const std::vector<T>& container, std::function<void(const T&)> acti
 BOOST_AUTO_TEST_CASE(LittleEndianConverterEncodeDecodeIntegrationTest) {
     TestAll<int32_t>({-100, 0, 1, 65537}, TestAllMethods<int32_t>);
     TestAll<int64_t>({INT64_MIN, 0, 1, INT64_MAX}, TestAllMethods<int64_t>);
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(LittleEndianConverterDecodeNotEnoughBytesTest, T, LittleEndianConverterTestTypeData) {
+    std::array<std::byte, sizeof(T) - 1> buffer;
+    auto a = LittleEndianConverter<T>();
+    BOOST_REQUIRE_EXCEPTION(
+        a.Decode(buffer),
+        std::length_error,
+        [](const std::length_error& e) {
+            BOOST_REQUIRE_EQUAL(e.what(), "not enough bytes or byte sequence invalid");
+            return true;
+        });
 }
 
 BOOST_AUTO_TEST_SUITE_END()
