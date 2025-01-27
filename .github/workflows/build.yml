@@ -1,0 +1,19 @@
+name: build
+"on": push
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup
+        run: sh scripts/workflows/setup.sh
+
+      - name: Test
+        run: sh scripts/workflows/test.sh
+
+      - name: Coverage
+        run: sh scripts/workflows/coverage.sh
+
+      - name: Coveralls
+        uses: coverallsapp/github-action@v2
