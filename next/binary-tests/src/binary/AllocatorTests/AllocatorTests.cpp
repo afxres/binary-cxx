@@ -2,6 +2,8 @@
 #include <boost/test/unit_test.hpp>
 
 #include <binary/Allocator.hpp>
+#include <binary/ConverterExtensions.hpp>
+#include <binary/internal/AllocatorUnsafeAccessor.hpp>
 
 namespace tests::binary::AllocatorTests {
 BOOST_AUTO_TEST_SUITE(AllocatorTests)
@@ -130,6 +132,156 @@ BOOST_AUTO_TEST_CASE(AllocatorAppendSpanMultipleTimesIntegrationTest) {
     auto actual = std::string(reinterpret_cast<const char*>(span.data()), span.size());
     auto wanted = a + b + c;
     BOOST_REQUIRE_EQUAL(wanted, actual);
+}
+
+BOOST_AUTO_TEST_CASE(AllocatorAppendByteIntegrationTest) {
+    ::binary::Allocator allocator;
+    allocator.Append(std::byte{'A'});
+    BOOST_REQUIRE_EQUAL(allocator.Length(), 1);
+    BOOST_REQUIRE_EQUAL(allocator.Capacity(), 256);
+    std::string a(255, 'A');
+    allocator.Append(std::span(reinterpret_cast<const std::byte*>(a.data()), a.size()));
+    BOOST_REQUIRE_EQUAL(allocator.Length(), 256);
+    BOOST_REQUIRE_EQUAL(allocator.Capacity(), 256);
+    allocator.Append(std::byte{'A'});
+    BOOST_REQUIRE_EQUAL(allocator.Length(), 257);
+    BOOST_REQUIRE_EQUAL(allocator.Capacity(), 512);
+    auto span = allocator.AsSpan();
+    auto actual = std::string(reinterpret_cast<const char*>(span.data()), span.size());
+    std::string wanted(257, 'A');
+    BOOST_REQUIRE_EQUAL(wanted, actual);
+}
+
+BOOST_AUTO_TEST_CASE(AllocatorAppendFunctionWithMaxLengthIntegrationTest) {
+    ::binary::Allocator allocator;
+    allocator.Append(200, std::function<size_t(std::span<std::byte>)>([](auto span) {
+        for (auto& i : span) {
+            i = std::byte{'B'};
+        }
+        return 100;
+    }));
+    BOOST_REQUIRE_EQUAL(allocator.Length(), 100);
+    BOOST_REQUIRE_EQUAL(allocator.Capacity(), 256);
+    allocator.Append(600, std::function<size_t(std::span<std::byte>)>([](auto span) {
+        for (auto& i : span) {
+            i = std::byte{'C'};
+        }
+        return 200;
+    }));
+    BOOST_REQUIRE_EQUAL(allocator.Length(), 300);
+    BOOST_REQUIRE_EQUAL(allocator.Capacity(), 1024);
+    auto span = allocator.AsSpan();
+    auto actual = std::string(reinterpret_cast<const char*>(span.data()), span.size());
+    std::string wanted = std::string(100, 'B') + std::string(200, 'C');
+    BOOST_REQUIRE_EQUAL(wanted, actual);
+}
+
+BOOST_AUTO_TEST_CASE(AllocatorAppendFunctionWithZeroMaxLengthTest) {
+    ::binary::Allocator allocator;
+    allocator.Append(0, std::function<size_t(std::span<std::byte>)>([]([[maybe_unused]] auto span) -> size_t {
+        throw std::exception();
+    }));
+    BOOST_REQUIRE_EQUAL(allocator.Length(), 0);
+    BOOST_REQUIRE_EQUAL(allocator.Capacity(), 0);
+}
+
+BOOST_DATA_TEST_CASE(AllocatorAppendFunctionWithMaxLengthIntegrationInvalidReturnValueTest, boost::unit_test::data::make<size_t>({1, 255, 1024, 65567}), length) {
+    ::binary::Allocator allocator;
+    BOOST_REQUIRE_EXCEPTION(
+        allocator.Append(length, std::function<size_t(std::span<std::byte>)>([length]([[maybe_unused]] auto span) {
+            return length + 1;
+        })),
+        std::logic_error,
+        [](const std::logic_error& e) {
+            BOOST_REQUIRE_EQUAL(e.what(), "invalid return value");
+            return true;
+        });
+    BOOST_REQUIRE_EQUAL(allocator.Length(), 0);
+    BOOST_REQUIRE_GE(allocator.Capacity(), length);
+}
+
+BOOST_DATA_TEST_CASE(AllocatorAppendWithLengthPrefixAllocatorFunctionTest, boost::unit_test::data::make<size_t>({0, 1, 255, 1024}), length) {
+    std::string source(length, ' ');
+    ::binary::Allocator allocator;
+    allocator.AppendWithLengthPrefix([&source](auto& allocator) {
+        allocator.Append(std::span(reinterpret_cast<const std::byte*>(source.data()), source.size()));
+    });
+    auto span = allocator.AsSpan();
+    auto result = ::binary::DecodeWithLengthPrefix(span);
+    BOOST_REQUIRE_EQUAL(span.size(), 0);
+    auto actual = std::string(reinterpret_cast<const char*>(result.data()), result.size());
+    BOOST_REQUIRE_EQUAL(source, actual);
+}
+
+BOOST_AUTO_TEST_CASE(AllocatorAppendWithLengthPrefixFunctionWithZeroMaxLengthTest) {
+    ::binary::Allocator allocator;
+    allocator.AppendWithLengthPrefix(0, []([[maybe_unused]] auto span) -> size_t {
+        throw std::exception();
+    });
+    auto span = allocator.AsSpan();
+    auto result = ::binary::DecodeWithLengthPrefix(span);
+    BOOST_REQUIRE_EQUAL(span.size(), 0);
+    BOOST_REQUIRE_EQUAL(result.size(), 0);
+}
+
+BOOST_AUTO_TEST_CASE(AllocatorAppendWithLengthPrefixFunctionWithMaxLengthIntegrationTest) {
+    ::binary::Allocator allocator;
+    allocator.AppendWithLengthPrefix(192, std::function<size_t(std::span<std::byte>)>([](auto span) {
+        for (auto& i : span) {
+            i = std::byte{'E'};
+        }
+        return 128;
+    }));
+    allocator.AppendWithLengthPrefix(768, std::function<size_t(std::span<std::byte>)>([](auto span) {
+        for (auto& i : span) {
+            i = std::byte{'F'};
+        }
+        return 256;
+    }));
+    auto span = allocator.AsSpan();
+    auto a = ::binary::DecodeWithLengthPrefix(span);
+    auto b = ::binary::DecodeWithLengthPrefix(span);
+    BOOST_REQUIRE_EQUAL(span.size(), 0);
+    BOOST_REQUIRE_EQUAL(std::string(128, 'E'), std::string(reinterpret_cast<const char*>(a.data()), a.size()));
+    BOOST_REQUIRE_EQUAL(std::string(256, 'F'), std::string(reinterpret_cast<const char*>(b.data()), b.size()));
+}
+
+BOOST_DATA_TEST_CASE(AllocatorAppendWithLengthPrefixFunctionWithMaxLengthIntegrationInvalidReturnValueTest, boost::unit_test::data::make<size_t>({1, 255, 1024, 65567}), length) {
+    ::binary::Allocator allocator;
+    BOOST_REQUIRE_EXCEPTION(
+        allocator.AppendWithLengthPrefix(length, std::function<size_t(std::span<std::byte>)>([length]([[maybe_unused]] auto span) {
+            return length + 1;
+        })),
+        std::logic_error,
+        [](const std::logic_error& e) {
+            BOOST_REQUIRE_EQUAL(e.what(), "invalid return value");
+            return true;
+        });
+    BOOST_REQUIRE_EQUAL(allocator.Length(), 0);
+    BOOST_REQUIRE_GT(allocator.Capacity(), length);
+}
+
+std::vector<std::tuple<size_t, size_t>> AllocatorAnchorInvalidOperationTestData = {
+    {0, 0},
+    {0, 3},
+    {3, 0},
+    {381, 384},
+    {384, 384},
+    {385, 384},
+    {static_cast<uint32_t>(INT32_MAX) + 1, 0},
+};
+
+BOOST_DATA_TEST_CASE(AllocatorAnchorInvalidOperationTest, AllocatorAnchorInvalidOperationTestData, anchor, offset) {
+    ::binary::Allocator allocator;
+    allocator.Expand(offset);
+    BOOST_REQUIRE_EQUAL(allocator.Length(), offset);
+    BOOST_REQUIRE_EXCEPTION(
+        ::binary::internal::AllocatorUnsafeAccessor::FinishAnchor(allocator, anchor),
+        std::logic_error,
+        [](const std::logic_error& e) {
+            BOOST_REQUIRE_EQUAL(e.what(), "allocator has been modified unexpectedly");
+            return true;
+        });
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -1,4 +1,7 @@
+---
 AccessModifierOffset: -4
+AlignAfterOpenBracket: DontAlign
+AlignOperands: DontAlign
 AllowShortBlocksOnASingleLine: Empty
 AllowShortFunctionsOnASingleLine: Inline
 AlwaysBreakTemplateDeclarations: true
@@ -15,3 +18,4 @@ InsertNewlineAtEOF: true
 Language: Cpp
 PackConstructorInitializers: NextLine
 PointerAlignment: Left
+---

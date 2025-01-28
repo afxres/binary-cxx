@@ -10,4 +10,8 @@ void ThrowNotEnoughBytes() {
 void ThrowNotEnoughBytesToWrite() {
     throw std::length_error("not enough bytes to write");
 }
+
+void ThrowInvalidReturnValue() {
+    throw std::logic_error("invalid return value");
+}
 }

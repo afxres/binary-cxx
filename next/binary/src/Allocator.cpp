@@ -4,6 +4,7 @@
 #include <cstring>
 #include <stdexcept>
 
+#include "binary/internal/Exception.hpp"
 #include "binary/internal/Length.hpp"
 
 #define ALLOCATOR_ANCHOR_SIZE (4)
@@ -71,6 +72,13 @@ void Allocator::Resize(size_t length) {
     assert(offset <= this->bounds);
 }
 
+size_t Allocator::Anchor() {
+    Ensure(ALLOCATOR_ANCHOR_SIZE);
+    size_t offset = this->offset;
+    this->offset = offset + ALLOCATOR_ANCHOR_SIZE;
+    return offset;
+}
+
 std::byte* Allocator::Assign(size_t length) {
     assert(length != 0);
     Ensure(length);
@@ -79,11 +87,11 @@ std::byte* Allocator::Assign(size_t length) {
     return this->buffer.get() + offset;
 }
 
-size_t Allocator::Anchor() {
-    Ensure(ALLOCATOR_ANCHOR_SIZE);
+std::byte* Allocator::Create(size_t length) {
+    assert(length != 0);
+    Ensure(length);
     size_t offset = this->offset;
-    this->offset = offset + ALLOCATOR_ANCHOR_SIZE;
-    return offset;
+    return this->buffer.get() + offset;
 }
 
 void Allocator::FinishAnchor(size_t anchor) {
@@ -109,6 +117,14 @@ void Allocator::FinishAnchor(size_t anchor) {
     }
 }
 
+void Allocator::FinishCreate(size_t length) {
+    size_t offset = this->offset;
+    assert(this->bounds <= INT32_MAX);
+    assert(this->bounds >= offset);
+    assert(this->bounds >= offset + length);
+    this->offset = offset + length;
+}
+
 void Allocator::Ensure(size_t length) {
     assert(this->bounds <= INT32_MAX);
     assert(this->offset <= this->bounds);
@@ -126,6 +142,10 @@ void Allocator::Expand(size_t length) {
     assert(this->offset <= this->bounds);
 }
 
+void Allocator::Append(std::byte data) {
+    *Assign(sizeof(std::byte)) = data;
+}
+
 void Allocator::Append(const std::span<const std::byte>& span) {
     if (span.empty()) {
         return;
@@ -138,6 +158,36 @@ void Allocator::Append(size_t length, std::function<void(std::span<std::byte>)> 
         return;
     }
     action(std::span<std::byte>(Assign(length), length));
+}
+
+void Allocator::Append(size_t maxLength, std::function<size_t(std::span<std::byte>)> action) {
+    if (maxLength == 0) {
+        return;
+    }
+    std::byte* target = Create(maxLength);
+    size_t actual = action(std::span<std::byte>(target, maxLength));
+    if (actual > maxLength) {
+        internal::ThrowInvalidReturnValue();
+    }
+    FinishCreate(actual);
+}
+
+void Allocator::AppendWithLengthPrefix(std::function<void(Allocator&)> action) {
+    size_t anchor = Anchor();
+    action(*this);
+    FinishAnchor(anchor);
+}
+
+void Allocator::AppendWithLengthPrefix(size_t maxLength, std::function<size_t(std::span<std::byte>)> action) {
+    internal::EnsureLengthPrefixLength(maxLength);
+    size_t prefixLength = internal::EncodeLengthPrefixLength(maxLength);
+    std::byte* target = Create(maxLength + prefixLength);
+    size_t actual = maxLength == 0 ? 0 : action(std::span<std::byte>(target + prefixLength, maxLength));
+    if (actual > maxLength) {
+        internal::ThrowInvalidReturnValue();
+    }
+    internal::EncodeLengthPrefix(target, actual, prefixLength);
+    FinishCreate(actual + prefixLength);
 }
 
 std::vector<std::byte> Allocator::Invoke(std::function<void(Allocator&)> action) {
