@@ -95,5 +95,42 @@ BOOST_DATA_TEST_CASE(AllocatorAppendFunctionTest, boost::unit_test::data::make<s
     BOOST_REQUIRE_EQUAL(source, actual);
 }
 
+std::vector<std::tuple<size_t, size_t>> AllocatorAppendSpanWithMaxCapacityLimitsTestData = {
+    {20, 64},
+    {300, 384},
+};
+
+BOOST_DATA_TEST_CASE(AllocatorAppendSpanWithMaxCapacityLimitsTest, AllocatorAppendSpanWithMaxCapacityLimitsTestData, length, maxCapacity) {
+    std::string source(length, ' ');
+    ::binary::Allocator allocator(maxCapacity);
+    allocator.Append(std::span(reinterpret_cast<const std::byte*>(source.data()), source.size()));
+    BOOST_REQUIRE_EQUAL(allocator.Length(), length);
+    BOOST_REQUIRE_EQUAL(allocator.Capacity(), maxCapacity);
+    BOOST_REQUIRE_EQUAL(allocator.MaxCapacity(), maxCapacity);
+    auto span = allocator.AsSpan();
+    std::string actual(reinterpret_cast<const char*>(span.data()), span.size());
+    BOOST_REQUIRE_EQUAL(source, actual);
+}
+
+BOOST_AUTO_TEST_CASE(AllocatorAppendSpanMultipleTimesIntegrationTest) {
+    std::string a(100, '1');
+    std::string b(200, '2');
+    std::string c(400, '4');
+    ::binary::Allocator allocator;
+    allocator.Append(std::span(reinterpret_cast<const std::byte*>(a.data()), a.size()));
+    BOOST_REQUIRE_EQUAL(allocator.Length(), 100);
+    BOOST_REQUIRE_EQUAL(allocator.Capacity(), 256);
+    allocator.Append(std::span(reinterpret_cast<const std::byte*>(b.data()), b.size()));
+    BOOST_REQUIRE_EQUAL(allocator.Length(), 300);
+    BOOST_REQUIRE_EQUAL(allocator.Capacity(), 512);
+    allocator.Append(std::span(reinterpret_cast<const std::byte*>(c.data()), c.size()));
+    BOOST_REQUIRE_EQUAL(allocator.Length(), 700);
+    BOOST_REQUIRE_EQUAL(allocator.Capacity(), 1024);
+    auto span = allocator.AsSpan();
+    auto actual = std::string(reinterpret_cast<const char*>(span.data()), span.size());
+    auto wanted = a + b + c;
+    BOOST_REQUIRE_EQUAL(wanted, actual);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 }

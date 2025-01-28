@@ -61,10 +61,7 @@ void Allocator::Resize(size_t length) {
     assert(cursor <= this->limits);
 
     size_t bounds = static_cast<size_t>(cursor);
-    std::shared_ptr<std::byte> target(static_cast<std::byte*>(malloc(bounds)), free);
-    if (target == nullptr) {
-        throw std::bad_alloc();
-    }
+    auto target = std::make_shared<std::byte[]>(bounds);
     if (offset != 0) {
         memcpy(target.get(), this->buffer.get(), offset);
     }

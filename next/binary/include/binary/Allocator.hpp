@@ -17,7 +17,7 @@ class Allocator {
     friend class internal::AllocatorUnsafeAccessor;
 
 private:
-    std::shared_ptr<std::byte> buffer;
+    std::shared_ptr<std::byte[]> buffer;
     size_t offset;
     size_t bounds;
     size_t limits;

@@ -182,5 +182,21 @@ BOOST_DATA_TEST_CASE(SimplePersonConverterDecodeWithDuplicateKeyTest, SimplePers
         }));
 }
 
+std::vector<std::tuple<std::string, uint8_t, std::string>> SimplePersonConverterDecodeWithUnknownKeyTestData = {
+    {std::string() + "\x03" + "Age\x01\x16\x02" + "Id\x01\x20\x04" + "Name\x05" + "Alice", 22, "Alice"},
+    {std::string() + "\x01" + "X\x01\xFF\x04" + "Name\x03" + "Tom\x03" + "Age\x01\x20\x04" + "Fake\x01\x80", 32, "Tom"}};
+
+BOOST_DATA_TEST_CASE(SimplePersonConverterDecodeWithUnknownKeyTest, SimplePersonConverterDecodeWithUnknownKeyTestData, buffer, age, name) {
+    std::span<const std::byte> span(reinterpret_cast<const std::byte*>(buffer.data()), buffer.size());
+    ::binary::Generator generator;
+    ::binary::AddConverter<::binary::converters::LittleEndianConverter<int8_t>>(generator);
+    ::binary::AddConverter<::binary::converters::LittleEndianStringConverter<std::string>>(generator);
+    ::binary::AddConverter<SimplePersonNamedObjectConverter>(generator);
+    auto converter = ::binary::GetConverter<SimplePerson>(generator);
+    auto result = converter->Decode(span);
+    BOOST_REQUIRE_EQUAL(result.Age, age);
+    BOOST_REQUIRE_EQUAL(result.Name, name);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 }
