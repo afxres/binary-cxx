@@ -123,5 +123,64 @@ BOOST_DATA_TEST_CASE(SimplePersonDecodeOptionalMemberTest, SimplePersonDecodeOpt
     BOOST_REQUIRE_EQUAL(name, result.GetName());
 }
 
+BINARY_NAMED_OBJECT_CONVERTER(SimplePerson, SimplePersonDuplicateKeyNamedObjectConverter)
+BINARY_NAMED_MEMBER(Age)
+BINARY_NAMED_MEMBER(Age)
+BINARY_NAMED_OBJECT_CONVERTER_END()
+
+BOOST_AUTO_TEST_CASE(SimplePersonDuplicateKeyNamedObjectConverterTest) {
+    ::binary::Generator generator;
+    ::binary::AddConverter<::binary::converters::LittleEndianConverter<int8_t>>(generator);
+    ::binary::AddConverter<::binary::converters::LittleEndianStringConverter<std::string>>(generator);
+    BOOST_REQUIRE_EXCEPTION(
+        ::binary::AddConverter<SimplePersonDuplicateKeyNamedObjectConverter>(generator),
+        std::invalid_argument,
+        [](const std::invalid_argument& e) {
+            BOOST_REQUIRE_EQUAL(e.what(), "named key 'Age' already exists");
+            return true;
+        });
+}
+
+class BadStringConverter : public ::binary::Converter<std::string> {
+public:
+    virtual void Encode([[maybe_unused]] ::binary::Allocator& allocator, [[maybe_unused]] const std::string& item) override {}
+    virtual std::string Decode([[maybe_unused]] const std::span<const std::byte>& span) override { throw std::exception(); }
+};
+
+BOOST_AUTO_TEST_CASE(SimplePersonConverterWithBadStringConverterDuplicateKeyTest) {
+    ::binary::Generator generator;
+    ::binary::AddConverter<::binary::converters::LittleEndianConverter<int8_t>>(generator);
+    ::binary::AddConverter<BadStringConverter>(generator);
+    BOOST_REQUIRE_EXCEPTION(
+        ::binary::AddConverter<SimplePersonNamedObjectConverter>(generator),
+        std::invalid_argument,
+        [](const std::invalid_argument& e) {
+            BOOST_REQUIRE_EQUAL(e.what(), "named key 'Name' already exists");
+            return true;
+        });
+}
+
+std::vector<std::tuple<std::string, std::string>> SimplePersonConverterDecodeWithDuplicateKeyTestData = {
+    {std::string() + "\x03" + "Age\x01\x14\x03" + "Age\x01\x14", "Age"},
+    {std::string() + "\x04" + "Name\03" + "Bob\x04" + "Name\01" + "X", "Name"},
+};
+
+BOOST_DATA_TEST_CASE(SimplePersonConverterDecodeWithDuplicateKeyTest, SimplePersonConverterDecodeWithDuplicateKeyTestData, buffer, key) {
+    std::span<const std::byte> span(reinterpret_cast<const std::byte*>(buffer.data()), buffer.size());
+    std::string output = "named key '" + key + "' already exists";
+    ::binary::Generator generator;
+    ::binary::AddConverter<::binary::converters::LittleEndianConverter<int8_t>>(generator);
+    ::binary::AddConverter<::binary::converters::LittleEndianStringConverter<std::string>>(generator);
+    ::binary::AddConverter<SimplePersonNamedObjectConverter>(generator);
+    auto converter = ::binary::GetConverter<SimplePerson>(generator);
+    BOOST_REQUIRE_EXCEPTION(
+        converter->Decode(span),
+        std::invalid_argument,
+        ([output](const std::invalid_argument& e) {
+            BOOST_REQUIRE_EQUAL(e.what(), output);
+            return true;
+        }));
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 }
