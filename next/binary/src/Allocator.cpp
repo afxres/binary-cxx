@@ -7,11 +7,11 @@
 #include "binary/internal/Exception.hpp"
 #include "binary/internal/Length.hpp"
 
-#define ALLOCATOR_ANCHOR_SIZE (4)
-#define ALLOCATOR_ANCHOR_SHRINK_LIMITS (16)
-#define ALLOCATOR_CAPACITY_SEED (128)
-
 namespace binary {
+constexpr size_t AllocatorAnchorSize = 4;
+constexpr size_t AllocatorAnchorShrinkLimits = 16;
+constexpr size_t AllocatorCapacitySeed = 128;
+
 Allocator::Allocator() {
     this->buffer = nullptr;
     this->offset = 0;
@@ -50,7 +50,7 @@ void Allocator::Resize(size_t length) {
     size_t source = this->bounds;
     uint64_t cursor = static_cast<uint64_t>(source);
     if (cursor == 0) {
-        cursor = ALLOCATOR_CAPACITY_SEED;
+        cursor = AllocatorCapacitySeed;
     }
     do {
         cursor *= 2;
@@ -73,9 +73,9 @@ void Allocator::Resize(size_t length) {
 }
 
 size_t Allocator::Anchor() {
-    Ensure(ALLOCATOR_ANCHOR_SIZE);
+    Ensure(AllocatorAnchorSize);
     size_t offset = this->offset;
-    this->offset = offset + ALLOCATOR_ANCHOR_SIZE;
+    this->offset = offset + AllocatorAnchorSize;
     return offset;
 }
 
@@ -98,13 +98,13 @@ void Allocator::FinishAnchor(size_t anchor) {
     assert(this->bounds <= INT32_MAX);
     assert(this->offset <= this->bounds);
     size_t offset = this->offset;
-    uint64_t refers = static_cast<uint64_t>(anchor) + ALLOCATOR_ANCHOR_SIZE;
+    uint64_t refers = static_cast<uint64_t>(anchor) + AllocatorAnchorSize;
     if (anchor > INT32_MAX || refers > offset) {
         throw std::logic_error("allocator has been modified unexpectedly");
     }
     size_t length = offset - static_cast<size_t>(refers);
     std::byte* target = this->buffer.get() + anchor;
-    if (length <= ALLOCATOR_ANCHOR_SHRINK_LIMITS) {
+    if (length <= AllocatorAnchorShrinkLimits) {
         this->offset = offset - 3;
         internal::EncodeLengthPrefix(target, length, 1);
         std::memmove(target + 1, target + 4, length);
