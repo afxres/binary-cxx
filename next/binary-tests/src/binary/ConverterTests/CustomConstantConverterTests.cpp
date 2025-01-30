@@ -16,7 +16,7 @@ class CustomConstantConverter : public Converter<int8_t> {
 
     virtual void Encode(Allocator& allocator, const int8_t& item) override {
         size_t length = Length();
-        std::unique_ptr<std::byte[]> buffer(new std::byte[length], std::default_delete<std::byte[]>());
+        auto buffer = std::make_unique<std::byte[]>(length);
         std::span<std::byte> span(buffer.get(), length);
         span[0] = static_cast<std::byte>(item);
         allocator.Append(span);

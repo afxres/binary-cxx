@@ -1,6 +1,5 @@
 #include "binary/IConverter.hpp"
 
-#include <cassert>
 #include <cstdint>
 #include <stdexcept>
 

@@ -6,7 +6,6 @@
 
 #include "binary/Converter.hpp"
 #include "binary/ConverterExtensions.hpp"
-#include "binary/IGenerator.hpp"
 #include "binary/components/NamedObjectDecoder.hpp"
 
 namespace binary::components {

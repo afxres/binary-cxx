@@ -2,7 +2,6 @@
 #define BINARY_COMPONENTS_TUPLEOBJECTCONVERTER_HPP
 
 #include "binary/Converter.hpp"
-#include "binary/IGenerator.hpp"
 #include "binary/internal/Converter.hpp"
 
 namespace binary::components {

@@ -1,8 +1,6 @@
 #ifndef BINARY_CONVERTERS_LITTLEENDIANSTRINGCONVERTER_HPP
 #define BINARY_CONVERTERS_LITTLEENDIANSTRINGCONVERTER_HPP
 
-#include <format>
-
 #include "binary/Converter.hpp"
 #include "binary/internal/Converter.hpp"
 #include "binary/internal/Endian.hpp"
@@ -31,6 +29,16 @@ public:
         }
     }
 
+    virtual void EncodeAuto(Allocator& allocator, const T& item) override {
+        EncodeWithLengthPrefix(allocator, item);
+    }
+
+    virtual void EncodeWithLengthPrefix(Allocator& allocator, const T& item) override {
+        constexpr size_t size = sizeof(typename T::value_type);
+        ::binary::Encode(allocator, size * item.size());
+        Encode(allocator, item);
+    }
+
     virtual T Decode(const std::span<const std::byte>& span) override {
         if (span.empty()) {
             return {};
@@ -49,6 +57,14 @@ public:
             }
             return result;
         }
+    }
+
+    virtual T DecodeAuto(std::span<const std::byte>& span) override {
+        return Decode(::binary::DecodeWithLengthPrefix(span));
+    }
+
+    virtual T DecodeWithLengthPrefix(std::span<const std::byte>& span) override {
+        return Decode(::binary::DecodeWithLengthPrefix(span));
     }
 };
 }

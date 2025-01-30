@@ -2,7 +2,6 @@
 #define BINARY_COMPONENTS_NAMEDOBJECTDECODER_HPP
 
 #include <map>
-#include <memory>
 #include <span>
 #include <string>
 #include <string_view>

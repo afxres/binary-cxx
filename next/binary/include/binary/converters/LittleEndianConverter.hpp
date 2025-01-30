@@ -1,9 +1,8 @@
 #ifndef BINARY_CONVERTERS_LITTLEENDIANCONVERTER_HPP
 #define BINARY_CONVERTERS_LITTLEENDIANCONVERTER_HPP
 
-#include <cassert>
-
 #include "binary/Converter.hpp"
+#include "binary/internal/AllocatorUnsafeAccessor.hpp"
 #include "binary/internal/Endian.hpp"
 #include "binary/internal/Length.hpp"
 
@@ -16,10 +15,7 @@ public:
         : Converter<T>(sizeof(T)) {}
 
     virtual void Encode(Allocator& allocator, const T& item) override {
-        allocator.Append(sizeof(T), [item](std::span<std::byte> span) {
-            assert(span.size() == sizeof(T));
-            internal::EncodeLittleEndian(span.data(), item);
-        });
+        internal::EncodeLittleEndian(internal::AllocatorUnsafeAccessor::Assign(allocator, sizeof(T)), item);
     }
 
     virtual T Decode(const std::span<const std::byte>& span) override {

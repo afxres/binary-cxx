@@ -62,11 +62,11 @@ void Allocator::Resize(size_t length) {
     assert(cursor <= this->limits);
 
     size_t bounds = static_cast<size_t>(cursor);
-    auto target = std::make_shared<std::byte[]>(bounds);
+    auto target = std::make_unique<std::byte[]>(bounds);
     if (offset != 0) {
         memcpy(target.get(), this->buffer.get(), offset);
     }
-    this->buffer = target;
+    this->buffer = std::move(target);
     this->bounds = bounds;
     assert(offset <= source);
     assert(offset <= this->bounds);

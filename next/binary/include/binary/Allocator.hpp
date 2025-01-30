@@ -1,7 +1,6 @@
 #ifndef BINARY_ALLOCATOR_HPP
 #define BINARY_ALLOCATOR_HPP
 
-#include <cassert>
 #include <cstddef>
 #include <functional>
 #include <memory>
@@ -17,7 +16,7 @@ class Allocator {
     friend class internal::AllocatorUnsafeAccessor;
 
 private:
-    std::shared_ptr<std::byte[]> buffer;
+    std::unique_ptr<std::byte[]> buffer;
     size_t offset;
     size_t bounds;
     size_t limits;
@@ -36,6 +35,8 @@ public:
 
     Allocator();
     Allocator(size_t maxCapacity);
+    Allocator(Allocator&&) = delete;
+    Allocator(const Allocator&) = delete;
     std::span<const std::byte> AsSpan() const;
     void Ensure(size_t length);
     void Expand(size_t length);
