@@ -43,9 +43,9 @@ public:
     void Append(std::byte data);
     void Append(const std::span<const std::byte>& span);
     void Append(size_t length, std::function<void(std::span<std::byte>)> action);
-    void Append(size_t maxLength, std::function<size_t(std::span<std::byte>)> action);
+    void Append(size_t maxLength, std::function<void(std::span<std::byte> span, size_t& bytesWritten)> action);
     void AppendWithLengthPrefix(std::function<void(Allocator&)> action);
-    void AppendWithLengthPrefix(size_t maxLength, std::function<size_t(std::span<std::byte>)> action);
+    void AppendWithLengthPrefix(size_t maxLength, std::function<void(std::span<std::byte> span, size_t& bytesWritten)> action);
 
     static std::vector<std::byte> Invoke(std::function<void(Allocator&)> action);
 };

@@ -4,7 +4,7 @@
 namespace binary::internal {
 [[noreturn]] void ThrowNotEnoughBytes();
 [[noreturn]] void ThrowNotEnoughBytesToWrite();
-[[noreturn]] void ThrowInvalidReturnValue();
+[[noreturn]] void ThrowInvalidBytesWrittenValue();
 }
 
 #endif

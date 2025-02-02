@@ -160,14 +160,15 @@ void Allocator::Append(size_t length, std::function<void(std::span<std::byte>)> 
     action(std::span<std::byte>(Assign(length), length));
 }
 
-void Allocator::Append(size_t maxLength, std::function<size_t(std::span<std::byte>)> action) {
+void Allocator::Append(size_t maxLength, std::function<void(std::span<std::byte>, size_t&)> action) {
     if (maxLength == 0) {
         return;
     }
+    size_t actual = SIZE_MAX;
     std::byte* target = Create(maxLength);
-    size_t actual = action(std::span<std::byte>(target, maxLength));
+    action(std::span<std::byte>(target, maxLength), actual);
     if (actual > maxLength) {
-        internal::ThrowInvalidReturnValue();
+        internal::ThrowInvalidBytesWrittenValue();
     }
     FinishCreate(actual);
 }
@@ -178,13 +179,19 @@ void Allocator::AppendWithLengthPrefix(std::function<void(Allocator&)> action) {
     FinishAnchor(anchor);
 }
 
-void Allocator::AppendWithLengthPrefix(size_t maxLength, std::function<size_t(std::span<std::byte>)> action) {
+void Allocator::AppendWithLengthPrefix(size_t maxLength, std::function<void(std::span<std::byte>, size_t&)> action) {
     internal::EnsureLengthPrefixLength(maxLength);
+    size_t actual;
     size_t prefixLength = internal::EncodeLengthPrefixLength(maxLength);
     std::byte* target = Create(maxLength + prefixLength);
-    size_t actual = maxLength == 0 ? 0 : action(std::span<std::byte>(target + prefixLength, maxLength));
-    if (actual > maxLength) {
-        internal::ThrowInvalidReturnValue();
+    if (maxLength == 0) {
+        actual = 0;
+    } else {
+        actual = SIZE_MAX;
+        action(std::span<std::byte>(target + prefixLength, maxLength), actual);
+        if (actual > maxLength) {
+            internal::ThrowInvalidBytesWrittenValue();
+        }
     }
     internal::EncodeLengthPrefix(target, actual, prefixLength);
     FinishCreate(actual + prefixLength);

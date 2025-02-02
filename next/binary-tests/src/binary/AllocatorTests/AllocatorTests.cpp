@@ -154,20 +154,22 @@ BOOST_AUTO_TEST_CASE(AllocatorAppendByteIntegrationTest) {
 
 BOOST_AUTO_TEST_CASE(AllocatorAppendFunctionWithMaxLengthIntegrationTest) {
     ::binary::Allocator allocator;
-    allocator.Append(200, std::function<size_t(std::span<std::byte>)>([](auto span) {
+    allocator.Append(200, [](auto span, auto& bytesWritten) {
+        BOOST_REQUIRE_EQUAL(SIZE_MAX, bytesWritten);
         for (auto& i : span) {
             i = std::byte{'B'};
         }
-        return 100;
-    }));
+        bytesWritten = 100;
+    });
     BOOST_REQUIRE_EQUAL(allocator.Length(), 100);
     BOOST_REQUIRE_EQUAL(allocator.Capacity(), 256);
-    allocator.Append(600, std::function<size_t(std::span<std::byte>)>([](auto span) {
+    allocator.Append(600, [](auto span, auto& bytesWritten) {
+        BOOST_REQUIRE_EQUAL(SIZE_MAX, bytesWritten);
         for (auto& i : span) {
             i = std::byte{'C'};
         }
-        return 200;
-    }));
+        bytesWritten = 200;
+    });
     BOOST_REQUIRE_EQUAL(allocator.Length(), 300);
     BOOST_REQUIRE_EQUAL(allocator.Capacity(), 1024);
     auto span = allocator.AsSpan();
@@ -178,22 +180,25 @@ BOOST_AUTO_TEST_CASE(AllocatorAppendFunctionWithMaxLengthIntegrationTest) {
 
 BOOST_AUTO_TEST_CASE(AllocatorAppendFunctionWithZeroMaxLengthTest) {
     ::binary::Allocator allocator;
-    allocator.Append(0, std::function<size_t(std::span<std::byte>)>([]([[maybe_unused]] auto span) -> size_t {
+    allocator.Append(0, []([[maybe_unused]] auto span, [[maybe_unused]] auto& bytesWritten) {
         throw std::exception();
-    }));
+    });
     BOOST_REQUIRE_EQUAL(allocator.Length(), 0);
     BOOST_REQUIRE_EQUAL(allocator.Capacity(), 0);
 }
 
 BOOST_DATA_TEST_CASE(AllocatorAppendFunctionWithMaxLengthIntegrationInvalidReturnValueTest, boost::unit_test::data::make<size_t>({1, 255, 1024, 65567}), length) {
     ::binary::Allocator allocator;
+    auto action = [length](auto span, auto& bytesWritten) {
+        BOOST_REQUIRE_EQUAL(SIZE_MAX, bytesWritten);
+        BOOST_REQUIRE_EQUAL(length, span.size());
+        bytesWritten = length + 1;
+    };
     BOOST_REQUIRE_EXCEPTION(
-        allocator.Append(length, std::function<size_t(std::span<std::byte>)>([length]([[maybe_unused]] auto span) {
-            return length + 1;
-        })),
+        allocator.Append(length, action),
         std::logic_error,
         [](const std::logic_error& e) {
-            BOOST_REQUIRE_EQUAL(e.what(), "invalid return value");
+            BOOST_REQUIRE_EQUAL(e.what(), "value for bytes written is invalid or not set");
             return true;
         });
     BOOST_REQUIRE_EQUAL(allocator.Length(), 0);
@@ -215,7 +220,7 @@ BOOST_DATA_TEST_CASE(AllocatorAppendWithLengthPrefixAllocatorFunctionTest, boost
 
 BOOST_AUTO_TEST_CASE(AllocatorAppendWithLengthPrefixFunctionWithZeroMaxLengthTest) {
     ::binary::Allocator allocator;
-    allocator.AppendWithLengthPrefix(0, []([[maybe_unused]] auto span) -> size_t {
+    allocator.AppendWithLengthPrefix(0, []([[maybe_unused]] auto span, [[maybe_unused]] auto& bytesWritten) {
         throw std::exception();
     });
     auto span = allocator.AsSpan();
@@ -226,18 +231,20 @@ BOOST_AUTO_TEST_CASE(AllocatorAppendWithLengthPrefixFunctionWithZeroMaxLengthTes
 
 BOOST_AUTO_TEST_CASE(AllocatorAppendWithLengthPrefixFunctionWithMaxLengthIntegrationTest) {
     ::binary::Allocator allocator;
-    allocator.AppendWithLengthPrefix(192, std::function<size_t(std::span<std::byte>)>([](auto span) {
+    allocator.AppendWithLengthPrefix(192, [](auto span, auto& bytesWritten) {
+        BOOST_REQUIRE_EQUAL(SIZE_MAX, bytesWritten);
         for (auto& i : span) {
             i = std::byte{'E'};
         }
-        return 128;
-    }));
-    allocator.AppendWithLengthPrefix(768, std::function<size_t(std::span<std::byte>)>([](auto span) {
+        bytesWritten = 128;
+    });
+    allocator.AppendWithLengthPrefix(768, [](auto span, auto& bytesWritten) {
+        BOOST_REQUIRE_EQUAL(SIZE_MAX, bytesWritten);
         for (auto& i : span) {
             i = std::byte{'F'};
         }
-        return 256;
-    }));
+        bytesWritten = 256;
+    });
     auto span = allocator.AsSpan();
     auto a = ::binary::DecodeWithLengthPrefix(span);
     auto b = ::binary::DecodeWithLengthPrefix(span);
@@ -248,13 +255,16 @@ BOOST_AUTO_TEST_CASE(AllocatorAppendWithLengthPrefixFunctionWithMaxLengthIntegra
 
 BOOST_DATA_TEST_CASE(AllocatorAppendWithLengthPrefixFunctionWithMaxLengthIntegrationInvalidReturnValueTest, boost::unit_test::data::make<size_t>({1, 255, 1024, 65567}), length) {
     ::binary::Allocator allocator;
+    auto action = [length](auto span, auto& bytesWritten) {
+        BOOST_REQUIRE_EQUAL(SIZE_MAX, bytesWritten);
+        BOOST_REQUIRE_EQUAL(length, span.size());
+        bytesWritten = length + 1;
+    };
     BOOST_REQUIRE_EXCEPTION(
-        allocator.AppendWithLengthPrefix(length, std::function<size_t(std::span<std::byte>)>([length]([[maybe_unused]] auto span) {
-            return length + 1;
-        })),
+        allocator.AppendWithLengthPrefix(length, action),
         std::logic_error,
         [](const std::logic_error& e) {
-            BOOST_REQUIRE_EQUAL(e.what(), "invalid return value");
+            BOOST_REQUIRE_EQUAL(e.what(), "value for bytes written is invalid or not set");
             return true;
         });
     BOOST_REQUIRE_EQUAL(allocator.Length(), 0);
