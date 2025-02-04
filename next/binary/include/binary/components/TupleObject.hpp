@@ -4,27 +4,28 @@
 #include "binary/GeneratorExtensions.hpp"
 #include "binary/components/TupleObjectConverter.hpp"
 
-#define BINARY_TUPLE_OBJECT_CONVERTER(ARG_TYPE, ARG_CONVERTER_NAME)                          \
-    class ARG_CONVERTER_NAME : public ::binary::components::TupleObjectConverter<ARG_TYPE> { \
-    public:                                                                                  \
-        ARG_CONVERTER_NAME(::binary::IGenerator& generator)                                  \
-            : TupleObjectConverter<ARG_TYPE>(GetContexts(generator)) {}                      \
-                                                                                             \
-    private:                                                                                 \
-        using GenericArgument = ARG_TYPE;                                                    \
-        using MemberInfoInitializer = std::function<MemberInfo(::binary::IGenerator&)>;      \
-                                                                                             \
-        static std::vector<MemberInfo> GetContexts(::binary::IGenerator& generator) {        \
-            std::vector<MemberInfo> contexts;                                                \
-            for (const auto initializer : GetInitializers()) {                               \
-                contexts.emplace_back(initializer(generator));                               \
-            }                                                                                \
-            return contexts;                                                                 \
-        }                                                                                    \
-                                                                                             \
-        static const std::vector<MemberInfoInitializer>& GetInitializers() {                 \
-            static bool initialized = false;                                                 \
-            static std::vector<MemberInfoInitializer> initializers;                          \
+#define BINARY_TUPLE_OBJECT_CONVERTER(ARG_TYPE, ARG_CONVERTER_NAME)                              \
+    class ARG_CONVERTER_NAME : public ::binary::components::TupleObjectConverter<ARG_TYPE> {     \
+    public:                                                                                      \
+        ARG_CONVERTER_NAME(::binary::IGenerator& generator)                                      \
+            : TupleObjectConverter<ARG_TYPE>(GetContexts(generator)) {}                          \
+                                                                                                 \
+    private:                                                                                     \
+        using GenericArgument = ARG_TYPE;                                                        \
+        using MemberInfoInitializer = std::function<MemberInfo(::binary::IGenerator&, bool)>;    \
+                                                                                                 \
+        static std::vector<MemberInfo> GetContexts(::binary::IGenerator& generator) {            \
+            std::vector<MemberInfo> contexts;                                                    \
+            const auto& initializers = GetInitializers();                                        \
+            for (size_t i = 0; i < initializers.size(); i++) {                                   \
+                contexts.emplace_back(initializers[i](generator, i == initializers.size() - 1)); \
+            }                                                                                    \
+            return contexts;                                                                     \
+        }                                                                                        \
+                                                                                                 \
+        static const std::vector<MemberInfoInitializer>& GetInitializers() {                     \
+            static bool initialized = false;                                                     \
+            static std::vector<MemberInfoInitializer> initializers;                              \
             if (!initialized) {
 
 #define BINARY_TUPLE_OBJECT_CONVERTER_END() \
@@ -43,26 +44,29 @@
 
 #define BINARY_TUPLE_MEMBER_CUSTOM(ARG_GET_MEMBER_EXPRESSION, ARG_SET_MEMBER_EXPRESSION, ARG_GET_CONVERTER_EXPRESSION) \
     initializers.push_back(([]() {                                                                                     \
-        return []([[maybe_unused]] auto& generator) {                                                                  \
+        return []([[maybe_unused]] auto& generator, bool last) {                                                       \
             auto converter = ARG_GET_CONVERTER_EXPRESSION;                                                             \
             MemberInfo info{};                                                                                         \
             info.Length = converter->Length();                                                                         \
-            info.Encode = [converter](bool automatic, auto& allocator, const auto& item) {                             \
-                if (!automatic) {                                                                                      \
-                    converter->Encode(allocator, ARG_GET_MEMBER_EXPRESSION);                                           \
-                } else {                                                                                               \
-                    converter->EncodeAuto(allocator, ARG_GET_MEMBER_EXPRESSION);                                       \
-                }                                                                                                      \
+            info.EncodeAuto = [converter](auto& allocator, const auto& item) {                                         \
+                converter->EncodeAuto(allocator, ARG_GET_MEMBER_EXPRESSION);                                           \
             };                                                                                                         \
-            info.Decode = [converter](bool automatic, auto& item, auto& span) {                                        \
-                if (!automatic) {                                                                                      \
+            info.DecodeAuto = [converter](auto& item, auto& span) {                                                    \
+                auto result = converter->DecodeAuto(span);                                                             \
+                ARG_SET_MEMBER_EXPRESSION;                                                                             \
+            };                                                                                                         \
+            if (last) {                                                                                                \
+                info.Encode = [converter](auto& allocator, const auto& item) {                                         \
+                    converter->Encode(allocator, ARG_GET_MEMBER_EXPRESSION);                                           \
+                };                                                                                                     \
+                info.Decode = [converter](auto& item, auto& span) {                                                    \
                     auto result = converter->Decode(span);                                                             \
                     ARG_SET_MEMBER_EXPRESSION;                                                                         \
-                } else {                                                                                               \
-                    auto result = converter->DecodeAuto(span);                                                         \
-                    ARG_SET_MEMBER_EXPRESSION;                                                                         \
-                }                                                                                                      \
-            };                                                                                                         \
+                };                                                                                                     \
+            } else {                                                                                                   \
+                info.Encode = info.EncodeAuto;                                                                         \
+                info.Decode = info.DecodeAuto;                                                                         \
+            }                                                                                                          \
             return info;                                                                                               \
         };                                                                                                             \
     })());
