@@ -47,7 +47,7 @@ public:
         if constexpr (size == 1) {
             return T(reinterpret_cast<const typename T::value_type*>(span.data()), span.size());
         } else {
-            T result;
+            T result{};
             auto capacity = internal::GetCapacity(span.size(), size, typeid(T));
             result.resize(capacity);
             auto source = reinterpret_cast<const typename T::value_type*>(span.data());

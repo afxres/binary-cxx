@@ -16,8 +16,9 @@
                                                                                              \
         static std::vector<MemberInfo> GetContexts(::binary::IGenerator& generator) {        \
             std::vector<MemberInfo> contexts;                                                \
-            for (const auto initializer : GetInitializers()) {                               \
-                contexts.emplace_back(initializer(generator));                               \
+            const auto& initializers = GetInitializers();                                    \
+            for (size_t i = 0; i < initializers.size(); i++) {                               \
+                contexts.emplace_back(initializers.at(i)(generator));                        \
             }                                                                                \
             return contexts;                                                                 \
         }                                                                                    \

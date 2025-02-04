@@ -35,8 +35,8 @@ public:
             return {};
         }
 
-        T result;
-        auto copy = span;
+        T result{};
+        std::span<const std::byte> copy = span;
         auto converter = this->converter;
         if constexpr (Reserve::IsEnable) {
             if (converter->Length() != 0) {
