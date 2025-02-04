@@ -17,6 +17,7 @@ class TupleConverter<T<E...>> : public Converter<T<E...>> {
 private:
     static constexpr size_t NoAutoLast = sizeof...(E) - 1;
     static constexpr size_t AlwaysAuto = SIZE_MAX;
+    static constexpr auto IndexSequence = std::make_index_sequence<sizeof...(E)>();
 
     template <size_t NoAutoIndex, size_t Index>
     void EncodeAt(Allocator& allocator, const T<E...>& item) {
@@ -54,20 +55,20 @@ public:
         , converter({converter...}) {}
 
     virtual void Encode(Allocator& allocator, const T<E...>& item) override {
-        EncodeAll<NoAutoLast>(allocator, item, std::make_index_sequence<sizeof...(E)>());
+        EncodeAll<NoAutoLast>(allocator, item, IndexSequence);
     }
 
     virtual void EncodeAuto(Allocator& allocator, const T<E...>& item) override {
-        EncodeAll<AlwaysAuto>(allocator, item, std::make_index_sequence<sizeof...(E)>());
+        EncodeAll<AlwaysAuto>(allocator, item, IndexSequence);
     }
 
     virtual T<E...> Decode(const std::span<const std::byte>& span) override {
         std::span<const std::byte> copy = span;
-        return DecodeAll<NoAutoLast>(copy, std::make_index_sequence<sizeof...(E)>());
+        return DecodeAll<NoAutoLast>(copy, IndexSequence);
     }
 
     virtual T<E...> DecodeAuto(std::span<const std::byte>& span) override {
-        return DecodeAll<AlwaysAuto>(span, std::make_index_sequence<sizeof...(E)>());
+        return DecodeAll<AlwaysAuto>(span, IndexSequence);
     }
 };
 }
