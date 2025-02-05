@@ -2,5 +2,6 @@
 project("binary")
 set(CMAKE_CXX_STANDARD 20)
 file(GLOB_RECURSE SOURCE_FILES "src/*.cpp")
-add_library(${PROJECT_NAME} STATIC ${SOURCE_FILES})
+file(GLOB_RECURSE HEADER_FILES "include/*.hpp")
+add_library(${PROJECT_NAME} STATIC ${SOURCE_FILES} ${HEADER_FILES})
 target_include_directories(${PROJECT_NAME} PUBLIC "${PROJECT_SOURCE_DIR}/include")
