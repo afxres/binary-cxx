@@ -33,7 +33,7 @@ std::vector<std::tuple<size_t, int8_t>> CustomConstantConverterEncodeAutoDecodeA
 };
 
 BOOST_DATA_TEST_CASE(CustomConstantConverterEncodeAutoDecodeAutoTest, CustomConstantConverterEncodeAutoDecodeAutoData, converterLength, data) {
-    CustomConstantConverter converter{converterLength};
+    CustomConstantConverter converter(converterLength);
     Allocator allocator;
     BOOST_REQUIRE_EQUAL(allocator.Length(), 0);
     BOOST_REQUIRE_EQUAL(converter.Length(), converterLength);

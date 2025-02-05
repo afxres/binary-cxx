@@ -66,7 +66,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(ContainerConverterEncodeDecodeSingleDefaultValueCo
     ::binary::AddConverter<::binary::converters::TupleConverter<std::pair<const std::string, int64_t>>>(generator);
     ::binary::AddConverter<::binary::converters::ContainerConverter<T>>(generator);
     auto converter = ::binary::GetConverter<T>(generator);
-    T source{{}};
+    T source({std::ranges::range_value_t<T>{}});
     BOOST_REQUIRE_EQUAL(1, source.size());
     auto buffer = ::binary::Allocator::Invoke([converter, source](auto& allocator) { converter->Encode(allocator, source); });
     BOOST_REQUIRE_NE(0, buffer.size());
