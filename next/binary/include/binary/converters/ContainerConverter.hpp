@@ -9,10 +9,7 @@
 #include "binary/internal/Converter.hpp"
 
 namespace binary::converters {
-template <
-    typename T,
-    typename Emplace = internal::ContainerInsertFunction<T>,
-    typename Reserve = internal::ContainerResizeFunction<T>>
+template <typename T>
     requires std::same_as<T, std::remove_cv_t<T>> && std::ranges::input_range<T>
 class ContainerConverter : public Converter<T> {
 private:
@@ -38,14 +35,14 @@ public:
         T result{};
         std::span<const std::byte> copy = span;
         auto converter = this->converter;
-        if constexpr (Reserve::IsEnable) {
+        if constexpr (internal::ContainerResizeFunction<T>::IsEnable) {
             if (converter->Length() != 0) {
                 size_t capacity = internal::GetCapacity(span.size(), converter->Length(), typeid(T));
-                Reserve()(result, capacity);
+                internal::ContainerResizeFunction<T>()(result, capacity);
             }
         }
         while (!copy.empty()) {
-            Emplace()(result, converter->DecodeAuto(copy));
+            internal::ContainerInsertFunction<T>()(result, converter->DecodeAuto(copy));
         }
         return result;
     }
