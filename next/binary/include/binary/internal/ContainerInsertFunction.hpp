@@ -8,14 +8,21 @@ template <typename T>
 struct ContainerInsertFunction;
 
 template <std::ranges::input_range T>
+struct ContainerInsertFunction<T> {
+    static constexpr bool IsEnable = false;
+};
+
+template <std::ranges::input_range T>
     requires requires(T& container, std::ranges::range_value_t<T>&& result) { container.emplace(result); }
 struct ContainerInsertFunction<T> {
+    static constexpr bool IsEnable = true;
     void operator()(T& container, std::ranges::range_value_t<T>&& result) { container.emplace(result); }
 };
 
 template <std::ranges::input_range T>
     requires requires(T& container, std::ranges::range_value_t<T>&& result) { container.emplace_back(result); }
 struct ContainerInsertFunction<T> {
+    static constexpr bool IsEnable = true;
     void operator()(T& container, std::ranges::range_value_t<T>&& result) { container.emplace_back(result); }
 };
 }

@@ -1,6 +1,7 @@
 #ifndef BINARY_CONVERTERS_CONTAINERCONVERTER_HPP
 #define BINARY_CONVERTERS_CONTAINERCONVERTER_HPP
 
+#include <format>
 #include <ranges>
 
 #include "binary/Converter.hpp"
@@ -28,23 +29,26 @@ public:
     }
 
     virtual T Decode(const std::span<const std::byte>& span) override {
-        if (span.empty()) {
-            return {};
-        }
-
-        T result{};
-        std::span<const std::byte> copy = span;
-        auto converter = this->converter;
-        if constexpr (internal::ContainerResizeFunction<T>::IsEnable) {
-            if (converter->Length() != 0) {
-                size_t capacity = internal::GetCapacity(span.size(), converter->Length(), typeid(T));
-                internal::ContainerResizeFunction<T>()(result, capacity);
+        if constexpr (!internal::ContainerInsertFunction<T>::IsEnable) {
+            throw std::logic_error(std::format("no suitable construct method found, type: {}", typeid(T).name()));
+        } else {
+            if (span.empty()) {
+                return {};
             }
+            T result{};
+            std::span<const std::byte> copy = span;
+            auto converter = this->converter;
+            if constexpr (internal::ContainerResizeFunction<T>::IsEnable) {
+                if (converter->Length() != 0) {
+                    size_t capacity = internal::GetCapacity(span.size(), converter->Length(), typeid(T));
+                    internal::ContainerResizeFunction<T>()(result, capacity);
+                }
+            }
+            while (!copy.empty()) {
+                internal::ContainerInsertFunction<T>()(result, converter->DecodeAuto(copy));
+            }
+            return result;
         }
-        while (!copy.empty()) {
-            internal::ContainerInsertFunction<T>()(result, converter->DecodeAuto(copy));
-        }
-        return result;
     }
 };
 }
