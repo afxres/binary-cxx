@@ -10,7 +10,7 @@ namespace binary {
 template <typename T>
     requires std::same_as<T, std::remove_cv_t<T>>
 std::shared_ptr<Converter<T>> GetConverter(IGenerator& generator) {
-    return internal::GetConverter<T>(generator.GetConverter(typeid(Converter<T>)));
+    return internal::GetConverter<T>(generator.GetConverter(typeid(T)));
 }
 
 template <typename TConverter, typename... TArguments>

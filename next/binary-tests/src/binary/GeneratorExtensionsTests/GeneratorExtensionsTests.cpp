@@ -69,7 +69,7 @@ BOOST_AUTO_TEST_CASE(GeneratorExtensionsAddNonTemplateConverterTest) {
 
     generator.AddConverter(std::make_shared<FakeDoubleConverter>());
     AddConverter<FakeNonTemplateMultipleArgumentsConverter, double>(generator);
-    std::shared_ptr<FakeNonTemplateMultipleArgumentsConverter> a = std::dynamic_pointer_cast<FakeNonTemplateMultipleArgumentsConverter>(converters.at(typeid(Converter<FakeType<void>>)));
+    std::shared_ptr<FakeNonTemplateMultipleArgumentsConverter> a = std::dynamic_pointer_cast<FakeNonTemplateMultipleArgumentsConverter>(converters.at(typeid(FakeType<void>)));
     BOOST_REQUIRE_EQUAL(a->Result(), 1);
     BOOST_REQUIRE_EQUAL(converters.size(), 2);
 
@@ -77,7 +77,7 @@ BOOST_AUTO_TEST_CASE(GeneratorExtensionsAddNonTemplateConverterTest) {
     generator.AddConverter(std::make_shared<FakeDoubleConverter>());
     generator.AddConverter(std::make_shared<FakeStringConverter>());
     AddConverter<FakeNonTemplateMultipleArgumentsConverter, double, std::string>(generator);
-    std::shared_ptr<FakeNonTemplateMultipleArgumentsConverter> b = std::dynamic_pointer_cast<FakeNonTemplateMultipleArgumentsConverter>(converters.at(typeid(Converter<FakeType<void>>)));
+    std::shared_ptr<FakeNonTemplateMultipleArgumentsConverter> b = std::dynamic_pointer_cast<FakeNonTemplateMultipleArgumentsConverter>(converters.at(typeid(FakeType<void>)));
     BOOST_REQUIRE_EQUAL(b->Result(), 2);
     BOOST_REQUIRE_EQUAL(converters.size(), 3);
 }

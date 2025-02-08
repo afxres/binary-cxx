@@ -19,7 +19,7 @@ namespace tests::binary::internal::ConverterTests {
 BOOST_AUTO_TEST_SUITE(ConverterTests)
 
 BOOST_AUTO_TEST_CASE(CastFromNullToStringConverterTest) {
-    std::string output = std::string() + "cast converter pointer error, source is null, target argument type: '" + typeid(::binary::Converter<std::string>).name() + "'";
+    std::string output = std::string() + "cast converter pointer error, source is null, target argument type: '" + typeid(std::string).name() + "'";
     BOOST_REQUIRE_EXCEPTION(
         ::binary::internal::GetConverter<std::string>(std::shared_ptr<::binary::IConverter>(nullptr)),
         std::invalid_argument,
@@ -30,7 +30,7 @@ BOOST_AUTO_TEST_CASE(CastFromNullToStringConverterTest) {
 }
 
 BOOST_AUTO_TEST_CASE(CastFromStringConverterToByteConverterTest) {
-    std::string output = std::string() + "cast converter pointer error, source argument type: '" + typeid(::binary::Converter<std::string>).name() + "', target argument type: '" + typeid(::binary::Converter<std::byte>).name() + "'";
+    std::string output = std::string() + "cast converter pointer error, source argument type: '" + typeid(std::string).name() + "', target argument type: '" + typeid(std::byte).name() + "'";
     BOOST_REQUIRE_EXCEPTION(
         ::binary::internal::GetConverter<std::byte>(std::make_shared<::binary::converters::LittleEndianStringConverter<std::string>>()),
         std::invalid_argument,
