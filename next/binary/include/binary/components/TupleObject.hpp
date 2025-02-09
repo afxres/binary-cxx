@@ -36,10 +36,10 @@
     }                                       \
     ;
 
-#define BINARY_TUPLE_MEMBER(ARG_NAME) \
-    BINARY_TUPLE_MEMBER_CUSTOM(       \
-        item.ARG_NAME,                \
-        item.ARG_NAME = result,       \
+#define BINARY_TUPLE_MEMBER(ARG_NAME)      \
+    BINARY_TUPLE_MEMBER_CUSTOM(            \
+        item.ARG_NAME,                     \
+        item.ARG_NAME = std::move(result), \
         GetConverter<decltype(GenericArgument::ARG_NAME)>(generator))
 
 #define BINARY_TUPLE_MEMBER_CUSTOM(ARG_GET_MEMBER_EXPRESSION, ARG_SET_MEMBER_EXPRESSION, ARG_GET_CONVERTER_EXPRESSION) \
