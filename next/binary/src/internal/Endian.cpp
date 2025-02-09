@@ -30,11 +30,6 @@ uint64_t __binary_swap64__(uint64_t x) {
 #endif
 
 template <>
-void __binary_swap__<1>(void* target, const void* source) {
-    *static_cast<uint8_t*>(target) = *static_cast<const uint8_t*>(source);
-}
-
-template <>
 void __binary_swap__<2>(void* target, const void* source) {
     *static_cast<uint16_t*>(target) = __binary_swap16__(*static_cast<const uint16_t*>(source));
 }

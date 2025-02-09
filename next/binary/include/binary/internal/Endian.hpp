@@ -18,7 +18,7 @@ void __binary_swap__(void* target, const void* source);
 template <typename T, bool Is>
     requires std::same_as<T, std::remove_cv_t<T>>
 inline void __binary_save__(void* target, T item) {
-    if constexpr (Is) {
+    if constexpr (Is || sizeof(T) == 1) {
         *static_cast<T*>(target) = item;
     } else {
         __binary_swap__<sizeof(T)>(target, &item);
@@ -28,7 +28,7 @@ inline void __binary_save__(void* target, T item) {
 template <typename T, bool Is>
     requires std::same_as<T, std::remove_cv_t<T>>
 inline T __binary_load__(const void* source) {
-    if constexpr (Is) {
+    if constexpr (Is || sizeof(T) == 1) {
         return *static_cast<const T*>(source);
     } else {
         T result{};
