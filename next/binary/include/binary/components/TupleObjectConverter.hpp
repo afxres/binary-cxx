@@ -20,7 +20,8 @@ public:
     };
 
     TupleObjectConverter(std::vector<MemberInfo>&& contexts)
-        : Converter<T>(::binary::internal::GetConverterLength(contexts | std::views::transform([](const auto& info) { return info.Length; }))), contexts(contexts) {}
+        : Converter<T>(::binary::internal::GetConverterLength(contexts | std::views::transform([](const auto& info) { return info.Length; })))
+        , contexts(std::move(contexts)) {}
 
     virtual void Encode(Allocator& allocator, const T& item) override {
         for (const auto& info : this->contexts) {

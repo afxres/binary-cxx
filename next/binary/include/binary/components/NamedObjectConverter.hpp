@@ -30,7 +30,7 @@ public:
             this->optional.emplace_back(info.IsOptional);
         }
         this->decoder = std::make_unique<NamedObjectDecoder>(this->optional, this->names, this->headers);
-        this->contexts = contexts;
+        this->contexts = std::move(contexts);
     }
 
     virtual void Encode(Allocator& allocator, const T& item) override {
