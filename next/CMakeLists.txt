@@ -1,4 +1,4 @@
-﻿cmake_minimum_required(VERSION 3.30)
+﻿cmake_minimum_required(VERSION 3.28)
 project("binary-cxx")
 if(MSVC)
     add_compile_options(/W4 /wd4458)
