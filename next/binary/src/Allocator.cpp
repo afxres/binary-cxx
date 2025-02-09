@@ -1,6 +1,7 @@
 #include "binary/Allocator.hpp"
 
 #include <cassert>
+#include <cstdint>
 #include <cstring>
 #include <stdexcept>
 
@@ -12,25 +13,31 @@ constexpr size_t AllocatorAnchorSize = 4;
 constexpr size_t AllocatorAnchorShrinkLimits = 16;
 constexpr size_t AllocatorCapacitySeed = 128;
 
-Allocator::Allocator() {
-    this->buffer = nullptr;
-    this->offset = 0;
-    this->bounds = 0;
-    this->limits = INT32_MAX;
-}
+Allocator::Allocator()
+    : Allocator({}, INT32_MAX) {}
 
-Allocator::Allocator(size_t maxCapacity) {
+Allocator::Allocator(std::span<std::byte> span)
+    : Allocator(span, INT32_MAX) {}
+
+Allocator::Allocator(std::span<std::byte> span, size_t maxCapacity) {
     if (maxCapacity > INT32_MAX) {
         throw std::invalid_argument("maxCapacity > INT32_MAX");
     }
-    this->buffer = nullptr;
+    this->allocated = false;
+    this->buffer = span.data();
+    this->bounds = std::min(span.size(), maxCapacity);
     this->offset = 0;
-    this->bounds = 0;
     this->limits = maxCapacity;
 }
 
+binary::Allocator::~Allocator() {
+    if (this->allocated) {
+        free(this->buffer);
+    }
+}
+
 std::span<const std::byte> Allocator::AsSpan() const {
-    return std::span<const std::byte>(this->buffer.get(), this->offset);
+    return std::span<const std::byte>(this->buffer, this->offset);
 }
 
 void Allocator::Resize(size_t length) {
@@ -62,11 +69,18 @@ void Allocator::Resize(size_t length) {
     assert(cursor <= this->limits);
 
     size_t bounds = static_cast<size_t>(cursor);
-    auto target = std::make_unique<std::byte[]>(bounds);
-    if (offset != 0) {
-        memcpy(target.get(), this->buffer.get(), offset);
+    auto target = static_cast<std::byte*>(malloc(bounds));
+    if (target == nullptr) {
+        throw std::bad_alloc();
     }
-    this->buffer = std::move(target);
+    if (offset != 0) {
+        memcpy(target, this->buffer, offset);
+    }
+    if (this->allocated) {
+        free(this->buffer);
+    }
+    this->allocated = true;
+    this->buffer = target;
     this->bounds = bounds;
     assert(offset <= source);
     assert(offset <= this->bounds);
@@ -84,14 +98,14 @@ std::byte* Allocator::Assign(size_t length) {
     Ensure(length);
     size_t offset = this->offset;
     this->offset = offset + length;
-    return this->buffer.get() + offset;
+    return this->buffer + offset;
 }
 
 std::byte* Allocator::Create(size_t length) {
     assert(length != 0);
     Ensure(length);
     size_t offset = this->offset;
-    return this->buffer.get() + offset;
+    return this->buffer + offset;
 }
 
 void Allocator::FinishAnchor(size_t anchor) {
@@ -103,7 +117,7 @@ void Allocator::FinishAnchor(size_t anchor) {
         throw std::logic_error("allocator has been modified unexpectedly");
     }
     size_t length = offset - static_cast<size_t>(refers);
-    std::byte* target = this->buffer.get() + anchor;
+    std::byte* target = this->buffer + anchor;
     if (length <= AllocatorAnchorShrinkLimits) {
         this->offset = offset - 3;
         internal::EncodeLengthPrefix(target, length, 1);

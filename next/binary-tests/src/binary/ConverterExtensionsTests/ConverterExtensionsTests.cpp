@@ -105,7 +105,7 @@ std::vector<std::tuple<size_t, size_t>> EncodeWithLengthPrefixMaxCapacityExceede
 
 BOOST_DATA_TEST_CASE(EncodeWithLengthPrefixMaxCapacityExceededTest, EncodeWithLengthPrefixMaxCapacityExceededTestData, dataLength, allocatorMaxCapacity) {
     std::string source(dataLength, 'x');
-    ::binary::Allocator allocator(allocatorMaxCapacity);
+    ::binary::Allocator allocator({}, allocatorMaxCapacity);
     BOOST_REQUIRE_EXCEPTION(
         ::binary::EncodeWithLengthPrefix(allocator, std::span(reinterpret_cast<const std::byte*>(source.data()), source.size())),
         std::length_error,

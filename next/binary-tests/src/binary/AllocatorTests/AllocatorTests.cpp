@@ -19,7 +19,7 @@ BOOST_AUTO_TEST_CASE(AllocatorDefaultValueTest) {
 }
 
 BOOST_DATA_TEST_CASE(AllocatorCustomMaxCapacityTest, boost::unit_test::data::make<size_t>({0, 1, 65567, INT32_MAX}), maxCapacity) {
-    ::binary::Allocator allocator(maxCapacity);
+    ::binary::Allocator allocator({}, maxCapacity);
     BOOST_REQUIRE_EQUAL(0, allocator.Length());
     BOOST_REQUIRE_EQUAL(0, allocator.Capacity());
     BOOST_REQUIRE_EQUAL(maxCapacity, allocator.MaxCapacity());
@@ -30,7 +30,7 @@ BOOST_DATA_TEST_CASE(AllocatorCustomMaxCapacityTest, boost::unit_test::data::mak
 
 BOOST_DATA_TEST_CASE(AllocatorInvalidMaxCapacityTest, boost::unit_test::data::make<size_t>({static_cast<uint32_t>(INT32_MAX) + 1, UINT32_MAX}), maxCapacity) {
     BOOST_REQUIRE_EXCEPTION(
-        ::binary::Allocator allocator(maxCapacity),
+        ::binary::Allocator allocator({}, maxCapacity),
         std::invalid_argument,
         [](const std::invalid_argument& e) {
             BOOST_REQUIRE_EQUAL(e.what(), "maxCapacity > INT32_MAX");
@@ -46,7 +46,7 @@ BOOST_DATA_TEST_CASE(AllocatorEnsureTest, boost::unit_test::data::make<size_t>({
 }
 
 BOOST_DATA_TEST_CASE(AllocatorEnsureInvalidLengthTest, boost::unit_test::data::make<size_t>({1, 65567}) ^ boost::unit_test::data::make<size_t>({0, 65535}), length, maxCapacity) {
-    ::binary::Allocator allocator(maxCapacity);
+    ::binary::Allocator allocator({}, maxCapacity);
     BOOST_REQUIRE_EXCEPTION(
         allocator.Ensure(length),
         std::length_error,
@@ -104,7 +104,7 @@ std::vector<std::tuple<size_t, size_t>> AllocatorAppendSpanWithMaxCapacityLimits
 
 BOOST_DATA_TEST_CASE(AllocatorAppendSpanWithMaxCapacityLimitsTest, AllocatorAppendSpanWithMaxCapacityLimitsTestData, length, maxCapacity) {
     std::string source(length, ' ');
-    ::binary::Allocator allocator(maxCapacity);
+    ::binary::Allocator allocator({}, maxCapacity);
     allocator.Append(std::span(reinterpret_cast<const std::byte*>(source.data()), source.size()));
     BOOST_REQUIRE_EQUAL(allocator.Length(), length);
     BOOST_REQUIRE_EQUAL(allocator.Capacity(), maxCapacity);

@@ -3,7 +3,6 @@
 
 #include <cstddef>
 #include <functional>
-#include <memory>
 #include <span>
 #include <vector>
 
@@ -12,11 +11,12 @@ class AllocatorUnsafeAccessor;
 }
 
 namespace binary {
-class Allocator {
+class Allocator final {
     friend class internal::AllocatorUnsafeAccessor;
 
 private:
-    std::unique_ptr<std::byte[]> buffer;
+    bool allocated;
+    std::byte* buffer;
     size_t offset;
     size_t bounds;
     size_t limits;
@@ -34,9 +34,11 @@ public:
     size_t MaxCapacity() const { return this->limits; }
 
     Allocator();
-    Allocator(size_t maxCapacity);
+    Allocator(std::span<std::byte> span);
+    Allocator(std::span<std::byte> span, size_t maxCapacity);
     Allocator(Allocator&&) = delete;
     Allocator(const Allocator&) = delete;
+    ~Allocator();
     std::span<const std::byte> AsSpan() const;
     void Ensure(size_t length);
     void Expand(size_t length);
