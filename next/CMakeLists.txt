@@ -2,6 +2,8 @@
 project("binary-cxx")
 if(MSVC)
     add_compile_options(/W4 /wd4458)
+    set(BINARY_BUILD_TESTS ON)
+    set(BINARY_BUILD_BENCHMARKS ON)
 elseif(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
     add_compile_options(-Wall -Wextra -Wpedantic -Wsign-conversion -Werror)
     if(CMAKE_BUILD_TYPE STREQUAL "Debug")
