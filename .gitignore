@@ -331,8 +331,10 @@ ASALocalRun/
 
 # Custom files
 .vscode/
+dependencies/
 coverage/
 build/
+build-*/
 out/
 cmake-build-debug/
 cmake-build-release/

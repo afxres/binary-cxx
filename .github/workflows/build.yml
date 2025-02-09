@@ -10,7 +10,7 @@ jobs:
         run: sh scripts/workflows/setup.sh
 
       - name: Test
-        run: sh scripts/workflows/test.sh
+        run: sh scripts/workflows/build.sh
 
       - name: Coverage
         run: sh scripts/workflows/coverage.sh
