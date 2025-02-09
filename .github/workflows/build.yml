@@ -9,7 +9,7 @@ jobs:
       - name: Setup
         run: sh scripts/workflows/setup.sh
 
-      - name: Test
+      - name: Build
         run: sh scripts/workflows/build.sh
 
       - name: Coverage
