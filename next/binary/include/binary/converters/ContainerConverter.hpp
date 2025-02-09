@@ -30,7 +30,7 @@ public:
 
     virtual T Decode(const std::span<const std::byte>& span) override {
         if constexpr (!internal::ContainerInsertFunction<T>::IsEnable) {
-            throw std::logic_error(std::format("no suitable construct method found, type: {}", typeid(T).name()));
+            throw std::logic_error(std::format("no suitable emplace method found, type: {}", typeid(T).name()));
         } else {
             if (span.empty()) {
                 return {};

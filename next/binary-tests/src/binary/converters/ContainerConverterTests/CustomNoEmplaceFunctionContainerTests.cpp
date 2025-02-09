@@ -34,7 +34,7 @@ BOOST_AUTO_TEST_CASE(CustomNoEmplaceFunctionContainerEncodeNumberTypeTest) {
 BOOST_AUTO_TEST_CASE(CustomNoEmplaceFunctionContainerDecodeStringTypeNotSupportedTest) {
     CustomNoEmplaceFunctionContainer<std::string> source;
     ::binary::converters::ContainerConverter<CustomNoEmplaceFunctionContainer<std::string>> converter(std::make_shared<::binary::converters::LittleEndianStringConverter<std::string>>());
-    std::string output = std::string() + "no suitable construct method found, type: " + typeid(CustomNoEmplaceFunctionContainer<std::string>).name();
+    std::string output = std::string() + "no suitable emplace method found, type: " + typeid(CustomNoEmplaceFunctionContainer<std::string>).name();
     BOOST_REQUIRE_EXCEPTION(
         converter.Decode(std::span<const std::byte>()),
         std::logic_error,
