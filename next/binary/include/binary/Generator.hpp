@@ -1,15 +1,15 @@
 #ifndef BINARY_GENERATOR_HPP
 #define BINARY_GENERATOR_HPP
 
-#include <map>
 #include <typeindex>
+#include <unordered_map>
 
 #include "binary/IGenerator.hpp"
 
 namespace binary {
 class Generator : public IGenerator {
 private:
-    std::map<std::type_index, std::shared_ptr<IConverter>> converters;
+    std::unordered_map<std::type_index, std::shared_ptr<IConverter>> converters;
 
 public:
     virtual void AddConverter(std::shared_ptr<IConverter> converter) override;

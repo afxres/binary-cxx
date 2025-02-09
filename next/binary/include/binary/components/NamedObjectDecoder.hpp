@@ -1,11 +1,11 @@
 #ifndef BINARY_COMPONENTS_NAMEDOBJECTDECODER_HPP
 #define BINARY_COMPONENTS_NAMEDOBJECTDECODER_HPP
 
-#include <map>
 #include <span>
 #include <string>
 #include <string_view>
 #include <tuple>
+#include <unordered_map>
 #include <vector>
 
 namespace binary::components {
@@ -20,7 +20,7 @@ private:
 
     const std::vector<bool>& optional;
     const std::vector<std::string>& names;
-    std::map<std::string_view, size_t> record;
+    std::unordered_map<std::string_view, size_t> record;
 };
 }
 
