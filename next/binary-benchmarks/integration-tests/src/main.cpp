@@ -87,9 +87,12 @@ static void EncodeNamedObject(benchmark::State& state) {
     ::binary::AddConverter<Type01NamedObjectConverter>(generator);
     auto converter = ::binary::GetConverter<Type01>(generator);
     auto data = GetTestDataOfType01();
+    auto length = static_cast<size_t>(state.range(0));
+    auto memory = std::make_unique<std::byte[]>(length);
+    std::span<std::byte> span(memory.get(), length);
 
     for (auto _ : state) {
-        ::binary::Allocator allocator;
+        ::binary::Allocator allocator(span);
         converter->Encode(allocator, data);
     }
 }
@@ -100,9 +103,12 @@ static void EncodeTupleObject(benchmark::State& state) {
     ::binary::AddConverter<Type01TupleObjectConverter>(generator);
     auto converter = ::binary::GetConverter<Type01>(generator);
     auto data = GetTestDataOfType01();
+    auto length = static_cast<size_t>(state.range(0));
+    auto memory = std::make_unique<std::byte[]>(length);
+    std::span<std::byte> span(memory.get(), length);
 
     for (auto _ : state) {
-        ::binary::Allocator allocator;
+        ::binary::Allocator allocator(span);
         converter->Encode(allocator, data);
     }
 }
@@ -113,9 +119,12 @@ static void EncodeSystemTuple(benchmark::State& state) {
     ::binary::AddConverter<::binary::converters::TupleConverter<TypeX1>>(generator);
     auto converter = ::binary::GetConverter<TypeX1>(generator);
     auto data = GetTestDataOfTypeX1();
+    auto length = static_cast<size_t>(state.range(0));
+    auto memory = std::make_unique<std::byte[]>(length);
+    std::span<std::byte> span(memory.get(), length);
 
     for (auto _ : state) {
-        ::binary::Allocator allocator;
+        ::binary::Allocator allocator(span);
         converter->Encode(allocator, data);
     }
 }
@@ -165,9 +174,9 @@ static void DecodeSystemTuple(benchmark::State& state) {
     }
 }
 
-BENCHMARK(EncodeNamedObject)->Name("Encode Custom Named Object");
-BENCHMARK(EncodeTupleObject)->Name("Encode Custom Tuple Object");
-BENCHMARK(EncodeSystemTuple)->Name("Encode System Tuple");
+BENCHMARK(EncodeNamedObject)->Name("Encode Custom Named Object, with pre-allocate memory")->Arg(0)->Arg(1024);
+BENCHMARK(EncodeTupleObject)->Name("Encode Custom Tuple Object, with pre-allocate memory")->Arg(0)->Arg(1024);
+BENCHMARK(EncodeSystemTuple)->Name("Encode System Tuple, with pre-allocate memory")->Arg(0)->Arg(1024);
 
 BENCHMARK(DecodeNamedObject)->Name("Decode Custom Named Object");
 BENCHMARK(DecodeTupleObject)->Name("Decode Custom Tuple Object");
