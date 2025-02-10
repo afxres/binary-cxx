@@ -38,6 +38,38 @@ BOOST_DATA_TEST_CASE(AllocatorInvalidMaxCapacityTest, boost::unit_test::data::ma
         });
 }
 
+BOOST_AUTO_TEST_CASE(AllocatorInitializeWithExternalMemoryIntegrationTest) {
+    const size_t length = 32;
+    auto memory = std::make_unique<std::byte[]>(length);
+    auto source = std::span<std::byte>(memory.get(), length);
+    ::binary::Allocator allocator(source);
+    BOOST_REQUIRE_EQUAL(allocator.Length(), 0);
+    BOOST_REQUIRE_EQUAL(allocator.Capacity(), length);
+    BOOST_REQUIRE_EQUAL(allocator.MaxCapacity(), INT32_MAX);
+    std::string a(16, 'A');
+    std::string b(384, 'B');
+    allocator.Append(std::as_bytes(std::span(a)));
+    BOOST_REQUIRE_EQUAL(allocator.Length(), 16);
+    BOOST_REQUIRE_EQUAL(allocator.Capacity(), length);
+    allocator.Append(std::as_bytes(std::span(b)));
+    BOOST_REQUIRE_EQUAL(allocator.Length(), 400);
+    BOOST_REQUIRE_EQUAL(allocator.Capacity(), 512);
+    auto span = allocator.AsSpan();
+    auto actual = std::string(reinterpret_cast<const char*>(span.data()), span.size());
+    BOOST_REQUIRE_EQUAL(actual, a + b);
+    BOOST_REQUIRE_EQUAL(a + std::string(16, '\0'), std::string(reinterpret_cast<const char*>(memory.get()), length));
+}
+
+BOOST_AUTO_TEST_CASE(AllocatorInitializeWithExternalMemoryAndMaxCapacityTest) {
+    const size_t length = 1024;
+    const size_t maxCapacity = 384;
+    auto memory = std::make_unique<std::byte[]>(length);
+    ::binary::Allocator allocator(std::span<std::byte>(memory.get(), length), maxCapacity);
+    BOOST_REQUIRE_EQUAL(allocator.Length(), 0);
+    BOOST_REQUIRE_EQUAL(allocator.Capacity(), maxCapacity);
+    BOOST_REQUIRE_EQUAL(allocator.MaxCapacity(), maxCapacity);
+}
+
 BOOST_DATA_TEST_CASE(AllocatorEnsureTest, boost::unit_test::data::make<size_t>({0, 1, 65567}), length) {
     ::binary::Allocator allocator;
     allocator.Ensure(length);

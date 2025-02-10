@@ -30,7 +30,7 @@ Allocator::Allocator(std::span<std::byte> span, size_t maxCapacity) {
     this->limits = maxCapacity;
 }
 
-binary::Allocator::~Allocator() {
+Allocator::~Allocator() {
     if (this->allocated) {
         free(this->buffer);
     }
