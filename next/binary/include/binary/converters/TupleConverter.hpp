@@ -48,7 +48,7 @@ private:
         return GenericArgument({DecodeAt<NoAutoIndex, Index>(span)...});
     }
 
-    std::tuple<std::shared_ptr<Converter<std::remove_cv_t<E>>>...> converter;
+    const std::tuple<std::shared_ptr<Converter<std::remove_cv_t<E>>>...> converter;
 
 public:
     TupleConverter(std::shared_ptr<Converter<std::remove_cv_t<E>>>... converter)

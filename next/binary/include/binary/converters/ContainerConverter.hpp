@@ -14,7 +14,7 @@ template <typename T>
     requires std::same_as<T, std::remove_cv_t<T>> && std::ranges::input_range<T>
 class ContainerConverter : public Converter<T> {
 private:
-    std::shared_ptr<Converter<std::ranges::range_value_t<T>>> converter;
+    const std::shared_ptr<Converter<std::ranges::range_value_t<T>>> converter;
 
 public:
     ContainerConverter(std::shared_ptr<Converter<std::ranges::range_value_t<T>>> converter)
@@ -22,9 +22,9 @@ public:
     }
 
     virtual void Encode(Allocator& allocator, const T& item) override {
-        auto converter = this->converter;
+        const auto& converter = this->converter;
         for (const auto& i : item) {
-            this->converter->EncodeAuto(allocator, i);
+            converter->EncodeAuto(allocator, i);
         }
     }
 
@@ -37,7 +37,7 @@ public:
             }
             T result{};
             std::span<const std::byte> copy = span;
-            auto converter = this->converter;
+            const auto& converter = this->converter;
             if constexpr (internal::ContainerResizeFunction<T>::IsEnable) {
                 if (converter->Length() != 0) {
                     size_t capacity = internal::GetCapacity(span.size(), converter->Length(), typeid(T));
