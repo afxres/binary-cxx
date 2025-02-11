@@ -12,6 +12,10 @@ void ThrowNotEnoughBytesToWrite() {
     throw std::length_error("not enough bytes to write");
 }
 
+void ThrowInvalidMemoryAccess() {
+    throw std::logic_error("invalid memory access or out of memory");
+}
+
 void ThrowInvalidBytesWrittenValue() {
     throw std::logic_error("value for bytes written is invalid or not set");
 }

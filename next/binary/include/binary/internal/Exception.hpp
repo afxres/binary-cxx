@@ -6,6 +6,7 @@
 namespace binary::internal {
 [[noreturn]] void ThrowNotEnoughBytes();
 [[noreturn]] void ThrowNotEnoughBytesToWrite();
+[[noreturn]] void ThrowInvalidMemoryAccess();
 [[noreturn]] void ThrowInvalidBytesWrittenValue();
 [[noreturn]] void ThrowInvalidConverterType(std::type_index source, std::type_index target);
 }

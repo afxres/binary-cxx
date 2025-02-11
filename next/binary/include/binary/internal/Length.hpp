@@ -5,6 +5,7 @@
 #include <span>
 
 namespace binary::internal {
+void EnsureMemoryAccess(void* memory);
 const std::byte* EnsureLength(const std::span<const std::byte>& span, const size_t length);
 void EnsureLengthPrefixLength(const size_t number);
 size_t EncodeLengthPrefixLength(const size_t number);

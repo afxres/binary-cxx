@@ -70,9 +70,7 @@ void Allocator::Resize(size_t length) {
 
     size_t bounds = static_cast<size_t>(cursor);
     auto target = static_cast<std::byte*>(malloc(bounds));
-    if (target == nullptr) {
-        throw std::bad_alloc();
-    }
+    internal::EnsureMemoryAccess(target);
     if (offset != 0) {
         memcpy(target, this->buffer, offset);
     }

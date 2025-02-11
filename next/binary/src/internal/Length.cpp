@@ -8,6 +8,12 @@
 #include "binary/internal/Exception.hpp"
 
 namespace binary::internal {
+void EnsureMemoryAccess(void* memory) {
+    if (memory == nullptr) {
+        internal::ThrowInvalidMemoryAccess();
+    }
+}
+
 const std::byte* EnsureLength(const std::span<const std::byte>& span, const size_t length) {
     if (span.size() < length) {
         internal::ThrowNotEnoughBytes();
