@@ -12,7 +12,7 @@ namespace binary::components {
 class NamedObjectDecoder {
 public:
     NamedObjectDecoder(const std::vector<bool>& optional, const std::vector<std::string>& names, const std::vector<std::vector<std::byte>>& headers);
-    void Invoke(const std::span<const std::byte>& span, std::vector<std::tuple<bool, std::span<const std::byte>>>& slices);
+    void Invoke(const std::span<const std::byte>& span, std::vector<std::span<const std::byte>>& slices);
 
 private:
     [[noreturn]] void ExceptKeyFound(size_t index);

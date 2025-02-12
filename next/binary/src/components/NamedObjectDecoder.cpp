@@ -20,7 +20,7 @@ NamedObjectDecoder::NamedObjectDecoder(const std::vector<bool>& optional, const 
     }
 }
 
-void NamedObjectDecoder::Invoke(const std::span<const std::byte>& span, std::vector<std::tuple<bool, std::span<const std::byte>>>& slices) {
+void NamedObjectDecoder::Invoke(const std::span<const std::byte>& span, std::vector<std::span<const std::byte>>& slices) {
     const auto& record = this->record;
     const auto& optional = this->optional;
     slices.resize(record.size());
@@ -35,14 +35,14 @@ void NamedObjectDecoder::Invoke(const std::span<const std::byte>& span, std::vec
         }
 
         auto cursor = iterator->second;
-        if (std::get<0>(slices.at(cursor))) {
+        if (slices.at(cursor).data() != nullptr) {
             ExceptKeyFound(cursor);
         }
-        slices.at(cursor) = std::make_tuple(true, tail);
+        slices.at(cursor) = tail;
     }
 
     for (size_t i = 0; i < slices.size(); i++) {
-        if (!std::get<0>(slices.at(i)) && !optional.at(i)) {
+        if (slices.at(i).data() == nullptr && !optional.at(i)) {
             ExceptNotFound(i);
         }
     }
