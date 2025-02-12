@@ -20,10 +20,10 @@ NamedObjectDecoder::NamedObjectDecoder(const std::vector<bool>& optional, const 
     }
 }
 
-void NamedObjectDecoder::Invoke(const std::span<const std::byte>& span, std::vector<std::span<const std::byte>>& slices) {
+std::vector<std::span<const std::byte>> NamedObjectDecoder::Invoke(const std::span<const std::byte>& span) {
     const auto& record = this->record;
     const auto& optional = this->optional;
-    slices.resize(record.size());
+    std::vector<std::span<const std::byte>> slices(record.size());
     std::span<const std::byte> copy = span;
     while (!copy.empty()) {
         auto head = DecodeWithLengthPrefix(copy);
@@ -35,10 +35,11 @@ void NamedObjectDecoder::Invoke(const std::span<const std::byte>& span, std::vec
         }
 
         auto cursor = iterator->second;
-        if (slices.at(cursor).data() != nullptr) {
+        auto& intent = slices.at(cursor);
+        if (intent.data() != nullptr) {
             ExceptKeyFound(cursor);
         }
-        slices.at(cursor) = tail;
+        intent = tail;
     }
 
     for (size_t i = 0; i < slices.size(); i++) {
@@ -46,6 +47,7 @@ void NamedObjectDecoder::Invoke(const std::span<const std::byte>& span, std::vec
             ExceptNotFound(i);
         }
     }
+    return slices;
 }
 
 void NamedObjectDecoder::ExceptKeyFound(size_t index) {

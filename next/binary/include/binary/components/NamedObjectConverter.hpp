@@ -43,12 +43,11 @@ public:
     }
 
     virtual T Decode(const std::span<const std::byte>& span) override {
-        std::vector<std::span<const std::byte>> slices;
-        this->decoder->Invoke(span, slices);
+        auto slices = this->decoder->Invoke(span);
 
         T result{};
         const auto& contexts = this->contexts;
-        for (size_t i = 0; i < slices.size(); i++) {
+        for (size_t i = 0; i < contexts.size(); i++) {
             const auto& intent = slices.at(i);
             assert(intent.data() != nullptr || this->optional.at(i));
             if (intent.data() != nullptr) {
