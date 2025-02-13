@@ -331,8 +331,6 @@ ASALocalRun/
 
 # Custom files
 .vscode/
-dependencies/
-coverage/
 build/
 build-*/
 out/

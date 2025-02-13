@@ -6,14 +6,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup
-        run: sh scripts/workflows/setup.sh
+      - name: Setup Environment
+        run: sh scripts/setup.sh
 
-      - name: Build
-        run: sh scripts/workflows/build.sh
+      - name: Build Tests
+        run: sh scripts/build-tests.sh
 
       - name: Coverage
-        run: sh scripts/workflows/coverage.sh
+        run: sh scripts/run-coverage.sh
 
       - name: Coveralls
         uses: coverallsapp/github-action@v2
+        with:
+          file: "build-result/lcov.info"
