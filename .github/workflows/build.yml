@@ -18,4 +18,5 @@ jobs:
       - name: Coveralls
         uses: coverallsapp/github-action@v2
         with:
+          fail-on-error: false
           file: "build-result/lcov.info"

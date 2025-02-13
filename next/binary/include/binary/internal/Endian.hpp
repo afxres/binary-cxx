@@ -13,26 +13,26 @@
 
 namespace binary::internal {
 template <size_t Size>
-void __binary_swap__(void* target, const void* source);
+void Swap(void* target, const void* source);
 
 template <typename T, bool Is>
     requires std::same_as<T, std::remove_cv_t<T>>
-inline void __binary_save__(void* target, T item) {
+inline void Save(void* target, T item) {
     if constexpr (Is || sizeof(T) == 1) {
         *static_cast<T*>(target) = item;
     } else {
-        __binary_swap__<sizeof(T)>(target, &item);
+        Swap<sizeof(T)>(target, &item);
     }
 }
 
 template <typename T, bool Is>
     requires std::same_as<T, std::remove_cv_t<T>>
-inline T __binary_load__(const void* source) {
+inline T Load(const void* source) {
     if constexpr (Is || sizeof(T) == 1) {
         return *static_cast<const T*>(source);
     } else {
         T result{};
-        __binary_swap__<sizeof(T)>(&result, source);
+        Swap<sizeof(T)>(&result, source);
         return result;
     }
 }
@@ -47,22 +47,22 @@ constexpr bool IsLittleEndian = true;
 
 template <typename T>
 inline void EncodeLittleEndian(void* target, T item) {
-    __binary_save__<T, IsLittleEndian>(target, item);
+    Save<T, IsLittleEndian>(target, item);
 }
 
 template <typename T>
 inline T DecodeLittleEndian(const void* source) {
-    return __binary_load__<T, IsLittleEndian>(source);
+    return Load<T, IsLittleEndian>(source);
 }
 
 template <typename T>
 inline void EncodeBigEndian(void* target, T item) {
-    __binary_save__<T, IsLittleEndian == false>(target, item);
+    Save<T, IsLittleEndian == false>(target, item);
 }
 
 template <typename T>
 inline T DecodeBigEndian(const void* source) {
-    return __binary_load__<T, IsLittleEndian == false>(source);
+    return Load<T, IsLittleEndian == false>(source);
 }
 }
 
