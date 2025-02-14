@@ -1,5 +1,8 @@
 name: benchmark
-"on": push
+on:
+  push:
+    branches:
+      - main
 permissions:
   deployments: write
   contents: write
