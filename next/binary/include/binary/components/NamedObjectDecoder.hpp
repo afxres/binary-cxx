@@ -10,7 +10,7 @@
 namespace binary::components {
 class NamedObjectDecoder {
 public:
-    NamedObjectDecoder(const std::vector<bool>& optional, const std::vector<std::string>& names, const std::vector<std::vector<std::byte>>& headers);
+    NamedObjectDecoder(const std::vector<std::vector<std::byte>>& headers, const std::vector<std::string>& names, const std::vector<bool>& optional);
     std::vector<std::span<const std::byte>> Invoke(const std::span<const std::byte>& span);
 
 private:

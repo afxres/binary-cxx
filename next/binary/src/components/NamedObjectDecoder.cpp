@@ -7,10 +7,14 @@
 #include "binary/ConverterExtensions.hpp"
 
 namespace binary::components {
-NamedObjectDecoder::NamedObjectDecoder(const std::vector<bool>& optional, const std::vector<std::string>& names, const std::vector<std::vector<std::byte>>& headers)
+NamedObjectDecoder::NamedObjectDecoder(const std::vector<std::vector<std::byte>>& headers, const std::vector<std::string>& names, const std::vector<bool>& optional)
     : optional(optional), names(names) {
-    assert(headers.size() == names.size());
-    assert(headers.size() == optional.size());
+    if (headers.empty() || names.empty() || optional.empty()) {
+        throw std::invalid_argument("sequence is empty");
+    }
+    if (headers.size() != names.size() || headers.size() != optional.size()) {
+        throw std::invalid_argument("sequence lengths not match");
+    }
     for (size_t i = 0; i < headers.size(); i++) {
         const auto& head = headers.at(i);
         std::string_view view(reinterpret_cast<const char*>(head.data()), head.size());

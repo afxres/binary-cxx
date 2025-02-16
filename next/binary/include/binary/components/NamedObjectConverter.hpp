@@ -29,7 +29,7 @@ public:
             this->headers.emplace_back(info.Header);
             this->optional.emplace_back(info.IsOptional);
         }
-        this->decoder = std::make_unique<NamedObjectDecoder>(this->optional, this->names, this->headers);
+        this->decoder = std::make_unique<NamedObjectDecoder>(this->headers, this->names, this->optional);
         this->contexts = std::move(contexts);
     }
 
