@@ -1,9 +1,6 @@
 #ifndef BINARY_COMPONENTS_NAMEDOBJECTCONVERTER_HPP
 #define BINARY_COMPONENTS_NAMEDOBJECTCONVERTER_HPP
 
-#include <string>
-#include <vector>
-
 #include "binary/Converter.hpp"
 #include "binary/ConverterExtensions.hpp"
 #include "binary/components/NamedObjectDecoder.hpp"
@@ -58,7 +55,7 @@ public:
     }
 
 private:
-    std::vector<bool> optional;
+    std::vector<uint8_t> optional;
     std::vector<MemberInfo> contexts;
     std::vector<std::string> names;
     std::vector<std::vector<std::byte>> headers;

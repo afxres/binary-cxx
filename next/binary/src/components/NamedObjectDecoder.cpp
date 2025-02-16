@@ -7,7 +7,7 @@
 #include "binary/ConverterExtensions.hpp"
 
 namespace binary::components {
-NamedObjectDecoder::NamedObjectDecoder(const std::vector<std::vector<std::byte>>& headers, const std::vector<std::string>& names, const std::vector<bool>& optional)
+NamedObjectDecoder::NamedObjectDecoder(const std::vector<std::vector<std::byte>>& headers, const std::vector<std::string>& names, const std::vector<uint8_t>& optional)
     : optional(optional), names(names) {
     if (headers.empty() || names.empty() || optional.empty()) {
         throw std::invalid_argument("sequence is empty");
