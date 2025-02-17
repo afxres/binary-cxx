@@ -7,14 +7,14 @@
 #define BINARY_TUPLE_OBJECT_CONVERTER(ARG_TYPE, ARG_CONVERTER_NAME)                                 \
     class ARG_CONVERTER_NAME : public ::binary::components::TupleObjectConverter<ARG_TYPE> {        \
     public:                                                                                         \
-        ARG_CONVERTER_NAME(::binary::IGenerator& generator)                                         \
+        ARG_CONVERTER_NAME(const ::binary::IGenerator& generator)                                   \
             : TupleObjectConverter<ARG_TYPE>(GetContexts(generator)) {}                             \
                                                                                                     \
     private:                                                                                        \
         using GenericArgument = ARG_TYPE;                                                           \
-        using MemberInfoInitializer = std::function<MemberInfo(::binary::IGenerator&, bool)>;       \
+        using MemberInfoInitializer = std::function<MemberInfo(const ::binary::IGenerator&, bool)>; \
                                                                                                     \
-        static std::vector<MemberInfo> GetContexts(::binary::IGenerator& generator) {               \
+        static std::vector<MemberInfo> GetContexts(const ::binary::IGenerator& generator) {         \
             std::vector<MemberInfo> contexts;                                                       \
             const auto& initializers = GetInitializers();                                           \
             for (size_t i = 0; i < initializers.size(); i++) {                                      \
