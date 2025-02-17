@@ -44,23 +44,21 @@
         GetConverter<decltype(GenericArgument::ARG_NAME)>(generator))
 
 #define BINARY_NAMED_MEMBER_CUSTOM(ARG_NAME, ARG_IS_OPTIONAL, ARG_GET_MEMBER_EXPRESSION, ARG_SET_MEMBER_EXPRESSION, ARG_GET_CONVERTER_EXPRESSION) \
-    initializers.push_back(([]() {                                                                                                                \
-        return []([[maybe_unused]] auto& generator) {                                                                                             \
-            auto encoding = GetConverter<std::string>(generator);                                                                                 \
-            auto converter = ARG_GET_CONVERTER_EXPRESSION;                                                                                        \
-            MemberInfo info{};                                                                                                                    \
-            info.Name = ARG_NAME;                                                                                                                 \
-            info.Header = ::binary::Allocator::Invoke([&encoding](auto& allocator) { encoding->Encode(allocator, ARG_NAME); });                   \
-            info.IsOptional = ARG_IS_OPTIONAL;                                                                                                    \
-            info.EncodeWithLengthPrefix = [converter](auto& allocator, const auto& item) {                                                        \
-                converter->EncodeWithLengthPrefix(allocator, ARG_GET_MEMBER_EXPRESSION);                                                          \
-            };                                                                                                                                    \
-            info.Decode = [converter](auto& item, const auto& span) {                                                                             \
-                auto result = converter->Decode(span);                                                                                            \
-                ARG_SET_MEMBER_EXPRESSION;                                                                                                        \
-            };                                                                                                                                    \
-            return info;                                                                                                                          \
+    initializers.push_back([]([[maybe_unused]] auto& generator) {                                                                                 \
+        auto encoding = GetConverter<std::string>(generator);                                                                                     \
+        auto converter = ARG_GET_CONVERTER_EXPRESSION;                                                                                            \
+        MemberInfo info{};                                                                                                                        \
+        info.Name = ARG_NAME;                                                                                                                     \
+        info.Header = ::binary::Allocator::Invoke([&encoding](auto& allocator) { encoding->Encode(allocator, ARG_NAME); });                       \
+        info.IsOptional = ARG_IS_OPTIONAL;                                                                                                        \
+        info.EncodeWithLengthPrefix = [converter](auto& allocator, const auto& item) {                                                            \
+            converter->EncodeWithLengthPrefix(allocator, ARG_GET_MEMBER_EXPRESSION);                                                              \
         };                                                                                                                                        \
-    })());
+        info.Decode = [converter](auto& item, const auto& span) {                                                                                 \
+            auto result = converter->Decode(span);                                                                                                \
+            ARG_SET_MEMBER_EXPRESSION;                                                                                                            \
+        };                                                                                                                                        \
+        return info;                                                                                                                              \
+    });
 
 #endif

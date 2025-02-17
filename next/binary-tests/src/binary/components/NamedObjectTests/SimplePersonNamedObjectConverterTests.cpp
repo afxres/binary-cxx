@@ -100,10 +100,10 @@ BOOST_DATA_TEST_CASE(SimplePersonDecodeKeyNotFoundTest, SimplePersonDecodeKeyNot
     BOOST_REQUIRE_EXCEPTION(
         converter->Decode(span),
         std::invalid_argument,
-        ([output](const std::invalid_argument& e) {
+        [output](const std::invalid_argument& e) {
             BOOST_REQUIRE_EQUAL(e.what(), output);
             return true;
-        }));
+        });
 }
 
 std::vector<std::tuple<std::string, int8_t, std::string>> SimplePersonDecodeOptionalMemberTestData = {
@@ -176,10 +176,10 @@ BOOST_DATA_TEST_CASE(SimplePersonConverterDecodeWithDuplicateKeyTest, SimplePers
     BOOST_REQUIRE_EXCEPTION(
         converter->Decode(span),
         std::invalid_argument,
-        ([output](const std::invalid_argument& e) {
+        [output](const std::invalid_argument& e) {
             BOOST_REQUIRE_EQUAL(e.what(), output);
             return true;
-        }));
+        });
 }
 
 std::vector<std::tuple<std::string, uint8_t, std::string>> SimplePersonConverterDecodeWithUnknownKeyTestData = {

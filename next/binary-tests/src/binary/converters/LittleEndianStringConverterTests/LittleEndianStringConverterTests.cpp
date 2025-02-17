@@ -102,10 +102,10 @@ BOOST_AUTO_TEST_CASE(LittleEndianStringConverterForWideStringDecodeNotEnoughByte
     BOOST_REQUIRE_EXCEPTION(
         a.Decode(buffer),
         std::length_error,
-        ([output](const std::length_error& e) {
+        [output](const std::length_error& e) {
             BOOST_REQUIRE_EQUAL(e.what(), output);
             return true;
-        }));
+        });
 }
 
 BOOST_AUTO_TEST_SUITE_END();

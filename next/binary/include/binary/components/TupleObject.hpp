@@ -43,32 +43,30 @@
         GetConverter<decltype(GenericArgument::ARG_NAME)>(generator))
 
 #define BINARY_TUPLE_MEMBER_CUSTOM(ARG_GET_MEMBER_EXPRESSION, ARG_SET_MEMBER_EXPRESSION, ARG_GET_CONVERTER_EXPRESSION) \
-    initializers.push_back(([]() {                                                                                     \
-        return []([[maybe_unused]] auto& generator, bool last) {                                                       \
-            auto converter = ARG_GET_CONVERTER_EXPRESSION;                                                             \
-            MemberInfo info{};                                                                                         \
-            info.Length = converter->Length();                                                                         \
-            info.EncodeAuto = [converter](auto& allocator, const auto& item) {                                         \
-                converter->EncodeAuto(allocator, ARG_GET_MEMBER_EXPRESSION);                                           \
+    initializers.push_back([]([[maybe_unused]] auto& generator, bool last) {                                           \
+        auto converter = ARG_GET_CONVERTER_EXPRESSION;                                                                 \
+        MemberInfo info{};                                                                                             \
+        info.Length = converter->Length();                                                                             \
+        info.EncodeAuto = [converter](auto& allocator, const auto& item) {                                             \
+            converter->EncodeAuto(allocator, ARG_GET_MEMBER_EXPRESSION);                                               \
+        };                                                                                                             \
+        info.DecodeAuto = [converter](auto& item, auto& span) {                                                        \
+            auto result = converter->DecodeAuto(span);                                                                 \
+            ARG_SET_MEMBER_EXPRESSION;                                                                                 \
+        };                                                                                                             \
+        if (last) {                                                                                                    \
+            info.Encode = [converter](auto& allocator, const auto& item) {                                             \
+                converter->Encode(allocator, ARG_GET_MEMBER_EXPRESSION);                                               \
             };                                                                                                         \
-            info.DecodeAuto = [converter](auto& item, auto& span) {                                                    \
-                auto result = converter->DecodeAuto(span);                                                             \
+            info.Decode = [converter](auto& item, auto& span) {                                                        \
+                auto result = converter->Decode(span);                                                                 \
                 ARG_SET_MEMBER_EXPRESSION;                                                                             \
             };                                                                                                         \
-            if (last) {                                                                                                \
-                info.Encode = [converter](auto& allocator, const auto& item) {                                         \
-                    converter->Encode(allocator, ARG_GET_MEMBER_EXPRESSION);                                           \
-                };                                                                                                     \
-                info.Decode = [converter](auto& item, auto& span) {                                                    \
-                    auto result = converter->Decode(span);                                                             \
-                    ARG_SET_MEMBER_EXPRESSION;                                                                         \
-                };                                                                                                     \
-            } else {                                                                                                   \
-                info.Encode = info.EncodeAuto;                                                                         \
-                info.Decode = info.DecodeAuto;                                                                         \
-            }                                                                                                          \
-            return info;                                                                                               \
-        };                                                                                                             \
-    })());
+        } else {                                                                                                       \
+            info.Encode = info.EncodeAuto;                                                                             \
+            info.Decode = info.DecodeAuto;                                                                             \
+        }                                                                                                              \
+        return info;                                                                                                   \
+    });
 
 #endif
