@@ -26,11 +26,11 @@
         static const std::vector<MemberInfoInitializer>& GetInitializers() {                  \
             static bool initialized = false;                                                  \
             static std::vector<MemberInfoInitializer> initializers;                           \
-            if (!initialized) {
+            if (initialized == false) {                                                       \
+                initialized = true;
 
 #define BINARY_NAMED_OBJECT_CONVERTER_END() \
     }                                       \
-    initialized = true;                     \
     return initializers;                    \
     }                                       \
     }                                       \
