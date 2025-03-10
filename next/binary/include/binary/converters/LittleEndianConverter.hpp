@@ -4,7 +4,7 @@
 #include "binary/Converter.hpp"
 #include "binary/internal/AllocatorUnsafeAccessor.hpp"
 #include "binary/internal/Endian.hpp"
-#include "binary/internal/Length.hpp"
+#include "binary/internal/Exception.hpp"
 
 namespace binary::converters {
 template <typename T>
@@ -19,7 +19,10 @@ public:
     }
 
     virtual T Decode(const std::span<const std::byte>& span) override {
-        return internal::DecodeLittleEndian<T>(internal::EnsureLength(span, sizeof(T)));
+        if (span.size() < sizeof(T)) {
+            internal::ThrowNotEnoughBytes();
+        }
+        return internal::DecodeLittleEndian<T>(span.data());
     }
 };
 }

@@ -14,13 +14,6 @@ void EnsureMemoryAccess(void* memory) {
     }
 }
 
-const std::byte* EnsureLength(const std::span<const std::byte>& span, const size_t length) {
-    if (span.size() < length) {
-        internal::ThrowNotEnoughBytes();
-    }
-    return span.data();
-}
-
 void EnsureLengthPrefixLength(const size_t number) {
     if (number > INT32_MAX) {
         throw std::invalid_argument("number > INT32_MAX");

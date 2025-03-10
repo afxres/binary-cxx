@@ -2,11 +2,9 @@
 #define BINARY_INTERNAL_LENGTH_HPP
 
 #include <cstddef>
-#include <span>
 
 namespace binary::internal {
 void EnsureMemoryAccess(void* memory);
-const std::byte* EnsureLength(const std::span<const std::byte>& span, const size_t length);
 void EnsureLengthPrefixLength(const size_t number);
 size_t EncodeLengthPrefixLength(const size_t number);
 void EncodeLengthPrefix(std::byte* buffer, const size_t number, const size_t length);

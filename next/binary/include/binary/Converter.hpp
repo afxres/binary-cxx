@@ -8,6 +8,7 @@
 #include "binary/ConverterExtensions.hpp"
 #include "binary/IConverter.hpp"
 #include "binary/internal/AllocatorUnsafeAccessor.hpp"
+#include "binary/internal/Exception.hpp"
 
 namespace binary {
 template <typename T>
@@ -42,9 +43,12 @@ public:
     virtual T DecodeAuto(std::span<const std::byte>& span) {
         size_t length = Length();
         if (length != 0) {
-            T result = Decode(span);
+            if (span.size() < length) {
+                internal::ThrowNotEnoughBytes();
+            }
+            std::span<const std::byte> copy = span;
             span = span.subspan(length);
-            return result;
+            return Decode(copy);
         } else {
             return DecodeWithLengthPrefix(span);
         }
