@@ -9,7 +9,7 @@
         <Expand>
           <ArrayItems>
             <Size>offset</Size>
-            <ValuePointer>((unsigned char*)buffer._Ptr),X</ValuePointer>
+            <ValuePointer>((unsigned char*)buffer),X</ValuePointer>
           </ArrayItems>
         </Expand>
       </Synthetic>
@@ -18,7 +18,7 @@
         <Expand>
           <ArrayItems>
             <Size>bounds</Size>
-            <ValuePointer>((unsigned char*)buffer._Ptr),X</ValuePointer>
+            <ValuePointer>((unsigned char*)buffer),X</ValuePointer>
           </ArrayItems>
         </Expand>
       </Synthetic>
