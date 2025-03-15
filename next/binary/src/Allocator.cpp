@@ -11,7 +11,7 @@
 namespace binary {
 constexpr size_t AllocatorAnchorSize = 4;
 constexpr size_t AllocatorAnchorShrinkLimits = 16;
-constexpr size_t AllocatorCapacitySeed = 128;
+constexpr size_t AllocatorCapacitySeed = 256;
 
 Allocator::Allocator()
     : Allocator({}, INT32_MAX) {}
@@ -59,9 +59,9 @@ void Allocator::Resize(size_t length) {
     if (cursor == 0) {
         cursor = AllocatorCapacitySeed;
     }
-    do {
+    while (cursor < amount) {
         cursor *= 2;
-    } while (cursor < amount);
+    }
     if (cursor > limits) {
         cursor = limits;
     }
