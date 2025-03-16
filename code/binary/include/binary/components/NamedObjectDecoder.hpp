@@ -2,11 +2,12 @@
 #define BINARY_COMPONENTS_NAMEDOBJECTDECODER_HPP
 
 #include <cstdint>
+#include <memory>
 #include <span>
 #include <string>
-#include <string_view>
-#include <unordered_map>
 #include <vector>
+
+#include "binary/external/ByteViewList.hpp"
 
 namespace binary::components {
 class NamedObjectDecoder {
@@ -20,7 +21,7 @@ private:
 
     const std::vector<uint8_t>& optional;
     const std::vector<std::string>& names;
-    std::unordered_map<std::string_view, size_t> record;
+    std::unique_ptr<external::ByteViewList> record;
 };
 }
 
