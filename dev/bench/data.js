@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1742051444413,
+  "lastUpdate": 1742107866023,
   "repoUrl": "https://github.com/afxres/binary-cxx",
   "entries": {
     "Benchmark": [
@@ -1140,6 +1140,120 @@ window.BENCHMARK_DATA = {
             "value": 1102.580760915384,
             "unit": "ns/iter",
             "extra": "iterations: 647089\ncpu: 1102.5598565266905 ns\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "stdarg@outlook.com",
+            "name": "miko",
+            "username": "afxres"
+          },
+          "committer": {
+            "email": "stdarg@outlook.com",
+            "name": "miko",
+            "username": "afxres"
+          },
+          "distinct": true,
+          "id": "ffd6dce9476b116cf1f384a9b6a315cfe4f1a7cf",
+          "message": "Remove unused header",
+          "timestamp": "2025-03-16T14:49:43+08:00",
+          "tree_id": "446a3ae8c2209f2ba0865855216a1886dfd0f2e3",
+          "url": "https://github.com/afxres/binary-cxx/commit/ffd6dce9476b116cf1f384a9b6a315cfe4f1a7cf"
+        },
+        "date": 1742107865730,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "Encode Custom Named Object, pre-allocate memory/0",
+            "value": 111.11598932109936,
+            "unit": "ns/iter",
+            "extra": "iterations: 6317504\ncpu: 111.1155685853147 ns\nthreads: 1"
+          },
+          {
+            "name": "Encode Custom Named Object, pre-allocate memory/1024",
+            "value": 97.89354552473017,
+            "unit": "ns/iter",
+            "extra": "iterations: 7164161\ncpu: 97.88367137477789 ns\nthreads: 1"
+          },
+          {
+            "name": "Encode Custom Tuple Object, pre-allocate memory/0",
+            "value": 64.21049316941655,
+            "unit": "ns/iter",
+            "extra": "iterations: 11019702\ncpu: 64.20938052589807 ns\nthreads: 1"
+          },
+          {
+            "name": "Encode Custom Tuple Object, pre-allocate memory/1024",
+            "value": 51.570043108350504,
+            "unit": "ns/iter",
+            "extra": "iterations: 13631234\ncpu: 51.56774537066857 ns\nthreads: 1"
+          },
+          {
+            "name": "Encode System Tuple, pre-allocate memory/0",
+            "value": 52.55858253952108,
+            "unit": "ns/iter",
+            "extra": "iterations: 13312738\ncpu: 52.55779412169006 ns\nthreads: 1"
+          },
+          {
+            "name": "Encode System Tuple, pre-allocate memory/1024",
+            "value": 40.8931520100927,
+            "unit": "ns/iter",
+            "extra": "iterations: 17558992\ncpu: 40.8915360858983 ns\nthreads: 1"
+          },
+          {
+            "name": "Decode Custom Named Object",
+            "value": 285.252795986148,
+            "unit": "ns/iter",
+            "extra": "iterations: 2466661\ncpu: 285.2470667838024 ns\nthreads: 1"
+          },
+          {
+            "name": "Decode Custom Tuple Object",
+            "value": 187.69412244920022,
+            "unit": "ns/iter",
+            "extra": "iterations: 3723830\ncpu: 187.68988702491805 ns\nthreads: 1"
+          },
+          {
+            "name": "Decode System Tuple",
+            "value": 151.88153305484585,
+            "unit": "ns/iter",
+            "extra": "iterations: 4600279\ncpu: 151.87751308127184 ns\nthreads: 1"
+          },
+          {
+            "name": "Boost Encode Custom Tuple Object (text)",
+            "value": 2417.3654587270366,
+            "unit": "ns/iter",
+            "extra": "iterations: 289584\ncpu: 2417.304678435272 ns\nthreads: 1"
+          },
+          {
+            "name": "Boost Encode Custom Tuple Object (text, reuse stream)",
+            "value": 2243.208289132759,
+            "unit": "ns/iter",
+            "extra": "iterations: 311082\ncpu: 2243.0470519027135 ns\nthreads: 1"
+          },
+          {
+            "name": "Boost Encode Custom Tuple Object (binary)",
+            "value": 1186.6194016261243,
+            "unit": "ns/iter",
+            "extra": "iterations: 593074\ncpu: 1186.5687384710852 ns\nthreads: 1"
+          },
+          {
+            "name": "Boost Encode Custom Tuple Object (binary, reuse stream)",
+            "value": 998.4200065061015,
+            "unit": "ns/iter",
+            "extra": "iterations: 700882\ncpu: 998.3469385716851 ns\nthreads: 1"
+          },
+          {
+            "name": "Boost Decode Custom Tuple Object (text)",
+            "value": 2929.790060326608,
+            "unit": "ns/iter",
+            "extra": "iterations: 239364\ncpu: 2929.6558797480006 ns\nthreads: 1"
+          },
+          {
+            "name": "Boost Decode Custom Tuple Object (binary)",
+            "value": 1089.3624440267783,
+            "unit": "ns/iter",
+            "extra": "iterations: 651204\ncpu: 1089.341238690182 ns\nthreads: 1"
           }
         ]
       }
