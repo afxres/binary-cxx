@@ -1,6 +1,5 @@
 #include "binary/components/NamedObjectDecoder.hpp"
 
-#include <cassert>
 #include <format>
 #include <stdexcept>
 
