@@ -1,7 +1,7 @@
 #!/bin/bash
 
 PROJECT_ROOT="$PWD"
-PROJECT_DIR="$PROJECT_ROOT/next"
+PROJECT_DIR="$PROJECT_ROOT/code"
 BUILD_DIR="$PROJECT_ROOT/build-tests"
 
 mkdir -p "$BUILD_DIR"
