@@ -19,7 +19,7 @@ public:
     FakeGenerator(std::map<std::type_index, std::shared_ptr<IConverter>>& map)
         : map(map) {}
 
-    virtual void AddConverter(std::shared_ptr<IConverter> converter) override {
+    virtual void AddConverter(const std::shared_ptr<IConverter>& converter) override {
         map.emplace(converter->GetGenericArgument(), converter);
     }
 

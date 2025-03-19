@@ -9,7 +9,7 @@ namespace binary {
 class IGenerator {
 public:
     virtual ~IGenerator() = 0;
-    virtual void AddConverter(std::shared_ptr<IConverter> converter) = 0;
+    virtual void AddConverter(const std::shared_ptr<IConverter>& converter) = 0;
     virtual std::shared_ptr<IConverter> GetConverter(std::type_index type) const = 0;
 };
 }

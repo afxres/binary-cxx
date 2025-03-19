@@ -3,7 +3,7 @@
 #include <format>
 
 namespace binary {
-void Generator::AddConverter(std::shared_ptr<IConverter> converter) {
+void Generator::AddConverter(const std::shared_ptr<IConverter>& converter) {
     this->converters.emplace(converter->GetGenericArgument(), converter);
 }
 

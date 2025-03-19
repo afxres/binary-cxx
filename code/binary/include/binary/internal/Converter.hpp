@@ -11,7 +11,7 @@
 namespace binary::internal {
 template <typename T>
     requires std::same_as<T, std::remove_cv_t<T>>
-std::shared_ptr<Converter<T>> GetConverter(std::shared_ptr<IConverter> converter) {
+std::shared_ptr<Converter<T>> GetConverter(const std::shared_ptr<IConverter>& converter) {
     std::shared_ptr<Converter<T>> result = std::dynamic_pointer_cast<Converter<T>>(converter);
     if (result == nullptr) {
         internal::ThrowInvalidConverterType(converter == nullptr ? typeid(nullptr) : converter->GetGenericArgument(), typeid(T));

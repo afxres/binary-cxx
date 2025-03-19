@@ -51,7 +51,7 @@ private:
     const std::tuple<std::shared_ptr<Converter<std::remove_cv_t<E>>>...> converter;
 
 public:
-    TupleConverter(std::shared_ptr<Converter<std::remove_cv_t<E>>>... converter)
+    TupleConverter(const std::shared_ptr<Converter<std::remove_cv_t<E>>>&... converter)
         : Converter<GenericArgument>(internal::GetConverterLength(std::vector<std::shared_ptr<IConverter>>({converter...}) | std::views::transform([](const auto& converter) { return converter->Length(); })))
         , converter({converter...}) {}
 
