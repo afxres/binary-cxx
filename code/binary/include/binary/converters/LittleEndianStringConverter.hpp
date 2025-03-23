@@ -18,7 +18,7 @@ public:
         if constexpr (size == 1) {
             allocator.Append(std::span(reinterpret_cast<const std::byte*>(item.data()), item.size()));
         } else {
-            allocator.Append(size * item.size(), [item](std::span<std::byte> span) {
+            allocator.Append(size * item.size(), [&item](std::span<std::byte> span) {
                 assert(span.size() == size * item.size());
                 auto target = reinterpret_cast<typename T::value_type*>(span.data());
                 auto source = item.data();

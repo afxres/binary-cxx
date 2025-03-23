@@ -70,8 +70,8 @@ BOOST_DATA_TEST_CASE(SimplePersonConverterEncodeDecodeTest, SimplePersonTestData
     SimplePersonCustom y;
     y.SetAge(age);
     y.SetName(name);
-    auto f = ::binary::Allocator::Invoke([&](auto& allocator) { a->Encode(allocator, x); });
-    auto g = ::binary::Allocator::Invoke([&](auto& allocator) { b->Encode(allocator, y); });
+    auto f = ::binary::Allocator::Invoke([&a, &x](auto& allocator) { a->Encode(allocator, x); });
+    auto g = ::binary::Allocator::Invoke([&b, &y](auto& allocator) { b->Encode(allocator, y); });
     BOOST_REQUIRE_EQUAL(std::string_view(reinterpret_cast<const char*>(f.data()), f.size()), std::string_view(reinterpret_cast<const char*>(g.data()), g.size()));
     BOOST_REQUIRE_EQUAL(f.size(), outputLength);
     BOOST_REQUIRE_EQUAL(g.size(), outputLength);

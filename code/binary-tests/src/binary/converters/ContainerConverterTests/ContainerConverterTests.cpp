@@ -50,7 +50,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(ContainerConverterEncodeDecodeEmptyContainerTest, 
     auto converter = ::binary::GetConverter<T>(generator);
     T source;
     BOOST_REQUIRE_EQUAL(0, source.size());
-    auto buffer = ::binary::Allocator::Invoke([converter, source](auto& allocator) { converter->Encode(allocator, source); });
+    auto buffer = ::binary::Allocator::Invoke([&converter, &source](auto& allocator) { converter->Encode(allocator, source); });
     BOOST_REQUIRE_EQUAL(0, buffer.size());
     auto result = converter->Decode({});
     BOOST_REQUIRE_EQUAL(0, result.size());
@@ -68,7 +68,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(ContainerConverterEncodeDecodeSingleDefaultValueCo
     auto converter = ::binary::GetConverter<T>(generator);
     T source({std::ranges::range_value_t<T>{}});
     BOOST_REQUIRE_EQUAL(1, source.size());
-    auto buffer = ::binary::Allocator::Invoke([converter, source](auto& allocator) { converter->Encode(allocator, source); });
+    auto buffer = ::binary::Allocator::Invoke([&converter, &source](auto& allocator) { converter->Encode(allocator, source); });
     BOOST_REQUIRE_NE(0, buffer.size());
     auto result = converter->Decode(buffer);
     BOOST_REQUIRE_EQUAL(1, result.size());

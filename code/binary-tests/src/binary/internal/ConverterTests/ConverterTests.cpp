@@ -23,7 +23,7 @@ BOOST_AUTO_TEST_CASE(CastFromNullToStringConverterTest) {
     BOOST_REQUIRE_EXCEPTION(
         ::binary::internal::GetConverter<std::string>(std::shared_ptr<::binary::IConverter>(nullptr)),
         std::invalid_argument,
-        [output](const std::invalid_argument& e) {
+        [&output](const std::invalid_argument& e) {
             BOOST_REQUIRE_EQUAL(e.what(), output);
             return true;
         });
@@ -34,7 +34,7 @@ BOOST_AUTO_TEST_CASE(CastFromStringConverterToByteConverterTest) {
     BOOST_REQUIRE_EXCEPTION(
         ::binary::internal::GetConverter<std::byte>(std::make_shared<::binary::converters::LittleEndianStringConverter<std::string>>()),
         std::invalid_argument,
-        [output](const std::invalid_argument& e) {
+        [&output](const std::invalid_argument& e) {
             BOOST_REQUIRE_EQUAL(e.what(), output);
             return true;
         });

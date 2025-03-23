@@ -15,7 +15,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(GeneratorGetConverterWithUnknownTypeTest, T, Gener
     BOOST_REQUIRE_EXCEPTION(
         generator.GetConverter(typeid(T)),
         std::out_of_range,
-        [output](const std::out_of_range& e) {
+        [&output](const std::out_of_range& e) {
             BOOST_REQUIRE_EQUAL(e.what(), output);
             return true;
         });

@@ -38,7 +38,7 @@ BOOST_AUTO_TEST_CASE(CustomNoEmplaceFunctionContainerDecodeStringTypeNotSupporte
     BOOST_REQUIRE_EXCEPTION(
         converter.Decode(std::span<const std::byte>()),
         std::logic_error,
-        [output](const std::logic_error& e) {
+        [&output](const std::logic_error& e) {
             BOOST_REQUIRE_EQUAL(e.what(), output);
             return true;
         });

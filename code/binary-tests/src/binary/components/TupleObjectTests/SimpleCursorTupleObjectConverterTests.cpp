@@ -42,8 +42,8 @@ BOOST_DATA_TEST_CASE(SimpleCursorTest, SimpleCursorTestData, buffer, x, y) {
     SimpleCursor f;
     f.X = x;
     f.Y = y;
-    auto fa = ::binary::Allocator::Invoke([&](auto& allocator) { a->Encode(allocator, f); });
-    auto fb = ::binary::Allocator::Invoke([&](auto& allocator) { a->EncodeAuto(allocator, f); });
+    auto fa = ::binary::Allocator::Invoke([&a, &f](auto& allocator) { a->Encode(allocator, f); });
+    auto fb = ::binary::Allocator::Invoke([&a, &f](auto& allocator) { a->EncodeAuto(allocator, f); });
     BOOST_REQUIRE_EQUAL(buffer, std::string_view(reinterpret_cast<const char*>(fa.data()), fa.size()));
     BOOST_REQUIRE_EQUAL(buffer, std::string_view(reinterpret_cast<const char*>(fb.data()), fb.size()));
     auto fr = a->Decode(fa);

@@ -55,8 +55,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(ConstantLengthTupleConverterEncodeDecodeBothMethod
     ::binary::AddConverter<::binary::converters::LittleEndianConverter<int64_t>>(generator);
     ::binary::AddConverter<::binary::converters::TupleConverter<T>>(generator);
     auto converter = ::binary::GetConverter<T>(generator);
-    auto dataBuffer = ::binary::Allocator::Invoke([converter](auto& allocator) { converter->Encode(allocator, T()); });
-    auto autoBuffer = ::binary::Allocator::Invoke([converter](auto& allocator) { converter->EncodeAuto(allocator, T()); });
+    auto dataBuffer = ::binary::Allocator::Invoke([&converter](auto& allocator) { converter->Encode(allocator, T()); });
+    auto autoBuffer = ::binary::Allocator::Invoke([&converter](auto& allocator) { converter->EncodeAuto(allocator, T()); });
     BOOST_REQUIRE_EQUAL(converter->Length(), dataBuffer.size());
     BOOST_REQUIRE_EQUAL(converter->Length(), autoBuffer.size());
     BOOST_REQUIRE_EQUAL(std::string_view(reinterpret_cast<const char*>(dataBuffer.data()), dataBuffer.size()), std::string_view(reinterpret_cast<const char*>(autoBuffer.data()), autoBuffer.size()));
@@ -79,8 +79,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(VariableLengthTupleConverterEncodeDecodeBothMethod
     ::binary::AddConverter<::binary::converters::LittleEndianStringConverter<std::string>>(generator);
     ::binary::AddConverter<::binary::converters::TupleConverter<T>>(generator);
     auto converter = ::binary::GetConverter<T>(generator);
-    auto dataBuffer = ::binary::Allocator::Invoke([converter](auto& allocator) { converter->Encode(allocator, T()); });
-    auto autoBuffer = ::binary::Allocator::Invoke([converter](auto& allocator) { converter->EncodeAuto(allocator, T()); });
+    auto dataBuffer = ::binary::Allocator::Invoke([&converter](auto& allocator) { converter->Encode(allocator, T()); });
+    auto autoBuffer = ::binary::Allocator::Invoke([&converter](auto& allocator) { converter->EncodeAuto(allocator, T()); });
     BOOST_REQUIRE_NE(autoBuffer.size(), 0);
     BOOST_REQUIRE_LE(dataBuffer.size(), autoBuffer.size());
 

@@ -221,7 +221,7 @@ BOOST_AUTO_TEST_CASE(AllocatorAppendFunctionWithZeroMaxLengthTest) {
 
 BOOST_DATA_TEST_CASE(AllocatorAppendFunctionWithMaxLengthIntegrationInvalidReturnValueTest, boost::unit_test::data::make<size_t>({1, 255, 1024, 65567}), length) {
     ::binary::Allocator allocator;
-    auto action = [length](auto span, auto& bytesWritten) {
+    auto action = [&length](auto span, auto& bytesWritten) {
         BOOST_REQUIRE_EQUAL(SIZE_MAX, bytesWritten);
         BOOST_REQUIRE_EQUAL(length, span.size());
         bytesWritten = length + 1;
@@ -287,7 +287,7 @@ BOOST_AUTO_TEST_CASE(AllocatorAppendWithLengthPrefixFunctionWithMaxLengthIntegra
 
 BOOST_DATA_TEST_CASE(AllocatorAppendWithLengthPrefixFunctionWithMaxLengthIntegrationInvalidReturnValueTest, boost::unit_test::data::make<size_t>({1, 255, 1024, 65567}), length) {
     ::binary::Allocator allocator;
-    auto action = [length](auto span, auto& bytesWritten) {
+    auto action = [&length](auto span, auto& bytesWritten) {
         BOOST_REQUIRE_EQUAL(SIZE_MAX, bytesWritten);
         BOOST_REQUIRE_EQUAL(length, span.size());
         bytesWritten = length + 1;
