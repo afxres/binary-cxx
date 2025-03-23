@@ -4,34 +4,35 @@
 #include "binary/GeneratorExtensions.hpp"
 #include "binary/components/TupleObjectConverter.hpp"
 
-#define BINARY_TUPLE_OBJECT_CONVERTER(ARG_TYPE, ARG_CONVERTER_NAME)                                 \
-    class ARG_CONVERTER_NAME : public ::binary::components::TupleObjectConverter<ARG_TYPE> {        \
-    public:                                                                                         \
-        ARG_CONVERTER_NAME(const ::binary::IGenerator& generator)                                   \
-            : TupleObjectConverter<ARG_TYPE>(GetContexts(generator)) {}                             \
-                                                                                                    \
-    private:                                                                                        \
-        using GenericArgument = ARG_TYPE;                                                           \
-        using MemberInfoInitializer = std::function<MemberInfo(const ::binary::IGenerator&, bool)>; \
-                                                                                                    \
-        static std::vector<MemberInfo> GetContexts(const ::binary::IGenerator& generator) {         \
-            std::vector<MemberInfo> contexts;                                                       \
-            const auto& initializers = GetInitializers();                                           \
-            for (size_t i = 0; i < initializers.size(); i++) {                                      \
-                contexts.emplace_back(initializers.at(i)(generator, i == initializers.size() - 1)); \
-            }                                                                                       \
-            return contexts;                                                                        \
-        }                                                                                           \
-                                                                                                    \
-        static const std::vector<MemberInfoInitializer>& GetInitializers() {                        \
-            static bool initialized = false;                                                        \
-            static std::vector<MemberInfoInitializer> initializers;                                 \
-            if (initialized == false) {                                                             \
-                initialized = true;
+#define BINARY_TUPLE_OBJECT_CONVERTER(ARG_CONVERTER_NAME, ARG_CONVERTER_TARGET_TYPE)                           \
+    class ARG_CONVERTER_NAME : public ::binary::components::TupleObjectConverter<ARG_CONVERTER_TARGET_TYPE> {  \
+    public:                                                                                                    \
+        ARG_CONVERTER_NAME(const ::binary::IGenerator& generator)                                              \
+            : ::binary::components::TupleObjectConverter<ARG_CONVERTER_TARGET_TYPE>(GetContexts(generator)) {} \
+                                                                                                               \
+    private:                                                                                                   \
+        using ConverterTargetType = ARG_CONVERTER_TARGET_TYPE;                                                 \
+        using MemberInfo = ::binary::components::TupleObjectConverter<ARG_CONVERTER_TARGET_TYPE>::MemberInfo;  \
+        using MemberInfoInitializer = std::function<MemberInfo(const ::binary::IGenerator&, bool)>;            \
+                                                                                                               \
+        static std::vector<MemberInfo> GetContexts(const ::binary::IGenerator& generator) {                    \
+            static bool initialized = false;                                                                   \
+            static std::vector<MemberInfoInitializer> initializers;                                            \
+            if (initialized == false) {                                                                        \
+                initialized = true;                                                                            \
+                GetInitializers(initializers);                                                                 \
+            }                                                                                                  \
+                                                                                                               \
+            std::vector<MemberInfo> contexts;                                                                  \
+            for (size_t i = 0; i < initializers.size(); i++) {                                                 \
+                contexts.emplace_back(initializers.at(i)(generator, i == initializers.size() - 1));            \
+            }                                                                                                  \
+            return contexts;                                                                                   \
+        }                                                                                                      \
+                                                                                                               \
+        static void GetInitializers(std::vector<MemberInfoInitializer>& initializers) {
 
 #define BINARY_TUPLE_OBJECT_CONVERTER_END() \
-    }                                       \
-    return initializers;                    \
     }                                       \
     }                                       \
     ;
@@ -40,7 +41,7 @@
     BINARY_TUPLE_MEMBER_CUSTOM(            \
         item.ARG_NAME,                     \
         item.ARG_NAME = std::move(result), \
-        GetConverter<decltype(GenericArgument::ARG_NAME)>(generator))
+        ::binary::GetConverter<decltype(ConverterTargetType::ARG_NAME)>(generator))
 
 #define BINARY_TUPLE_MEMBER_CUSTOM(ARG_GET_MEMBER_EXPRESSION, ARG_SET_MEMBER_EXPRESSION, ARG_GET_CONVERTER_EXPRESSION) \
     initializers.push_back([]([[maybe_unused]] auto& generator, bool last) {                                           \
@@ -67,6 +68,6 @@
             info.Decode = info.DecodeAuto;                                                                             \
         }                                                                                                              \
         return info;                                                                                                   \
-    });
+    })
 
 #endif

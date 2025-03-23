@@ -15,9 +15,9 @@ struct SimpleCursor {
     int32_t Y;
 };
 
-BINARY_TUPLE_OBJECT_CONVERTER(SimpleCursor, SimpleCursorTupleObjectConverter)
-BINARY_TUPLE_MEMBER(X)
-BINARY_TUPLE_MEMBER(Y)
+BINARY_TUPLE_OBJECT_CONVERTER(SimpleCursorTupleObjectConverter, SimpleCursor)
+BINARY_TUPLE_MEMBER(X);
+BINARY_TUPLE_MEMBER(Y);
 BINARY_TUPLE_OBJECT_CONVERTER_END()
 
 BOOST_AUTO_TEST_CASE(SimpleCursorTupleObjectConverterLengthTest) {

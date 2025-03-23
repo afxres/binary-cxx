@@ -27,14 +27,14 @@ private:
     std::string name;
 };
 
-BINARY_NAMED_OBJECT_CONVERTER(SimplePerson, SimplePersonNamedObjectConverter)
-BINARY_NAMED_MEMBER(Age)
-BINARY_NAMED_MEMBER(Name)
+BINARY_NAMED_OBJECT_CONVERTER(SimplePersonNamedObjectConverter, SimplePerson)
+BINARY_NAMED_MEMBER(Age);
+BINARY_NAMED_MEMBER(Name);
 BINARY_NAMED_OBJECT_CONVERTER_END()
 
-BINARY_NAMED_OBJECT_CONVERTER(SimplePersonCustom, SimplePersonCustomNamedObjectConverter)
-BINARY_NAMED_MEMBER_CUSTOM("Age", true, item.GetAge(), item.SetAge(result), std::make_shared<::binary::converters::LittleEndianConverter<int8_t>>())
-BINARY_NAMED_MEMBER_CUSTOM("Name", true, item.GetName(), item.SetName(result), std::make_shared<::binary::converters::LittleEndianStringConverter<std::string>>())
+BINARY_NAMED_OBJECT_CONVERTER(SimplePersonCustomNamedObjectConverter, SimplePersonCustom)
+BINARY_NAMED_MEMBER_CUSTOM("Age", true, item.GetAge(), item.SetAge(result), std::make_shared<::binary::converters::LittleEndianConverter<int8_t>>());
+BINARY_NAMED_MEMBER_CUSTOM("Name", true, item.GetName(), item.SetName(result), std::make_shared<::binary::converters::LittleEndianStringConverter<std::string>>());
 BINARY_NAMED_OBJECT_CONVERTER_END()
 
 BOOST_AUTO_TEST_CASE(SimplePersonNamedObjectConverterLengthTest) {
@@ -123,9 +123,9 @@ BOOST_DATA_TEST_CASE(SimplePersonDecodeOptionalMemberTest, SimplePersonDecodeOpt
     BOOST_REQUIRE_EQUAL(name, result.GetName());
 }
 
-BINARY_NAMED_OBJECT_CONVERTER(SimplePerson, SimplePersonDuplicateKeyNamedObjectConverter)
-BINARY_NAMED_MEMBER(Age)
-BINARY_NAMED_MEMBER(Age)
+BINARY_NAMED_OBJECT_CONVERTER(SimplePersonDuplicateKeyNamedObjectConverter, SimplePerson)
+BINARY_NAMED_MEMBER(Age);
+BINARY_NAMED_MEMBER(Age);
 BINARY_NAMED_OBJECT_CONVERTER_END()
 
 BOOST_AUTO_TEST_CASE(SimplePersonDuplicateKeyNamedObjectConverterTest) {

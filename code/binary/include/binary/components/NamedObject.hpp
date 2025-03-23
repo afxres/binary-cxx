@@ -4,34 +4,35 @@
 #include "binary/GeneratorExtensions.hpp"
 #include "binary/components/NamedObjectConverter.hpp"
 
-#define BINARY_NAMED_OBJECT_CONVERTER(ARG_TYPE, ARG_CONVERTER_NAME)                           \
-    class ARG_CONVERTER_NAME : public ::binary::components::NamedObjectConverter<ARG_TYPE> {  \
-    public:                                                                                   \
-        ARG_CONVERTER_NAME(const ::binary::IGenerator& generator)                             \
-            : NamedObjectConverter<ARG_TYPE>(GetContexts(generator)) {}                       \
-                                                                                              \
-    private:                                                                                  \
-        using GenericArgument = ARG_TYPE;                                                     \
-        using MemberInfoInitializer = std::function<MemberInfo(const ::binary::IGenerator&)>; \
-                                                                                              \
-        static std::vector<MemberInfo> GetContexts(const ::binary::IGenerator& generator) {   \
-            std::vector<MemberInfo> contexts;                                                 \
-            const auto& initializers = GetInitializers();                                     \
-            for (size_t i = 0; i < initializers.size(); i++) {                                \
-                contexts.emplace_back(initializers.at(i)(generator));                         \
-            }                                                                                 \
-            return contexts;                                                                  \
-        }                                                                                     \
-                                                                                              \
-        static const std::vector<MemberInfoInitializer>& GetInitializers() {                  \
-            static bool initialized = false;                                                  \
-            static std::vector<MemberInfoInitializer> initializers;                           \
-            if (initialized == false) {                                                       \
-                initialized = true;
+#define BINARY_NAMED_OBJECT_CONVERTER(ARG_CONVERTER_NAME, ARG_CONVERTER_TARGET_TYPE)                           \
+    class ARG_CONVERTER_NAME : public ::binary::components::NamedObjectConverter<ARG_CONVERTER_TARGET_TYPE> {  \
+    public:                                                                                                    \
+        ARG_CONVERTER_NAME(const ::binary::IGenerator& generator)                                              \
+            : ::binary::components::NamedObjectConverter<ARG_CONVERTER_TARGET_TYPE>(GetContexts(generator)) {} \
+                                                                                                               \
+    private:                                                                                                   \
+        using ConverterTargetType = ARG_CONVERTER_TARGET_TYPE;                                                 \
+        using MemberInfo = ::binary::components::NamedObjectConverter<ARG_CONVERTER_TARGET_TYPE>::MemberInfo;  \
+        using MemberInfoInitializer = std::function<MemberInfo(const ::binary::IGenerator&)>;                  \
+                                                                                                               \
+        static std::vector<MemberInfo> GetContexts(const ::binary::IGenerator& generator) {                    \
+            static bool initialized = false;                                                                   \
+            static std::vector<MemberInfoInitializer> initializers;                                            \
+            if (initialized == false) {                                                                        \
+                initialized = true;                                                                            \
+                GetInitializers(initializers);                                                                 \
+            }                                                                                                  \
+                                                                                                               \
+            std::vector<MemberInfo> contexts;                                                                  \
+            for (size_t i = 0; i < initializers.size(); i++) {                                                 \
+                contexts.emplace_back(initializers.at(i)(generator));                                          \
+            }                                                                                                  \
+            return contexts;                                                                                   \
+        }                                                                                                      \
+                                                                                                               \
+        static void GetInitializers(std::vector<MemberInfoInitializer>& initializers) {
 
 #define BINARY_NAMED_OBJECT_CONVERTER_END() \
-    }                                       \
-    return initializers;                    \
     }                                       \
     }                                       \
     ;
@@ -41,16 +42,17 @@
         #ARG_NAME, false,                  \
         item.ARG_NAME,                     \
         item.ARG_NAME = std::move(result), \
-        GetConverter<decltype(GenericArgument::ARG_NAME)>(generator))
+        ::binary::GetConverter<decltype(ConverterTargetType::ARG_NAME)>(generator))
 
 #define BINARY_NAMED_MEMBER_CUSTOM(ARG_NAME, ARG_IS_OPTIONAL, ARG_GET_MEMBER_EXPRESSION, ARG_SET_MEMBER_EXPRESSION, ARG_GET_CONVERTER_EXPRESSION) \
-    initializers.push_back([]([[maybe_unused]] auto& generator) {                                                                                 \
-        auto encoding = GetConverter<std::string>(generator);                                                                                     \
+    initializers.push_back([](auto& generator) {                                                                                                  \
         auto converter = ARG_GET_CONVERTER_EXPRESSION;                                                                                            \
         MemberInfo info{};                                                                                                                        \
         info.Name = ARG_NAME;                                                                                                                     \
-        info.Header = ::binary::Allocator::Invoke([&encoding](auto& allocator) { encoding->Encode(allocator, ARG_NAME); });                       \
         info.IsOptional = ARG_IS_OPTIONAL;                                                                                                        \
+        info.Header = ::binary::Allocator::Invoke([&generator](auto& allocator) {                                                                 \
+            ::binary::GetConverter<std::string>(generator)->Encode(allocator, ARG_NAME);                                                          \
+        });                                                                                                                                       \
         info.EncodeWithLengthPrefix = [converter](auto& allocator, const auto& item) {                                                            \
             converter->EncodeWithLengthPrefix(allocator, ARG_GET_MEMBER_EXPRESSION);                                                              \
         };                                                                                                                                        \
@@ -59,6 +61,6 @@
             ARG_SET_MEMBER_EXPRESSION;                                                                                                            \
         };                                                                                                                                        \
         return info;                                                                                                                              \
-    });
+    })
 
 #endif
