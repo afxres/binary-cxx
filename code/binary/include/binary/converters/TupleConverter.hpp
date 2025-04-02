@@ -48,11 +48,17 @@ private:
         return GenericArgument({DecodeAt<NoAutoIndex, Index>(span)...});
     }
 
+    static size_t GetConverterLength(const std::shared_ptr<Converter<std::remove_cv_t<E>>>&... converter) {
+        std::vector<std::shared_ptr<IConverter>> converters({converter...});
+        auto lengths = converters | std::views::transform([](const auto& converter) { return converter->Length(); });
+        return internal::GetConverterLength(lengths);
+    }
+
     const std::tuple<std::shared_ptr<Converter<std::remove_cv_t<E>>>...> converter;
 
 public:
     TupleConverter(const std::shared_ptr<Converter<std::remove_cv_t<E>>>&... converter)
-        : Converter<GenericArgument>(internal::GetConverterLength(std::vector<std::shared_ptr<IConverter>>({converter...}) | std::views::transform([](const auto& converter) { return converter->Length(); })))
+        : Converter<GenericArgument>(GetConverterLength(converter...))
         , converter({converter...}) {}
 
     virtual void Encode(Allocator& allocator, const GenericArgument& item) override {
