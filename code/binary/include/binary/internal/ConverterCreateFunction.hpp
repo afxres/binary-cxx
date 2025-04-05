@@ -4,6 +4,7 @@
 #include <concepts>
 #include <memory>
 #include <ranges>
+#include <variant>
 
 #include "binary/Converter.hpp"
 #include "binary/IGenerator.hpp"
