@@ -17,35 +17,35 @@ class TupleConverter<T<E...>> : public Converter<T<E...>> {
 private:
     using GenericArgument = T<E...>;
     using ElementSequence = std::make_index_sequence<sizeof...(E)>;
-    static constexpr size_t AlwaysAuto = SIZE_MAX;
-    static constexpr size_t NoAutoLast = sizeof...(E) - 1;
 
-    template <size_t NoAutoIndex, size_t Index>
-    void EncodeAt(Allocator& allocator, const GenericArgument& item) {
-        if constexpr (Index == NoAutoIndex) {
-            std::get<Index>(this->converter)->Encode(allocator, std::get<Index>(item));
+    template <size_t IsAuto, size_t Index>
+    void EncodeInternal(Allocator& allocator, const GenericArgument& item) {
+        const auto& converter = std::get<Index>(this->converter);
+        if constexpr (IsAuto == 0 && Index == sizeof...(E) - 1) {
+            converter->Encode(allocator, std::get<Index>(item));
         } else {
-            std::get<Index>(this->converter)->EncodeAuto(allocator, std::get<Index>(item));
+            converter->EncodeAuto(allocator, std::get<Index>(item));
         }
     }
 
-    template <size_t NoAutoIndex, size_t... Index>
-    void EncodeAll(Allocator& allocator, const GenericArgument& item, std::index_sequence<Index...>) {
-        (EncodeAt<NoAutoIndex, Index>(allocator, item), ...);
+    template <size_t IsAuto, size_t... Index>
+    void EncodeInternal(Allocator& allocator, const GenericArgument& item, std::index_sequence<Index...>) {
+        (EncodeInternal<IsAuto, Index>(allocator, item), ...);
     }
 
-    template <size_t NoAutoIndex, size_t Index>
-    auto DecodeAt(std::span<const std::byte>& span) {
-        if constexpr (Index == NoAutoIndex) {
-            return std::get<Index>(this->converter)->Decode(span);
+    template <size_t IsAuto, size_t Index>
+    auto DecodeInternal(std::span<const std::byte>& span) {
+        const auto& converter = std::get<Index>(this->converter);
+        if constexpr (IsAuto == 0 && Index == sizeof...(E) - 1) {
+            return converter->Decode(span);
         } else {
-            return std::get<Index>(this->converter)->DecodeAuto(span);
+            return converter->DecodeAuto(span);
         }
     }
 
-    template <size_t NoAutoIndex, size_t... Index>
-    auto DecodeAll(std::span<const std::byte>& span, std::index_sequence<Index...>) {
-        return GenericArgument({DecodeAt<NoAutoIndex, Index>(span)...});
+    template <size_t IsAuto, size_t... Index>
+    auto DecodeInternal(std::span<const std::byte>& span, std::index_sequence<Index...>) {
+        return GenericArgument({DecodeInternal<IsAuto, Index>(span)...});
     }
 
     static size_t GetConverterLength(const std::shared_ptr<Converter<std::remove_cv_t<E>>>&... converter) {
@@ -62,20 +62,20 @@ public:
         , converter({converter...}) {}
 
     virtual void Encode(Allocator& allocator, const GenericArgument& item) override {
-        EncodeAll<NoAutoLast>(allocator, item, ElementSequence());
+        EncodeInternal<0>(allocator, item, ElementSequence());
     }
 
     virtual void EncodeAuto(Allocator& allocator, const GenericArgument& item) override {
-        EncodeAll<AlwaysAuto>(allocator, item, ElementSequence());
+        EncodeInternal<1>(allocator, item, ElementSequence());
     }
 
     virtual GenericArgument Decode(const std::span<const std::byte>& span) override {
         std::span<const std::byte> copy = span;
-        return DecodeAll<NoAutoLast>(copy, ElementSequence());
+        return DecodeInternal<0>(copy, ElementSequence());
     }
 
     virtual GenericArgument DecodeAuto(std::span<const std::byte>& span) override {
-        return DecodeAll<AlwaysAuto>(span, ElementSequence());
+        return DecodeInternal<1>(span, ElementSequence());
     }
 };
 }
