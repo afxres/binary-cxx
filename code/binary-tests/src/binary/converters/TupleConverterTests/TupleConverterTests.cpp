@@ -16,14 +16,18 @@ using ConstantLengthTupleConverterTestTypeData = boost::mpl::list<
     std::pair<int64_t, int16_t>,
     std::tuple<int32_t>,
     std::tuple<int32_t, int64_t>,
-    std::tuple<int16_t, int32_t, int64_t>>;
+    std::tuple<int16_t, int32_t, int64_t>,
+    std::pair<const int16_t, const int32_t>,
+    std::tuple<const int64_t>>;
 
 using VariableLengthTupleConverterTestTypeData = boost::mpl::list<
     std::pair<int16_t, std::string>,
     std::pair<std::string, int32_t>,
     std::tuple<std::string>,
     std::tuple<int32_t, std::string>,
-    std::tuple<int32_t, std::string, int64_t>>;
+    std::tuple<int32_t, std::string, int64_t>,
+    std::pair<const std::string, const int16_t>,
+    std::tuple<const std::string>>;
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(ConstantLengthTupleConverterTest, T, ConstantLengthTupleConverterTestTypeData) {
     ::binary::Generator generator;
@@ -90,6 +94,30 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(VariableLengthTupleConverterEncodeDecodeBothMethod
     auto autoResult = converter->DecodeAuto(autoSpan);
     BOOST_REQUIRE(T() == dataResult);
     BOOST_REQUIRE(T() == autoResult);
+    BOOST_REQUIRE_EQUAL(autoSpan.size(), 0);
+}
+
+std::vector<std::string> StringData = {
+    "",
+    "Alice",
+};
+
+BOOST_DATA_TEST_CASE(TupleConverterWithStringDataTest, StringData, data) {
+    ::binary::Generator generator;
+    ::binary::AddConverter<::binary::converters::LittleEndianStringConverter<std::string>>(generator);
+    ::binary::AddConverter<::binary::converters::TupleConverter<std::tuple<const std::string>>>(generator);
+    auto converter = ::binary::GetConverter<std::tuple<const std::string>>(generator);
+    std::tuple<const std::string> source(data);
+    auto dataBuffer = ::binary::Allocator::Invoke([&source, &converter](auto& allocator) { converter->Encode(allocator, source); });
+    auto autoBuffer = ::binary::Allocator::Invoke([&source, &converter](auto& allocator) { converter->EncodeAuto(allocator, source); });
+    BOOST_REQUIRE_LT(dataBuffer.size(), autoBuffer.size());
+
+    std::span<const std::byte> dataSpan(dataBuffer);
+    std::span<const std::byte> autoSpan(autoBuffer);
+    auto dataResult = converter->Decode(dataSpan);
+    auto autoResult = converter->DecodeAuto(autoSpan);
+    BOOST_REQUIRE(source == dataResult);
+    BOOST_REQUIRE(source == autoResult);
     BOOST_REQUIRE_EQUAL(autoSpan.size(), 0);
 }
 

@@ -84,5 +84,29 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(VariantConverterDecodeBothMethodsWithInvalidVarian
     BOOST_REQUIRE_EQUAL(autoSpan.size(), 0);
 }
 
+std::vector<std::string> StringData = {
+    "",
+    "Alice",
+};
+
+BOOST_DATA_TEST_CASE(VariantConverterWithStringDataTest, StringData, data) {
+    ::binary::Generator generator;
+    ::binary::AddConverter<::binary::converters::LittleEndianStringConverter<std::string>>(generator);
+    ::binary::AddConverter<::binary::converters::VariantConverter<std::variant<const std::string>>>(generator);
+    auto converter = ::binary::GetConverter<std::variant<const std::string>>(generator);
+    std::variant<const std::string> source(data);
+    auto dataBuffer = ::binary::Allocator::Invoke([&source, &converter](auto& allocator) { converter->Encode(allocator, source); });
+    auto autoBuffer = ::binary::Allocator::Invoke([&source, &converter](auto& allocator) { converter->EncodeAuto(allocator, source); });
+    BOOST_REQUIRE_LT(dataBuffer.size(), autoBuffer.size());
+
+    std::span<const std::byte> dataSpan(dataBuffer);
+    std::span<const std::byte> autoSpan(autoBuffer);
+    auto dataResult = converter->Decode(dataSpan);
+    auto autoResult = converter->DecodeAuto(autoSpan);
+    BOOST_REQUIRE(source == dataResult);
+    BOOST_REQUIRE(source == autoResult);
+    BOOST_REQUIRE_EQUAL(autoSpan.size(), 0);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 }
