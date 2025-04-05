@@ -38,26 +38,27 @@ private:
     }
 
     template <size_t IsAuto, size_t Index>
-    void DecodeInternal(std::span<const std::byte>& span, GenericArgument& result, size_t index) {
+    auto DecodeInternal(std::span<const std::byte>& span, size_t index) {
         if (Index == index) {
             const auto& converter = std::get<Index>(this->converter);
             if constexpr (IsAuto == 0) {
-                result = GenericArgument(std::in_place_index<Index>, converter->Decode(span));
+                return GenericArgument(std::in_place_index<Index>, converter->Decode(span));
             } else {
-                result = GenericArgument(std::in_place_index<Index>, converter->DecodeAuto(span));
+                return GenericArgument(std::in_place_index<Index>, converter->DecodeAuto(span));
+            }
+        } else {
+            if constexpr (Index == sizeof...(E) - 1) {
+                throw std::invalid_argument("invalid variant index");
+            } else {
+                return DecodeInternal<IsAuto, Index + 1>(span, index);
             }
         }
     }
 
-    template <size_t IsAuto, size_t... Index>
-    auto DecodeInternal(std::span<const std::byte>& span, std::index_sequence<Index...>) {
+    template <size_t IsAuto>
+    auto DecodeInternal(std::span<const std::byte>& span) {
         auto index = ::binary::Decode(span);
-        if (index > sizeof...(E)) {
-            throw std::out_of_range("variant index out of range");
-        }
-        GenericArgument result;
-        (DecodeInternal<IsAuto, Index>(span, result, index), ...);
-        return result;
+        return DecodeInternal<IsAuto, 0>(span, index);
     }
 
     const std::tuple<std::shared_ptr<Converter<std::remove_cv_t<E>>>...> converter;
@@ -76,11 +77,11 @@ public:
 
     virtual GenericArgument Decode(const std::span<const std::byte>& span) override {
         std::span<const std::byte> copy = span;
-        return DecodeInternal<0>(copy, ElementSequence());
+        return DecodeInternal<0>(copy);
     }
 
     virtual GenericArgument DecodeAuto(std::span<const std::byte>& span) override {
-        return DecodeInternal<1>(span, ElementSequence());
+        return DecodeInternal<1>(span);
     }
 };
 }

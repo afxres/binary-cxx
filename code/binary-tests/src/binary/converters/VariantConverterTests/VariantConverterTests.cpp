@@ -15,7 +15,9 @@ using VariantConverterTestTypeData = boost::mpl::list<
     std::variant<int32_t, int32_t>,
     std::variant<int32_t, int64_t, int16_t>,
     std::variant<int16_t, std::string>,
-    std::variant<std::string, int32_t, int64_t>>;
+    std::variant<std::string, int32_t, int64_t>,
+    std::variant<const int64_t, const std::string>,
+    std::variant<const int16_t, int32_t, const std::string>>;
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(VariantConverterLengthTest, T, VariantConverterTestTypeData) {
     ::binary::Generator generator;
@@ -49,6 +51,36 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(VariantConverterEncodeDecodeBothMethodsWithDefault
     BOOST_REQUIRE_EQUAL(0, autoResult.index());
     BOOST_REQUIRE_EQUAL(decltype(std::get<0>(T())){}, std::get<0>(dataResult));
     BOOST_REQUIRE_EQUAL(decltype(std::get<0>(T())){}, std::get<0>(autoResult));
+    BOOST_REQUIRE_EQUAL(autoSpan.size(), 0);
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(VariantConverterDecodeBothMethodsWithInvalidVariantIndexTest, T, VariantConverterTestTypeData) {
+    ::binary::Generator generator;
+    ::binary::AddConverter<::binary::converters::LittleEndianConverter<int16_t>>(generator);
+    ::binary::AddConverter<::binary::converters::LittleEndianConverter<int32_t>>(generator);
+    ::binary::AddConverter<::binary::converters::LittleEndianConverter<int64_t>>(generator);
+    ::binary::AddConverter<::binary::converters::LittleEndianStringConverter<std::string>>(generator);
+    ::binary::AddConverter<::binary::converters::VariantConverter<T>>(generator);
+    auto converter = ::binary::GetConverter<T>(generator);
+    auto dataBuffer = ::binary::Allocator::Invoke([](auto& allocator) { ::binary::Encode(allocator, std::variant_size_v<T>); });
+    auto autoBuffer = std::vector<std::byte>{dataBuffer};
+
+    std::span<const std::byte> dataSpan(dataBuffer);
+    std::span<const std::byte> autoSpan(autoBuffer);
+    BOOST_REQUIRE_EXCEPTION(
+        converter->Decode(dataSpan),
+        std::invalid_argument,
+        [](const std::invalid_argument& e) {
+            BOOST_REQUIRE_EQUAL(e.what(), "invalid variant index");
+            return true;
+        });
+    BOOST_REQUIRE_EXCEPTION(
+        converter->DecodeAuto(autoSpan),
+        std::invalid_argument,
+        [](const std::invalid_argument& e) {
+            BOOST_REQUIRE_EQUAL(e.what(), "invalid variant index");
+            return true;
+        });
     BOOST_REQUIRE_EQUAL(autoSpan.size(), 0);
 }
 
