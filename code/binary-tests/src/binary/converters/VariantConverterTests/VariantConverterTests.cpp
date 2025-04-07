@@ -108,5 +108,43 @@ BOOST_DATA_TEST_CASE(VariantConverterWithStringDataTest, StringData, data) {
     BOOST_REQUIRE_EQUAL(autoSpan.size(), 0);
 }
 
+class FakeCopyType {
+public:
+    FakeCopyType() {}
+    FakeCopyType(const FakeCopyType&) { throw std::logic_error("fake copy"); }
+};
+
+template <typename T>
+class FakeConverter : public ::binary::Converter<T> {
+public:
+    virtual void Encode([[maybe_unused]] ::binary::Allocator& allocator, [[maybe_unused]] const FakeCopyType& item) override {}
+    virtual FakeCopyType Decode([[maybe_unused]] const std::span<const std::byte>& span) override { throw std::exception(); }
+};
+
+BOOST_AUTO_TEST_CASE(VariantConverterEncodeInvalidVariantTest) {
+    std::variant<int32_t, FakeCopyType> source;
+    BOOST_REQUIRE_EQUAL(0, source.index());
+    BOOST_REQUIRE_EXCEPTION(
+        source = FakeCopyType(),
+        std::logic_error,
+        [](const std::logic_error& e) {
+            BOOST_REQUIRE_EQUAL(e.what(), "fake copy");
+            return true;
+        });
+    BOOST_REQUIRE(source.valueless_by_exception());
+    BOOST_REQUIRE_EQUAL(std::variant_npos, source.index());
+    ::binary::converters::VariantConverter<std::variant<int32_t, FakeCopyType>> converter(
+        std::make_shared<::binary::converters::LittleEndianConverter<int32_t>>(),
+        std::make_shared<FakeConverter<FakeCopyType>>());
+    ::binary::Allocator allocator;
+    BOOST_REQUIRE_EXCEPTION(
+        converter.Encode(allocator, source),
+        std::invalid_argument,
+        [](const std::invalid_argument& e) {
+            BOOST_REQUIRE_EQUAL(e.what(), "invalid variant value");
+            return true;
+        });
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 }

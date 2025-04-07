@@ -33,6 +33,9 @@ private:
 
     template <size_t IsAuto, size_t... Index>
     void EncodeInternal(Allocator& allocator, const GenericArgument& item, std::index_sequence<Index...>) {
+        if (item.valueless_by_exception()) {
+            throw std::invalid_argument("invalid variant value");
+        }
         ::binary::Encode(allocator, item.index());
         (EncodeInternal<IsAuto, Index>(allocator, item), ...);
     }
