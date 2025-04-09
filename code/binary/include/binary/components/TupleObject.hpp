@@ -16,18 +16,18 @@
         using MemberInfoInitializer = std::function<MemberInfo(const ::binary::IGenerator&, bool)>;            \
                                                                                                                \
         static std::vector<MemberInfo> GetContexts(const ::binary::IGenerator& generator) {                    \
-            static bool initialized = false;                                                                   \
-            static std::vector<MemberInfoInitializer> initializers;                                            \
-            if (initialized == false) {                                                                        \
-                initialized = true;                                                                            \
-                GetInitializers(initializers);                                                                 \
-            }                                                                                                  \
-                                                                                                               \
+            static auto initializers = GetInitializers();                                                      \
             std::vector<MemberInfo> contexts;                                                                  \
             for (size_t i = 0; i < initializers.size(); i++) {                                                 \
                 contexts.emplace_back(initializers.at(i)(generator, i == initializers.size() - 1));            \
             }                                                                                                  \
             return contexts;                                                                                   \
+        }                                                                                                      \
+                                                                                                               \
+        static std::vector<MemberInfoInitializer> GetInitializers() {                                          \
+            std::vector<MemberInfoInitializer> initializers;                                                   \
+            GetInitializers(initializers);                                                                     \
+            return initializers;                                                                               \
         }                                                                                                      \
                                                                                                                \
         static void GetInitializers(std::vector<MemberInfoInitializer>& initializers) {
