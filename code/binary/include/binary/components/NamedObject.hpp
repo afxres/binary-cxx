@@ -4,33 +4,33 @@
 #include "binary/GeneratorExtensions.hpp"
 #include "binary/components/NamedObjectConverter.hpp"
 
-#define BINARY_NAMED_OBJECT_CONVERTER(ARG_CONVERTER_NAME, ARG_CONVERTER_TARGET_TYPE)                           \
-    class ARG_CONVERTER_NAME : public ::binary::components::NamedObjectConverter<ARG_CONVERTER_TARGET_TYPE> {  \
-    public:                                                                                                    \
-        ARG_CONVERTER_NAME(const ::binary::IGenerator& generator)                                              \
-            : ::binary::components::NamedObjectConverter<ARG_CONVERTER_TARGET_TYPE>(GetContexts(generator)) {} \
-                                                                                                               \
-    private:                                                                                                   \
-        using ConverterTargetType = ARG_CONVERTER_TARGET_TYPE;                                                 \
-        using MemberInfo = ::binary::components::NamedObjectConverter<ARG_CONVERTER_TARGET_TYPE>::MemberInfo;  \
-        using MemberInfoInitializer = std::function<MemberInfo(const ::binary::IGenerator&)>;                  \
-                                                                                                               \
-        static std::vector<MemberInfo> GetContexts(const ::binary::IGenerator& generator) {                    \
-            static auto initializers = GetInitializers();                                                      \
-            std::vector<MemberInfo> contexts;                                                                  \
-            for (size_t i = 0; i < initializers.size(); i++) {                                                 \
-                contexts.emplace_back(initializers.at(i)(generator));                                          \
-            }                                                                                                  \
-            return contexts;                                                                                   \
-        }                                                                                                      \
-                                                                                                               \
-        static std::vector<MemberInfoInitializer> GetInitializers() {                                          \
-            std::vector<MemberInfoInitializer> initializers;                                                   \
-            GetInitializers(initializers);                                                                     \
-            return initializers;                                                                               \
-        }                                                                                                      \
-                                                                                                               \
-        static void GetInitializers(std::vector<MemberInfoInitializer>& initializers) {
+#define BINARY_NAMED_OBJECT_CONVERTER(ARG_CONVERTER_NAME, ARG_CONVERTER_TARGET_TYPE)                                 \
+    class ARG_CONVERTER_NAME : public ::binary::components::NamedObjectConverter<ARG_CONVERTER_TARGET_TYPE> {        \
+    public:                                                                                                          \
+        ARG_CONVERTER_NAME(const ::binary::IGenerator& generator)                                                    \
+            : ::binary::components::NamedObjectConverter<ARG_CONVERTER_TARGET_TYPE>(GetMemberInfoList(generator)) {} \
+                                                                                                                     \
+    private:                                                                                                         \
+        using ConverterTargetType = ARG_CONVERTER_TARGET_TYPE;                                                       \
+        using MemberInfo = ::binary::components::NamedObjectConverter<ARG_CONVERTER_TARGET_TYPE>::MemberInfo;        \
+        using MemberInfoInitializer = std::function<MemberInfo(const ::binary::IGenerator&)>;                        \
+                                                                                                                     \
+        static std::vector<MemberInfo> GetMemberInfoList(const ::binary::IGenerator& generator) {                    \
+            static auto initializers = GetMemberInfoInitializerList();                                               \
+            std::vector<MemberInfo> result;                                                                          \
+            for (size_t i = 0; i < initializers.size(); i++) {                                                       \
+                result.emplace_back(initializers.at(i)(generator));                                                  \
+            }                                                                                                        \
+            return result;                                                                                           \
+        }                                                                                                            \
+                                                                                                                     \
+        static std::vector<MemberInfoInitializer> GetMemberInfoInitializerList() {                                   \
+            std::vector<MemberInfoInitializer> initializers;                                                         \
+            GetMemberInfoInitializerList(initializers);                                                              \
+            return initializers;                                                                                     \
+        }                                                                                                            \
+                                                                                                                     \
+        static void GetMemberInfoInitializerList(std::vector<MemberInfoInitializer>& initializers) {
 
 #define BINARY_NAMED_OBJECT_CONVERTER_END() \
     }                                       \

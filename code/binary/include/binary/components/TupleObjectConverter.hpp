@@ -19,18 +19,18 @@ public:
         DecodeFunction DecodeAuto;
     };
 
-    TupleObjectConverter(std::vector<MemberInfo>&& contexts)
-        : Converter<T>(::binary::internal::GetConverterLength(contexts | std::views::transform([](const auto& info) { return info.Length; })))
-        , contexts(std::move(contexts)) {}
+    TupleObjectConverter(std::vector<MemberInfo>&& record)
+        : Converter<T>(::binary::internal::GetConverterLength(record | std::views::transform([](const auto& info) { return info.Length; })))
+        , record(std::move(record)) {}
 
     virtual void Encode(Allocator& allocator, const T& item) override {
-        for (const auto& info : this->contexts) {
+        for (const auto& info : this->record) {
             info.Encode(allocator, item);
         }
     }
 
     virtual void EncodeAuto(Allocator& allocator, const T& item) override {
-        for (const auto& info : this->contexts) {
+        for (const auto& info : this->record) {
             info.EncodeAuto(allocator, item);
         }
     }
@@ -38,7 +38,7 @@ public:
     virtual T Decode(const std::span<const std::byte>& span) override {
         T result{};
         std::span<const std::byte> copy = span;
-        for (const auto& info : this->contexts) {
+        for (const auto& info : this->record) {
             info.Decode(result, copy);
         }
         return result;
@@ -46,14 +46,14 @@ public:
 
     virtual T DecodeAuto(std::span<const std::byte>& span) override {
         T result{};
-        for (const auto& info : this->contexts) {
+        for (const auto& info : this->record) {
             info.DecodeAuto(result, span);
         }
         return result;
     }
 
 private:
-    std::vector<MemberInfo> contexts;
+    std::vector<MemberInfo> record;
 };
 }
 
