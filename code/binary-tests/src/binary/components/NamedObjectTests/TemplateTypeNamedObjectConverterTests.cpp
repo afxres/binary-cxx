@@ -17,16 +17,15 @@ struct Box {
     T Item;
 };
 
-template <typename T>
-BINARY_NAMED_OBJECT_CONVERTER(BoxConverter, Box<T>)
-BINARY_NAMED_MEMBER(Item);
-BINARY_NAMED_OBJECT_CONVERTER_END()
+BINARY_NAMED_OBJECT_CONVERTER_TEMPLATE(BoxConverter, T) {
+    BINARY_NAMED_MEMBER(Item);
+}
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(TemplateBoxNamedObjectConverterTest, T, BoxConverterTestTypeData) {
     ::binary::Generator generator;
     ::binary::AddConverter<::binary::converters::LittleEndianConverter<int32_t>>(generator);
     ::binary::AddConverter<::binary::converters::LittleEndianStringConverter<std::string>>(generator);
-    ::binary::AddConverter<BoxConverter<T>>(generator);
+    ::binary::AddConverter<BoxConverter<Box<T>>>(generator);
     auto converter = ::binary::GetConverter<Box<T>>(generator);
     BOOST_REQUIRE_EQUAL(converter->Length(), 0);
     Box<T> source;

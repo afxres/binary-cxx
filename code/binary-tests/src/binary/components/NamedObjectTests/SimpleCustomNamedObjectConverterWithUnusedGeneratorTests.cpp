@@ -12,9 +12,9 @@ struct Box {
     std::string Item;
 };
 
-BINARY_NAMED_OBJECT_CONVERTER(BoxConverter, Box)
-BINARY_NAMED_MEMBER_CUSTOM("item", false, item.Item, item.Item = std::move(result), std::make_shared<::binary::converters::LittleEndianStringConverter<std::string>>());
-BINARY_NAMED_OBJECT_CONVERTER_END()
+BINARY_NAMED_OBJECT_CONVERTER(BoxConverter, Box) {
+    BINARY_NAMED_MEMBER_CUSTOM("item", false, item.Item, item.Item = std::move(result), std::make_shared<::binary::converters::LittleEndianStringConverter<std::string>>());
+}
 
 class FakeGenerator : public ::binary::IGenerator {
 public:

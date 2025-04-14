@@ -12,9 +12,9 @@ struct Box {
     int32_t Item;
 };
 
-BINARY_TUPLE_OBJECT_CONVERTER(BoxConverter, Box)
-BINARY_TUPLE_MEMBER_CUSTOM(item.Item, item.Item = std::move(result), std::make_shared<::binary::converters::LittleEndianConverter<int32_t>>());
-BINARY_TUPLE_OBJECT_CONVERTER_END()
+BINARY_TUPLE_OBJECT_CONVERTER(BoxConverter, Box) {
+    BINARY_TUPLE_MEMBER_CUSTOM(item.Item, item.Item = std::move(result), std::make_shared<::binary::converters::LittleEndianConverter<int32_t>>());
+}
 
 class FakeGenerator : public ::binary::IGenerator {
 public:

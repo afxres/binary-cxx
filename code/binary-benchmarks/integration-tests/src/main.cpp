@@ -36,29 +36,29 @@ struct Type01 {
 using TypeX2 = std::tuple<double, std::vector<std::string>>;
 using TypeX1 = std::tuple<int32_t, std::string, std::vector<int32_t>, TypeX2>;
 
-BINARY_NAMED_OBJECT_CONVERTER(Type02NamedObjectConverter, Type02)
-BINARY_NAMED_MEMBER(Data);
-BINARY_NAMED_MEMBER(Tags);
-BINARY_NAMED_OBJECT_CONVERTER_END()
+BINARY_NAMED_OBJECT_CONVERTER(Type02NamedObjectConverter, Type02) {
+    BINARY_NAMED_MEMBER(Data);
+    BINARY_NAMED_MEMBER(Tags);
+}
 
-BINARY_NAMED_OBJECT_CONVERTER(Type01NamedObjectConverter, Type01)
-BINARY_NAMED_MEMBER(Id);
-BINARY_NAMED_MEMBER(Name);
-BINARY_NAMED_MEMBER(List);
-BINARY_NAMED_MEMBER(Item);
-BINARY_NAMED_OBJECT_CONVERTER_END()
+BINARY_NAMED_OBJECT_CONVERTER(Type01NamedObjectConverter, Type01) {
+    BINARY_NAMED_MEMBER(Id);
+    BINARY_NAMED_MEMBER(Name);
+    BINARY_NAMED_MEMBER(List);
+    BINARY_NAMED_MEMBER(Item);
+}
 
-BINARY_TUPLE_OBJECT_CONVERTER(Type02TupleObjectConverter, Type02)
-BINARY_TUPLE_MEMBER(Data);
-BINARY_TUPLE_MEMBER(Tags);
-BINARY_TUPLE_OBJECT_CONVERTER_END()
+BINARY_TUPLE_OBJECT_CONVERTER(Type02TupleObjectConverter, Type02) {
+    BINARY_TUPLE_MEMBER(Data);
+    BINARY_TUPLE_MEMBER(Tags);
+}
 
-BINARY_TUPLE_OBJECT_CONVERTER(Type01TupleObjectConverter, Type01)
-BINARY_TUPLE_MEMBER(Id);
-BINARY_TUPLE_MEMBER(Name);
-BINARY_TUPLE_MEMBER(List);
-BINARY_TUPLE_MEMBER(Item);
-BINARY_TUPLE_OBJECT_CONVERTER_END()
+BINARY_TUPLE_OBJECT_CONVERTER(Type01TupleObjectConverter, Type01) {
+    BINARY_TUPLE_MEMBER(Id);
+    BINARY_TUPLE_MEMBER(Name);
+    BINARY_TUPLE_MEMBER(List);
+    BINARY_TUPLE_MEMBER(Item);
+}
 
 template <typename Archive>
 void serialize(Archive& archive, Type02& item, [[maybe_unused]] const unsigned int version) {
