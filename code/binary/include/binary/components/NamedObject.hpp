@@ -11,7 +11,7 @@
             : ::binary::components::NamedObjectConverter<ARG_CONVERTER_TARGET_TYPE>(GetMemberInfoList(generator)) {} \
                                                                                                                      \
     private:                                                                                                         \
-        using ConverterTargetType = ARG_CONVERTER_TARGET_TYPE;                                                       \
+        using ObjectType = ARG_CONVERTER_TARGET_TYPE;                                                                \
         using MemberInfo = ::binary::components::NamedObjectConverter<ARG_CONVERTER_TARGET_TYPE>::MemberInfo;        \
         using MemberInfoInitializer = std::function<MemberInfo(const ::binary::IGenerator&)>;                        \
                                                                                                                      \
@@ -42,7 +42,7 @@
         #ARG_NAME, false,                  \
         item.ARG_NAME,                     \
         item.ARG_NAME = std::move(result), \
-        ::binary::GetConverter<decltype(ConverterTargetType::ARG_NAME)>(generator))
+        ::binary::GetConverter<decltype(ObjectType::ARG_NAME)>(generator))
 
 #define BINARY_NAMED_MEMBER_CUSTOM(ARG_NAME, ARG_IS_OPTIONAL, ARG_GET_MEMBER_EXPRESSION, ARG_SET_MEMBER_EXPRESSION, ARG_GET_CONVERTER_EXPRESSION) \
     initializers.push_back([](auto& generator) {                                                                                                  \

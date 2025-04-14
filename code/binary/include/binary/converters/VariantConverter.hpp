@@ -15,9 +15,9 @@ template <template <typename...> typename T, typename... E>
     requires requires { std::variant_size<T<E...>>::value; }
 class VariantConverter<T<E...>> : public Converter<T<E...>> {
 private:
-    using ConverterTargetType = T<E...>;
-    using EncodeFunction = std::function<void(Allocator&, const ConverterTargetType&)>;
-    using DecodeFunction = std::function<ConverterTargetType(std::span<const std::byte>&)>;
+    using ObjectType = T<E...>;
+    using EncodeFunction = std::function<void(Allocator&, const ObjectType&)>;
+    using DecodeFunction = std::function<ObjectType(std::span<const std::byte>&)>;
 
     struct MethodInfo {
         EncodeFunction Encode;
@@ -31,8 +31,8 @@ private:
         MethodInfo result;
         result.Encode = [converter](auto& allocator, const auto& item) { converter->Encode(allocator, std::get<Index>(item)); };
         result.EncodeAuto = [converter](auto& allocator, const auto& item) { converter->EncodeAuto(allocator, std::get<Index>(item)); };
-        result.Decode = [converter](auto& span) { return ConverterTargetType(std::in_place_index<Index>, converter->Decode(span)); };
-        result.DecodeAuto = [converter](auto& span) { return ConverterTargetType(std::in_place_index<Index>, converter->DecodeAuto(span)); };
+        result.Decode = [converter](auto& span) { return ObjectType(std::in_place_index<Index>, converter->Decode(span)); };
+        result.DecodeAuto = [converter](auto& span) { return ObjectType(std::in_place_index<Index>, converter->DecodeAuto(span)); };
         return result;
     }
 
@@ -44,7 +44,7 @@ private:
     }
 
     template <size_t IsAuto>
-    void EncodeInternal(Allocator& allocator, const ConverterTargetType& item) {
+    void EncodeInternal(Allocator& allocator, const ObjectType& item) {
         auto header = item.index();
         const auto& record = this->record;
         if (header >= record.size()) {
@@ -60,7 +60,7 @@ private:
     }
 
     template <size_t IsAuto>
-    ConverterTargetType DecodeInternal(std::span<const std::byte>& span) {
+    ObjectType DecodeInternal(std::span<const std::byte>& span) {
         auto header = ::binary::Decode(span);
         const auto& record = this->record;
         if (header >= record.size()) {
@@ -80,20 +80,20 @@ public:
     VariantConverter(const std::shared_ptr<Converter<std::remove_cv_t<E>>>&... converter)
         : record(GetMethodInfoList(converter..., std::make_index_sequence<sizeof...(E)>())) {}
 
-    virtual void Encode(Allocator& allocator, const ConverterTargetType& item) override {
+    virtual void Encode(Allocator& allocator, const ObjectType& item) override {
         EncodeInternal<0>(allocator, item);
     }
 
-    virtual void EncodeAuto(Allocator& allocator, const ConverterTargetType& item) override {
+    virtual void EncodeAuto(Allocator& allocator, const ObjectType& item) override {
         EncodeInternal<1>(allocator, item);
     }
 
-    virtual ConverterTargetType Decode(const std::span<const std::byte>& span) override {
+    virtual ObjectType Decode(const std::span<const std::byte>& span) override {
         std::span<const std::byte> copy = span;
         return DecodeInternal<0>(copy);
     }
 
-    virtual ConverterTargetType DecodeAuto(std::span<const std::byte>& span) override {
+    virtual ObjectType DecodeAuto(std::span<const std::byte>& span) override {
         return DecodeInternal<1>(span);
     }
 };

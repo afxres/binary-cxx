@@ -11,7 +11,7 @@
             : ::binary::components::TupleObjectConverter<ARG_CONVERTER_TARGET_TYPE>(GetMemberInfoList(generator)) {} \
                                                                                                                      \
     private:                                                                                                         \
-        using ConverterTargetType = ARG_CONVERTER_TARGET_TYPE;                                                       \
+        using ObjectType = ARG_CONVERTER_TARGET_TYPE;                                                                \
         using MemberInfo = ::binary::components::TupleObjectConverter<ARG_CONVERTER_TARGET_TYPE>::MemberInfo;        \
         using MemberInfoInitializer = std::function<MemberInfo(const ::binary::IGenerator&, bool)>;                  \
                                                                                                                      \
@@ -41,7 +41,7 @@
     BINARY_TUPLE_MEMBER_CUSTOM(            \
         item.ARG_NAME,                     \
         item.ARG_NAME = std::move(result), \
-        ::binary::GetConverter<decltype(ConverterTargetType::ARG_NAME)>(generator))
+        ::binary::GetConverter<decltype(ObjectType::ARG_NAME)>(generator))
 
 #define BINARY_TUPLE_MEMBER_CUSTOM(ARG_GET_MEMBER_EXPRESSION, ARG_SET_MEMBER_EXPRESSION, ARG_GET_CONVERTER_EXPRESSION) \
     initializers.push_back([]([[maybe_unused]] auto& generator, bool last) {                                           \
