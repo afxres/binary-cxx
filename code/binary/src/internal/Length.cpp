@@ -10,7 +10,7 @@
 namespace binary::internal {
 void EnsureMemoryAccess(void* memory) {
     if (memory == nullptr) {
-        internal::ThrowInvalidMemoryAccess();
+        throw std::logic_error("invalid memory access or out of memory");
     }
 }
 

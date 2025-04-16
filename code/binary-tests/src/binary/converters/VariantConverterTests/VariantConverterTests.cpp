@@ -8,6 +8,8 @@
 #include <binary/converters/LittleEndianStringConverter.hpp>
 #include <binary/converters/VariantConverter.hpp>
 
+#include <format>
+
 namespace tests::binary::converters::VariantConverterTests {
 BOOST_AUTO_TEST_SUITE(VariantConverterTests)
 
@@ -67,18 +69,19 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(VariantConverterDecodeBothMethodsWithInvalidVarian
 
     std::span<const std::byte> dataSpan(dataBuffer);
     std::span<const std::byte> autoSpan(autoBuffer);
+    auto message = std::format("invalid variant index: {}", std::variant_size_v<T>);
     BOOST_REQUIRE_EXCEPTION(
         converter->Decode(dataSpan),
         std::invalid_argument,
-        [](const std::invalid_argument& e) {
-            BOOST_REQUIRE_EQUAL(e.what(), "invalid variant index");
+        [message](const std::invalid_argument& e) {
+            BOOST_REQUIRE_EQUAL(e.what(), message);
             return true;
         });
     BOOST_REQUIRE_EXCEPTION(
         converter->DecodeAuto(autoSpan),
         std::invalid_argument,
-        [](const std::invalid_argument& e) {
-            BOOST_REQUIRE_EQUAL(e.what(), "invalid variant index");
+        [message](const std::invalid_argument& e) {
+            BOOST_REQUIRE_EQUAL(e.what(), message);
             return true;
         });
     BOOST_REQUIRE_EQUAL(autoSpan.size(), 0);
@@ -137,11 +140,12 @@ BOOST_AUTO_TEST_CASE(VariantConverterEncodeInvalidVariantTest) {
         std::make_shared<::binary::converters::LittleEndianConverter<int32_t>>(),
         std::make_shared<FakeConverter<FakeCopyType>>());
     ::binary::Allocator allocator;
+    auto message = std::format("invalid variant index: {}", SIZE_MAX);
     BOOST_REQUIRE_EXCEPTION(
         converter.Encode(allocator, source),
         std::invalid_argument,
-        [](const std::invalid_argument& e) {
-            BOOST_REQUIRE_EQUAL(e.what(), "invalid variant value");
+        [message](const std::invalid_argument& e) {
+            BOOST_REQUIRE_EQUAL(e.what(), message);
             return true;
         });
 }

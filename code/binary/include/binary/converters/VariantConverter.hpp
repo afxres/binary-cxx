@@ -6,6 +6,7 @@
 
 #include "binary/Converter.hpp"
 #include "binary/ConverterExtensions.hpp"
+#include "binary/internal/Exception.hpp"
 
 namespace binary::converters {
 template <typename T>
@@ -48,7 +49,7 @@ private:
         auto header = item.index();
         const auto& record = this->record;
         if (header >= record.size()) {
-            throw std::invalid_argument("invalid variant value");
+            internal::ThrowInvalidVariantIndex(header);
         }
 
         ::binary::Encode(allocator, header);
@@ -64,7 +65,7 @@ private:
         auto header = ::binary::Decode(span);
         const auto& record = this->record;
         if (header >= record.size()) {
-            throw std::invalid_argument("invalid variant index");
+            internal::ThrowInvalidVariantIndex(header);
         }
 
         if constexpr (IsAuto == 0) {

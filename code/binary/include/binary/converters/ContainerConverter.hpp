@@ -1,13 +1,13 @@
 #ifndef BINARY_CONVERTERS_CONTAINERCONVERTER_HPP
 #define BINARY_CONVERTERS_CONTAINERCONVERTER_HPP
 
-#include <format>
 #include <ranges>
 
 #include "binary/Converter.hpp"
 #include "binary/internal/ContainerInsertFunction.hpp"
 #include "binary/internal/ContainerResizeFunction.hpp"
 #include "binary/internal/Converter.hpp"
+#include "binary/internal/Exception.hpp"
 
 namespace binary::converters {
 template <typename T>
@@ -30,7 +30,7 @@ public:
 
     virtual T Decode(const std::span<const std::byte>& span) override {
         if constexpr (!internal::ContainerInsertFunction<T>::IsEnable) {
-            throw std::logic_error(std::format("no suitable emplace method found, type: {}", typeid(T).name()));
+            internal::ThrowNoSuitableEmplaceMethod(typeid(T));
         } else {
             if (span.empty()) {
                 return {};

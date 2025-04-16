@@ -1,7 +1,6 @@
 #ifndef BINARY_INTERNAL_CONVERTER_HPP
 #define BINARY_INTERNAL_CONVERTER_HPP
 
-#include <format>
 #include <memory>
 #include <ranges>
 
@@ -28,7 +27,7 @@ size_t GetConverterLength(const Range& lengths) {
             return 0;
         }
         if (length > INT32_MAX || (result += length) > INT32_MAX) {
-            throw std::overflow_error("converter length overflow");
+            internal::ThrowConverterLengthOverflow();
         }
     }
     return result;
