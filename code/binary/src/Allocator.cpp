@@ -119,7 +119,7 @@ void Allocator::FinishAnchor(size_t anchor) {
     if (length <= AllocatorAnchorShrinkLimits) {
         this->offset = offset - 3;
         internal::EncodeLengthPrefix(target, length, 1);
-        std::memmove(target + 1, target + 4, length);
+        memmove(target + 1, target + 4, length);
         assert(this->offset >= 1);
         assert(this->offset <= this->bounds);
     } else {
