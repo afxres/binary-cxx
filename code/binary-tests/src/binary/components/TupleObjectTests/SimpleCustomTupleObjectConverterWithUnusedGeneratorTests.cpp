@@ -6,7 +6,7 @@
 #include <binary/converters/LittleEndianConverter.hpp>
 
 namespace tests::binary::components::TupleObjectTests {
-BOOST_AUTO_TEST_SUITE_NO_DECOR(SimpleCustomTupleObjectConverterWithUnusedGeneratorTests)
+BOOST_AUTO_TEST_SUITE(SimpleCustomTupleObjectConverterWithUnusedGeneratorTests)
 
 struct Box {
     int32_t Item;

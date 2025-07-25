@@ -6,7 +6,7 @@
 #include <binary/converters/LittleEndianStringConverter.hpp>
 
 namespace tests::binary::components::NamedObjectTests {
-BOOST_AUTO_TEST_SUITE_NO_DECOR(SimpleCustomNamedObjectConverterWithUnusedGeneratorTests)
+BOOST_AUTO_TEST_SUITE(SimpleCustomNamedObjectConverterWithUnusedGeneratorTests)
 
 struct Box {
     std::string Item;
