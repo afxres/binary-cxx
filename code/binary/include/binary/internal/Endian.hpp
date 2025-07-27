@@ -8,13 +8,13 @@
 
 namespace binary::internal {
 #if defined(__GNUC__)
-#define __swap16__ __builtin_bswap16
-#define __swap32__ __builtin_bswap32
-#define __swap64__ __builtin_bswap64
+#define BINARY_INTERNAL_SWAP_16 __builtin_bswap16
+#define BINARY_INTERNAL_SWAP_32 __builtin_bswap32
+#define BINARY_INTERNAL_SWAP_64 __builtin_bswap64
 #elif defined(_WIN32)
-#define __swap16__ _byteswap_ushort
-#define __swap32__ _byteswap_ulong
-#define __swap64__ _byteswap_uint64
+#define BINARY_INTERNAL_SWAP_16 _byteswap_ushort
+#define BINARY_INTERNAL_SWAP_32 _byteswap_ulong
+#define BINARY_INTERNAL_SWAP_64 _byteswap_uint64
 #endif
 
 template <typename Item>
@@ -29,14 +29,14 @@ Item LoadUnaligned(const void* source) {
     return *static_cast<const Item*>(source);
 }
 
-#define SaveSwapTest(Size)                                                                   \
-    if constexpr (sizeof(Item) == sizeof(uint##Size##_t)) {                                  \
-        return SaveUnaligned(target, __swap##Size##__(std::bit_cast<uint##Size##_t>(item))); \
+#define BINARY_INTERNAL_SWAP_SAVE_TEST(Size)                                                            \
+    if constexpr (sizeof(Item) == sizeof(uint##Size##_t)) {                                             \
+        return SaveUnaligned(target, BINARY_INTERNAL_SWAP_##Size(std::bit_cast<uint##Size##_t>(item))); \
     }
 
-#define LoadSwapTest(Size)                                                                   \
-    if constexpr (sizeof(Item) == sizeof(uint##Size##_t)) {                                  \
-        return std::bit_cast<Item>(__swap##Size##__(LoadUnaligned<uint##Size##_t>(source))); \
+#define BINARY_INTERNAL_SWAP_LOAD_TEST(Size)                                                            \
+    if constexpr (sizeof(Item) == sizeof(uint##Size##_t)) {                                             \
+        return std::bit_cast<Item>(BINARY_INTERNAL_SWAP_##Size(LoadUnaligned<uint##Size##_t>(source))); \
     }
 
 template <typename Item, std::endian E>
@@ -45,9 +45,9 @@ void Save(void* target, Item item) {
     if constexpr (std::endian::native == E || sizeof(Item) == 1) {
         SaveUnaligned(target, item);
     } else {
-        SaveSwapTest(16);
-        SaveSwapTest(32);
-        SaveSwapTest(64);
+        BINARY_INTERNAL_SWAP_SAVE_TEST(16);
+        BINARY_INTERNAL_SWAP_SAVE_TEST(32);
+        BINARY_INTERNAL_SWAP_SAVE_TEST(64);
         static_assert("type not supported");
     }
 }
@@ -58,9 +58,9 @@ Item Load(const void* source) {
     if constexpr (std::endian::native == E || sizeof(Item) == 1) {
         return LoadUnaligned<Item>(source);
     } else {
-        LoadSwapTest(16);
-        LoadSwapTest(32);
-        LoadSwapTest(64);
+        BINARY_INTERNAL_SWAP_LOAD_TEST(16);
+        BINARY_INTERNAL_SWAP_LOAD_TEST(32);
+        BINARY_INTERNAL_SWAP_LOAD_TEST(64);
         static_assert("type not supported");
     }
 }
