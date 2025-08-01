@@ -5,6 +5,7 @@
 #include <concepts>
 #include <cstddef>
 #include <cstdint>
+#include <cstring>
 
 namespace binary::internal {
 #if defined(__GNUC__)
@@ -20,13 +21,15 @@ namespace binary::internal {
 template <typename Item>
     requires std::same_as<Item, std::remove_cv_t<Item>>
 void SaveUnaligned(void* target, Item item) {
-    *static_cast<Item*>(target) = item;
+    memcpy(target, &item, sizeof(Item));
 }
 
 template <typename Item>
     requires std::same_as<Item, std::remove_cv_t<Item>>
 Item LoadUnaligned(const void* source) {
-    return *static_cast<const Item*>(source);
+    Item item;
+    memcpy(&item, source, sizeof(Item));
+    return item;
 }
 
 #define BINARY_INTERNAL_SWAP_SAVE_TEST(Size)                                                            \
