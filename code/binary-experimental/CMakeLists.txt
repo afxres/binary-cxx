@@ -1,0 +1,8 @@
+﻿cmake_minimum_required(VERSION 3.28)
+project("binary-experimental")
+set(CMAKE_CXX_STANDARD 20)
+if(POLICY CMP0167)
+    cmake_policy(SET CMP0167 NEW)
+endif()
+find_package(Boost REQUIRED)
+include_directories(${Boost_INCLUDE_DIRS} "${binary_SOURCE_DIR}/include")
