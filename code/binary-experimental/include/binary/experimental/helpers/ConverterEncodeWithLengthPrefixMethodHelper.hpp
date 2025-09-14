@@ -1,0 +1,36 @@
+#ifndef BINARY_EXPERIMENTAL_HELPERS_CONVERTERENCODEWITHLENGTHPREFIXMETHODHELPER_HPP
+#define BINARY_EXPERIMENTAL_HELPERS_CONVERTERENCODEWITHLENGTHPREFIXMETHODHELPER_HPP
+
+#include "binary/ConverterExtensions.hpp"
+#include "binary/internal/AllocatorUnsafeAccessor.hpp"
+
+namespace binary::experimental::helpers {
+template <typename C>
+struct ConverterEncodeWithLengthPrefixMethodHelper;
+
+template <typename C>
+struct ConverterEncodeWithLengthPrefixMethodHelper {
+    BINARY_EXPERIMENTAL_DEFINE_STATIC_ENCODE_METHOD_WITH_NAME(C::ObjectType, Invoke) {
+        using typename ::binary::internal::AllocatorUnsafeAccessor;
+        constexpr size_t length = C::Length();
+        if constexpr (length == 0) {
+            size_t anchor = AllocatorUnsafeAccessor::Anchor(allocator);
+            C::Encode(allocator, item);
+            AllocatorUnsafeAccessor::FinishAnchor(allocator, anchor);
+        } else {
+            ::binary::Encode(allocator, length);
+            C::Encode(allocator, item);
+        }
+    }
+};
+
+template <typename C>
+    requires requires { &C::EncodeWithLengthPrefix; }
+struct ConverterEncodeWithLengthPrefixMethodHelper<C> {
+    BINARY_EXPERIMENTAL_DEFINE_STATIC_ENCODE_METHOD_WITH_NAME(C::ObjectType, Invoke) {
+        C::EncodeWithLengthPrefix(allocator, item);
+    }
+};
+}
+
+#endif

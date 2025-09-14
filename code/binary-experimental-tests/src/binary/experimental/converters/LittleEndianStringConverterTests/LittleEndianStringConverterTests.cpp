@@ -23,6 +23,16 @@ std::vector<std::string> StringTestData = {
     std::string(127, 'A'),
 };
 
+BOOST_AUTO_TEST_CASE(LittleEndianStringConverterForStringLengthTest) {
+    using ConverterType = ::binary::experimental::Converter<std::string>;
+    using ActualConverterType = typename ConverterType::ActualConverterType;
+    std::string name = typeid(ActualConverterType).name();
+    BOOST_REQUIRE(name.find("experimental") != 0);
+    BOOST_REQUIRE(name.find("LittleEndianStringConverter") != 0);
+    BOOST_REQUIRE_EQUAL(0, ConverterType::Length());
+    BOOST_REQUIRE_EQUAL(0, ActualConverterType::Length());
+}
+
 BOOST_DATA_TEST_CASE(LittleEndianStringConverterForStringEncodeDecodeTest, StringTestData, source) {
     auto x = ::binary::Allocator::Invoke([&source](auto& allocator) { ::binary::experimental::converters::LittleEndianStringConverter<std::string>::Encode(allocator, source); });
     auto y = ::binary::Allocator::Invoke([&source](auto& allocator) { ::binary::experimental::Converter<std::string>::Encode(allocator, source); });
