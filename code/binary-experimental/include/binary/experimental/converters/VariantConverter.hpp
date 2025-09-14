@@ -28,7 +28,7 @@ struct VariantConverter {
             }
         } else {
             if constexpr (Index == ElementCount - 1) {
-                internal::ThrowInvalidVariantIndex(item.index());
+                ::binary::internal::ThrowInvalidVariantIndex(item.index());
             } else {
                 EncodeInternal<IsAuto, Index + 1>(allocator, item);
             }
@@ -53,7 +53,7 @@ struct VariantConverter {
             }
         } else {
             if constexpr (Index == ElementCount - 1) {
-                internal::ThrowInvalidVariantIndex(index);
+                ::binary::internal::ThrowInvalidVariantIndex(index);
             } else {
                 return DecodeInternal<IsAuto, Index + 1>(span, index);
             }
