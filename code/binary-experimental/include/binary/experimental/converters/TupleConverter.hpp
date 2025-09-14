@@ -13,14 +13,13 @@ namespace binary::experimental::converters {
 template <typename T>
 struct TupleConverter {
     static constexpr size_t ElementCount = ::binary::experimental::internal::TupleSize<T>::Value;
-    using ObjectType = T;
 
     template <size_t Index>
-    using ElementConverterType = ::binary::experimental::Converter<std::remove_cv_t<typename ::binary::experimental::internal::TupleElement<Index, ObjectType>::Type>>;
+    using ElementConverterType = ::binary::experimental::Converter<std::remove_cv_t<typename ::binary::experimental::internal::TupleElement<Index, T>::Type>>;
 
     template <size_t IsAuto, size_t Index>
-    static void EncodeInternal(Allocator& allocator, const ObjectType& item) {
-        using ElementGetHelper = ::binary::experimental::internal::TupleGetHelper<Index, ObjectType>;
+    static void EncodeInternal(Allocator& allocator, const T& item) {
+        using ElementGetHelper = ::binary::experimental::internal::TupleGetHelper<Index, T>;
         using ElementConverterType = ElementConverterType<Index>;
         using ElementConverterEncodeAutoMethodHelperType = ::binary::experimental::helpers::ConverterEncodeAutoMethodHelper<ElementConverterType>;
         if constexpr (IsAuto == 0 && Index == ElementCount - 1) {
@@ -31,7 +30,7 @@ struct TupleConverter {
     }
 
     template <size_t IsAuto, size_t... Index>
-    static void EncodeInternal(Allocator& allocator, const ObjectType& item, std::index_sequence<Index...>) {
+    static void EncodeInternal(Allocator& allocator, const T& item, std::index_sequence<Index...>) {
         (EncodeInternal<IsAuto, Index>(allocator, item), ...);
     }
 
@@ -48,7 +47,7 @@ struct TupleConverter {
 
     template <size_t IsAuto, size_t... Index>
     static auto DecodeInternal(std::span<const std::byte>& span, std::index_sequence<Index...>) {
-        return ObjectType({DecodeInternal<IsAuto, Index>(span)...});
+        return T({DecodeInternal<IsAuto, Index>(span)...});
     }
 
     template <size_t Index>
@@ -72,20 +71,20 @@ struct TupleConverter {
         return GetConverterLengthRecursively<0>();
     }
 
-    BINARY_EXPERIMENTAL_DEFINE_STATIC_ENCODE_METHOD(ObjectType) {
+    BINARY_EXPERIMENTAL_DEFINE_STATIC_ENCODE_METHOD(T) {
         EncodeInternal<0>(allocator, item, std::make_index_sequence<ElementCount>());
     }
 
-    BINARY_EXPERIMENTAL_DEFINE_STATIC_ENCODE_AUTO_METHOD(ObjectType) {
+    BINARY_EXPERIMENTAL_DEFINE_STATIC_ENCODE_AUTO_METHOD(T) {
         EncodeInternal<1>(allocator, item, std::make_index_sequence<ElementCount>());
     }
 
-    BINARY_EXPERIMENTAL_DEFINE_STATIC_DECODE_METHOD(ObjectType) {
+    BINARY_EXPERIMENTAL_DEFINE_STATIC_DECODE_METHOD(T) {
         std::span<const std::byte> copy = span;
         return DecodeInternal<0>(copy, std::make_index_sequence<ElementCount>());
     }
 
-    BINARY_EXPERIMENTAL_DEFINE_STATIC_DECODE_AUTO_METHOD(ObjectType) {
+    BINARY_EXPERIMENTAL_DEFINE_STATIC_DECODE_AUTO_METHOD(T) {
         return DecodeInternal<1>(span, std::make_index_sequence<ElementCount>());
     }
 };
