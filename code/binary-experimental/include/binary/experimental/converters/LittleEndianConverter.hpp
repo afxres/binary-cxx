@@ -33,7 +33,7 @@ struct LittleEndianConverter {
 namespace binary::experimental {
 template <typename T>
     requires std::same_as<T, std::remove_cv_t<T>> &&
-    (std::is_integral_v<T> || std::is_floating_point_v<T> || std::is_enum_v<T>)
+    (std::is_arithmetic_v<T> || std::is_enum_v<T>)
 struct Converter<T> {
     using ObjectType = T;
     using ActualConverterType = ::binary::experimental::converters::LittleEndianConverter<T>;
