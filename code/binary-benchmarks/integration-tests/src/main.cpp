@@ -21,6 +21,11 @@
 #include <binary/converters/LittleEndianStringConverter.hpp>
 #include <binary/converters/TupleConverter.hpp>
 
+#include <binary/experimental/converters/ContainerConverter.hpp>
+#include <binary/experimental/converters/LittleEndianConverter.hpp>
+#include <binary/experimental/converters/LittleEndianStringConverter.hpp>
+#include <binary/experimental/converters/TupleConverter.hpp>
+
 struct Type02 {
     double Data;
     std::vector<std::string> Tags;
@@ -191,6 +196,56 @@ static void DecodeSystemTuple(benchmark::State& state) {
     }
 }
 
+static void ExperimentalEncodeTupleObject(benchmark::State& state) {
+    using ConverterType = ::binary::experimental::Converter<Type01>;
+    auto data = GetTestDataOfType01();
+    auto length = static_cast<size_t>(state.range(0));
+    auto memory = std::make_unique<std::byte[]>(length);
+    std::span<std::byte> span(memory.get(), length);
+
+    for (auto _ : state) {
+        ::binary::Allocator allocator(span);
+        ConverterType::Encode(allocator, data);
+    }
+}
+
+static void ExperimentalEncodeSystemTuple(benchmark::State& state) {
+    using ConverterType = ::binary::experimental::Converter<TypeX1>;
+    auto data = GetTestDataOfTypeX1();
+    auto length = static_cast<size_t>(state.range(0));
+    auto memory = std::make_unique<std::byte[]>(length);
+    std::span<std::byte> span(memory.get(), length);
+
+    for (auto _ : state) {
+        ::binary::Allocator allocator(span);
+        ConverterType::Encode(allocator, data);
+    }
+}
+
+static void ExperimentalDecodeTupleObject(benchmark::State& state) {
+    using ConverterType = ::binary::experimental::Converter<Type01>;
+    auto data = GetTestDataOfType01();
+    ::binary::Allocator allocator;
+    ConverterType::Encode(allocator, data);
+    const auto span = allocator.AsSpan();
+
+    for (auto _ : state) {
+        ConverterType::Decode(span);
+    }
+}
+
+static void ExperimentalDecodeSystemTuple(benchmark::State& state) {
+    using ConverterType = ::binary::experimental::Converter<TypeX1>;
+    auto data = GetTestDataOfTypeX1();
+    ::binary::Allocator allocator;
+    ConverterType::Encode(allocator, data);
+    const auto span = allocator.AsSpan();
+
+    for (auto _ : state) {
+        ConverterType::Decode(span);
+    }
+}
+
 static void BoostEncodeTupleObjectText(benchmark::State& state) {
     auto data = GetTestDataOfType01();
 
@@ -270,6 +325,12 @@ BENCHMARK(EncodeSystemTuple)->Name("Encode System Tuple, pre-allocate memory")->
 BENCHMARK(DecodeNamedObject)->Name("Decode Custom Named Object");
 BENCHMARK(DecodeTupleObject)->Name("Decode Custom Tuple Object");
 BENCHMARK(DecodeSystemTuple)->Name("Decode System Tuple");
+
+BENCHMARK(ExperimentalEncodeTupleObject)->Name("Experimental Encode Custom Tuple Object, pre-allocate memory")->Arg(0)->Arg(1024);
+BENCHMARK(ExperimentalEncodeSystemTuple)->Name("Experimental Encode System Tuple, pre-allocate memory")->Arg(0)->Arg(1024);
+
+BENCHMARK(ExperimentalDecodeTupleObject)->Name("Experimental Decode Custom Tuple Object");
+BENCHMARK(ExperimentalDecodeSystemTuple)->Name("Experimental Decode System Tuple");
 
 BENCHMARK(BoostEncodeTupleObjectText)->Name("Boost Encode Custom Tuple Object (text)");
 BENCHMARK(BoostEncodeTupleObjectTextReuseStream)->Name("Boost Encode Custom Tuple Object (text, reuse stream)");
