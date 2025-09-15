@@ -15,7 +15,7 @@ struct ConverterCreateFunction;
 template <typename TConverter>
     requires std::derived_from<TConverter, IConverter> && std::constructible_from<TConverter, const IGenerator&>
 struct ConverterCreateFunction<TConverter> {
-    auto operator()(const IGenerator& generator) {
+    static auto Invoke(const IGenerator& generator) {
         return std::make_shared<TConverter>(generator);
     }
 };
@@ -24,7 +24,7 @@ template <template <typename> typename TConverter, std::ranges::range TRange>
     requires std::derived_from<TConverter<TRange>, IConverter> &&
     std::constructible_from<TConverter<TRange>, const std::shared_ptr<Converter<std::ranges::range_value_t<TRange>>>&>
 struct ConverterCreateFunction<TConverter<TRange>> {
-    auto operator()(const IGenerator& generator) {
+    static auto Invoke(const IGenerator& generator) {
         return std::make_shared<TConverter<TRange>>(GetConverter<std::ranges::range_value_t<TRange>>(generator));
     }
 };
@@ -33,7 +33,7 @@ template <template <typename> typename TConverter, template <typename...> typena
     requires std::derived_from<TConverter<TValue<TArguments...>>, IConverter> &&
     std::constructible_from<TConverter<TValue<TArguments...>>, const std::shared_ptr<Converter<std::remove_cv_t<TArguments>>>&...>
 struct ConverterCreateFunction<TConverter<TValue<TArguments...>>> {
-    auto operator()(const IGenerator& generator) {
+    static auto Invoke(const IGenerator& generator) {
         return std::make_shared<TConverter<TValue<TArguments...>>>(GetConverter<std::remove_cv_t<TArguments>>(generator)...);
     }
 };

@@ -4,6 +4,7 @@
 #include "binary/Converter.hpp"
 #include "binary/ConverterExtensions.hpp"
 #include "binary/components/NamedObjectDecoder.hpp"
+#include "binary/internal/Define.hpp"
 
 namespace binary::components {
 template <typename T>
@@ -30,7 +31,7 @@ public:
         this->record = std::move(record);
     }
 
-    virtual void Encode(Allocator& allocator, const T& item) override {
+    BINARY_DEFINE_OVERRIDE_ENCODE_METHOD(T) {
         const auto& headers = this->headers;
         const auto& record = this->record;
         for (size_t i = 0; i < record.size(); i++) {
@@ -39,7 +40,7 @@ public:
         }
     }
 
-    virtual T Decode(const std::span<const std::byte>& span) override {
+    BINARY_DEFINE_OVERRIDE_DECODE_METHOD(T) {
         auto slices = this->decoder->Invoke(span);
 
         T result{};

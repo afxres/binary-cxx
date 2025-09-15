@@ -43,7 +43,7 @@ void EncodeLengthPrefix(std::byte* buffer, const size_t number, const size_t len
 size_t DecodeLengthPrefix(const std::byte* buffer, size_t& offset, const size_t limits) {
     assert(limits >= offset);
     if (limits == offset) {
-        internal::ThrowNotEnoughBytes();
+        ::binary::internal::ThrowNotEnoughBytes();
     }
     const std::byte* source = buffer + offset;
     uint32_t header = static_cast<uint32_t>(DecodeBigEndian<uint8_t>(source));
@@ -53,7 +53,7 @@ size_t DecodeLengthPrefix(const std::byte* buffer, size_t& offset, const size_t 
     }
     assert(limits >= offset);
     if (limits < offset + 3U) {
-        internal::ThrowNotEnoughBytes();
+        ::binary::internal::ThrowNotEnoughBytes();
     }
     uint32_t result = DecodeBigEndian<uint32_t>(source);
     offset += 3;

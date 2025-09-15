@@ -5,7 +5,8 @@
 #include <tuple>
 
 #include "binary/Converter.hpp"
-#include "binary/internal/Converter.hpp"
+#include "binary/internal/Define.hpp"
+#include "binary/internal/Module.hpp"
 
 namespace binary::converters {
 template <typename T>
@@ -49,9 +50,9 @@ private:
     }
 
     static size_t GetConverterLength(const std::shared_ptr<Converter<std::remove_cv_t<E>>>&... converter) {
-        std::vector<std::shared_ptr<IConverter>> converters({converter...});
-        auto lengths = converters | std::views::transform([](const auto& converter) { return converter->Length(); });
-        return internal::GetConverterLength(lengths);
+        std::vector<size_t> vector;
+        (vector.emplace_back(converter->Length()), ...);
+        return ::binary::internal::GetConverterLength(vector);
     }
 
     const std::tuple<std::shared_ptr<Converter<std::remove_cv_t<E>>>...> converter;
@@ -61,20 +62,20 @@ public:
         : Converter<ObjectType>(GetConverterLength(converter...))
         , converter({converter...}) {}
 
-    virtual void Encode(Allocator& allocator, const ObjectType& item) override {
+    BINARY_DEFINE_OVERRIDE_ENCODE_METHOD(ObjectType) {
         EncodeInternal<0>(allocator, item, std::make_index_sequence<ElementCount>());
     }
 
-    virtual void EncodeAuto(Allocator& allocator, const ObjectType& item) override {
+    BINARY_DEFINE_OVERRIDE_ENCODE_AUTO_METHOD(ObjectType) {
         EncodeInternal<1>(allocator, item, std::make_index_sequence<ElementCount>());
     }
 
-    virtual ObjectType Decode(const std::span<const std::byte>& span) override {
+    BINARY_DEFINE_OVERRIDE_DECODE_METHOD(ObjectType) {
         std::span<const std::byte> copy = span;
         return DecodeInternal<0>(copy, std::make_index_sequence<ElementCount>());
     }
 
-    virtual ObjectType DecodeAuto(std::span<const std::byte>& span) override {
+    BINARY_DEFINE_OVERRIDE_DECODE_AUTO_METHOD(ObjectType) {
         return DecodeInternal<1>(span, std::make_index_sequence<ElementCount>());
     }
 };

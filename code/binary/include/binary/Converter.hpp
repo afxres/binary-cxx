@@ -33,9 +33,9 @@ public:
     }
 
     virtual void EncodeWithLengthPrefix(Allocator& allocator, const T& item) {
-        size_t anchor = internal::AllocatorUnsafeAccessor::Anchor(allocator);
+        size_t anchor = ::binary::internal::AllocatorUnsafeAccessor::Anchor(allocator);
         Encode(allocator, item);
-        internal::AllocatorUnsafeAccessor::FinishAnchor(allocator, anchor);
+        ::binary::internal::AllocatorUnsafeAccessor::FinishAnchor(allocator, anchor);
     }
 
     virtual T Decode(const std::span<const std::byte>& span) = 0;
@@ -44,7 +44,7 @@ public:
         size_t length = Length();
         if (length != 0) {
             if (span.size() < length) {
-                internal::ThrowNotEnoughBytes();
+                ::binary::internal::ThrowNotEnoughBytes();
             }
             std::span<const std::byte> copy = span;
             span = span.subspan(length);

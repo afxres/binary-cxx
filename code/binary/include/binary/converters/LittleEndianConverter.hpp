@@ -3,6 +3,7 @@
 
 #include "binary/Converter.hpp"
 #include "binary/internal/AllocatorUnsafeAccessor.hpp"
+#include "binary/internal/Define.hpp"
 #include "binary/internal/Endian.hpp"
 #include "binary/internal/Exception.hpp"
 
@@ -14,15 +15,15 @@ public:
     LittleEndianConverter()
         : Converter<T>(sizeof(T)) {}
 
-    virtual void Encode(Allocator& allocator, const T& item) override {
-        internal::EncodeLittleEndian(internal::AllocatorUnsafeAccessor::Assign(allocator, sizeof(T)), item);
+    BINARY_DEFINE_OVERRIDE_ENCODE_METHOD(T) {
+        ::binary::internal::EncodeLittleEndian(internal::AllocatorUnsafeAccessor::Assign(allocator, sizeof(T)), item);
     }
 
-    virtual T Decode(const std::span<const std::byte>& span) override {
+    BINARY_DEFINE_OVERRIDE_DECODE_METHOD(T) {
         if (span.size() < sizeof(T)) {
-            internal::ThrowNotEnoughBytes();
+            ::binary::internal::ThrowNotEnoughBytes();
         }
-        return internal::DecodeLittleEndian<T>(span.data());
+        return ::binary::internal::DecodeLittleEndian<T>(span.data());
     }
 };
 }

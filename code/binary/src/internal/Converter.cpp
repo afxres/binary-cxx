@@ -1,4 +1,4 @@
-#include "binary/internal/Converter.hpp"
+#include "binary/internal/Module.hpp"
 
 #include <cassert>
 #include <format>

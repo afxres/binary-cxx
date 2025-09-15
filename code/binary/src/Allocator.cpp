@@ -70,7 +70,7 @@ void Allocator::Resize(size_t length) {
 
     size_t bounds = static_cast<size_t>(cursor);
     auto target = static_cast<std::byte*>(malloc(bounds));
-    internal::EnsureMemoryAccess(target);
+    ::binary::internal::EnsureMemoryAccess(target);
     if (offset != 0) {
         memcpy(target, this->buffer, offset);
     }
@@ -118,12 +118,12 @@ void Allocator::FinishAnchor(size_t anchor) {
     std::byte* target = this->buffer + anchor;
     if (length <= AllocatorAnchorShrinkLimits) {
         this->offset = offset - 3;
-        internal::EncodeLengthPrefix(target, length, 1);
+        ::binary::internal::EncodeLengthPrefix(target, length, 1);
         memmove(target + 1, target + 4, length);
         assert(this->offset >= 1);
         assert(this->offset <= this->bounds);
     } else {
-        internal::EncodeLengthPrefix(target, length, 4);
+        ::binary::internal::EncodeLengthPrefix(target, length, 4);
         assert(this->offset >= 4);
         assert(this->offset <= this->bounds);
     }
@@ -180,7 +180,7 @@ void Allocator::Append(size_t maxLength, std::function<void(std::span<std::byte>
     std::byte* target = Create(maxLength);
     action(std::span<std::byte>(target, maxLength), actual);
     if (actual > maxLength) {
-        internal::ThrowInvalidBytesWrittenValue();
+        ::binary::internal::ThrowInvalidBytesWrittenValue();
     }
     FinishCreate(actual);
 }
@@ -192,9 +192,9 @@ void Allocator::AppendWithLengthPrefix(std::function<void(Allocator&)> action) {
 }
 
 void Allocator::AppendWithLengthPrefix(size_t maxLength, std::function<void(std::span<std::byte>, size_t&)> action) {
-    internal::EnsureLengthPrefixLength(maxLength);
+    ::binary::internal::EnsureLengthPrefixLength(maxLength);
     size_t actual;
-    size_t prefixLength = internal::EncodeLengthPrefixLength(maxLength);
+    size_t prefixLength = ::binary::internal::EncodeLengthPrefixLength(maxLength);
     std::byte* target = Create(maxLength + prefixLength);
     if (maxLength == 0) {
         actual = 0;
@@ -202,10 +202,10 @@ void Allocator::AppendWithLengthPrefix(size_t maxLength, std::function<void(std:
         actual = SIZE_MAX;
         action(std::span<std::byte>(target + prefixLength, maxLength), actual);
         if (actual > maxLength) {
-            internal::ThrowInvalidBytesWrittenValue();
+            ::binary::internal::ThrowInvalidBytesWrittenValue();
         }
     }
-    internal::EncodeLengthPrefix(target, actual, prefixLength);
+    ::binary::internal::EncodeLengthPrefix(target, actual, prefixLength);
     FinishCreate(actual + prefixLength);
 }
 

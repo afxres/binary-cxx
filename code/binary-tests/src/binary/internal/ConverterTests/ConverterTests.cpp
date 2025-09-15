@@ -2,7 +2,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include <binary/converters/LittleEndianStringConverter.hpp>
-#include <binary/internal/Converter.hpp>
+#include <binary/internal/Module.hpp>
 
 template <>
 struct boost::test_tools::tt_detail::print_log_value<std::vector<size_t>> {

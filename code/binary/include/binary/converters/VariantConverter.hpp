@@ -7,6 +7,7 @@
 #include "binary/Converter.hpp"
 #include "binary/ConverterExtensions.hpp"
 #include "binary/internal/Exception.hpp"
+#include "binary/internal/Module.hpp"
 
 namespace binary::converters {
 template <typename T>
@@ -49,7 +50,7 @@ private:
         auto header = item.index();
         const auto& record = this->record;
         if (header >= record.size()) {
-            internal::ThrowInvalidVariantIndex(header);
+            ::binary::internal::ThrowInvalidVariantIndex(header);
         }
 
         ::binary::Encode(allocator, header);
@@ -61,11 +62,11 @@ private:
     }
 
     template <size_t IsAuto>
-    ObjectType DecodeInternal(std::span<const std::byte>& span) {
+    auto DecodeInternal(std::span<const std::byte>& span) {
         auto header = ::binary::Decode(span);
         const auto& record = this->record;
         if (header >= record.size()) {
-            internal::ThrowInvalidVariantIndex(header);
+            ::binary::internal::ThrowInvalidVariantIndex(header);
         }
 
         if constexpr (IsAuto == 0) {
@@ -81,20 +82,20 @@ public:
     VariantConverter(const std::shared_ptr<Converter<std::remove_cv_t<E>>>&... converter)
         : record(GetMethodInfoList(converter..., std::make_index_sequence<sizeof...(E)>())) {}
 
-    virtual void Encode(Allocator& allocator, const ObjectType& item) override {
+    BINARY_DEFINE_OVERRIDE_ENCODE_METHOD(ObjectType) {
         EncodeInternal<0>(allocator, item);
     }
 
-    virtual void EncodeAuto(Allocator& allocator, const ObjectType& item) override {
+    BINARY_DEFINE_OVERRIDE_ENCODE_AUTO_METHOD(ObjectType) {
         EncodeInternal<1>(allocator, item);
     }
 
-    virtual ObjectType Decode(const std::span<const std::byte>& span) override {
+    BINARY_DEFINE_OVERRIDE_DECODE_METHOD(ObjectType) {
         std::span<const std::byte> copy = span;
         return DecodeInternal<0>(copy);
     }
 
-    virtual ObjectType DecodeAuto(std::span<const std::byte>& span) override {
+    BINARY_DEFINE_OVERRIDE_DECODE_AUTO_METHOD(ObjectType) {
         return DecodeInternal<1>(span);
     }
 };

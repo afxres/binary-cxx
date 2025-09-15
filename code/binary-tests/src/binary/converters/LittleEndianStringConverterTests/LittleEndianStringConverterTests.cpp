@@ -108,5 +108,5 @@ BOOST_AUTO_TEST_CASE(LittleEndianStringConverterForWideStringDecodeNotEnoughByte
         });
 }
 
-BOOST_AUTO_TEST_SUITE_END();
+BOOST_AUTO_TEST_SUITE_END()
 }

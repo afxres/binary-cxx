@@ -3,20 +3,20 @@
 
 #include "binary/Converter.hpp"
 #include "binary/IGenerator.hpp"
-#include "binary/internal/Converter.hpp"
 #include "binary/internal/ConverterCreateFunction.hpp"
+#include "binary/internal/Module.hpp"
 
 namespace binary {
 template <typename T>
     requires std::same_as<T, std::remove_cv_t<T>>
 std::shared_ptr<Converter<T>> GetConverter(const IGenerator& generator) {
-    return internal::GetConverter<T>(generator.GetConverter(typeid(T)));
+    return ::binary::internal::GetConverter<T>(generator.GetConverter(typeid(T)));
 }
 
 template <typename TConverter>
-    requires requires(const IGenerator& generator) { internal::ConverterCreateFunction<TConverter>()(generator); }
+    requires requires(const IGenerator& generator) { ::binary::internal::ConverterCreateFunction<TConverter>::Invoke(generator); }
 auto CreateConverter(const IGenerator& generator) {
-    return internal::ConverterCreateFunction<TConverter>()(generator);
+    return ::binary::internal::ConverterCreateFunction<TConverter>::Invoke(generator);
 }
 
 template <typename TConverter>

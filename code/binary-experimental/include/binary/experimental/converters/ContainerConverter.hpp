@@ -7,8 +7,8 @@
 #include "binary/experimental/helpers/ConverterEncodeAutoMethodHelper.hpp"
 #include "binary/internal/ContainerInsertFunction.hpp"
 #include "binary/internal/ContainerResizeFunction.hpp"
-#include "binary/internal/Converter.hpp"
 #include "binary/internal/Exception.hpp"
+#include "binary/internal/Module.hpp"
 
 namespace binary::experimental::converters {
 template <typename T>
@@ -23,7 +23,7 @@ struct ContainerConverter {
 
     BINARY_EXPERIMENTAL_DEFINE_STATIC_ENCODE_METHOD(T) {
         for (const auto& i : item) {
-            binary::experimental::helpers::ConverterEncodeAutoMethodHelper<ValueConverterType>::Invoke(allocator, i);
+            ::binary::experimental::helpers::ConverterEncodeAutoMethodHelper<ValueConverterType>::Invoke(allocator, i);
         }
     }
 
@@ -40,11 +40,11 @@ struct ContainerConverter {
                 constexpr size_t length = ValueConverterType::Length();
                 if constexpr (length != 0) {
                     size_t capacity = ::binary::internal::GetCapacity(span.size(), length, typeid(T));
-                    ::binary::internal::ContainerResizeFunction<T>()(result, capacity);
+                    ::binary::internal::ContainerResizeFunction<T>::Invoke(result, capacity);
                 }
             }
             while (!copy.empty()) {
-                binary::internal::ContainerInsertFunction<T>()(result, binary::experimental::helpers::ConverterDecodeAutoMethodHelper<ValueConverterType>::Invoke(copy));
+                ::binary::internal::ContainerInsertFunction<T>::Invoke(result, ::binary::experimental::helpers::ConverterDecodeAutoMethodHelper<ValueConverterType>::Invoke(copy));
             }
             return result;
         }

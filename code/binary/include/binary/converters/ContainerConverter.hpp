@@ -6,8 +6,9 @@
 #include "binary/Converter.hpp"
 #include "binary/internal/ContainerInsertFunction.hpp"
 #include "binary/internal/ContainerResizeFunction.hpp"
-#include "binary/internal/Converter.hpp"
+#include "binary/internal/Define.hpp"
 #include "binary/internal/Exception.hpp"
+#include "binary/internal/Module.hpp"
 
 namespace binary::converters {
 template <typename T>
@@ -21,16 +22,16 @@ public:
         : converter(converter) {
     }
 
-    virtual void Encode(Allocator& allocator, const T& item) override {
+    BINARY_DEFINE_OVERRIDE_ENCODE_METHOD(T) {
         const auto& converter = this->converter;
         for (const auto& i : item) {
             converter->EncodeAuto(allocator, i);
         }
     }
 
-    virtual T Decode(const std::span<const std::byte>& span) override {
+    BINARY_DEFINE_OVERRIDE_DECODE_METHOD(T) {
         if constexpr (!internal::ContainerInsertFunction<T>::IsEnable) {
-            internal::ThrowNoSuitableEmplaceMethod(typeid(T));
+            ::binary::internal::ThrowNoSuitableEmplaceMethod(typeid(T));
         } else {
             if (span.empty()) {
                 return {};
@@ -40,12 +41,12 @@ public:
             const auto& converter = this->converter;
             if constexpr (internal::ContainerResizeFunction<T>::IsEnable) {
                 if (converter->Length() != 0) {
-                    size_t capacity = internal::GetCapacity(span.size(), converter->Length(), typeid(T));
-                    internal::ContainerResizeFunction<T>()(result, capacity);
+                    size_t capacity = ::binary::internal::GetCapacity(span.size(), converter->Length(), typeid(T));
+                    ::binary::internal::ContainerResizeFunction<T>::Invoke(result, capacity);
                 }
             }
             while (!copy.empty()) {
-                internal::ContainerInsertFunction<T>()(result, converter->DecodeAuto(copy));
+                ::binary::internal::ContainerInsertFunction<T>::Invoke(result, converter->DecodeAuto(copy));
             }
             return result;
         }

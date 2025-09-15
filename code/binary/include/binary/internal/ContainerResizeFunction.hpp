@@ -16,7 +16,7 @@ template <std::ranges::input_range T>
     requires requires(T& container, size_t size) { container.reserve(size); }
 struct ContainerResizeFunction<T> {
     static constexpr bool IsEnable = true;
-    void operator()(T& container, size_t size) { container.reserve(size); }
+    static void Invoke(T& container, size_t size) { container.reserve(size); }
 };
 }
 

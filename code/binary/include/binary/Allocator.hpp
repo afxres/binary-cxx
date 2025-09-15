@@ -12,7 +12,7 @@ class AllocatorUnsafeAccessor;
 
 namespace binary {
 class Allocator final {
-    friend class internal::AllocatorUnsafeAccessor;
+    friend class ::binary::internal::AllocatorUnsafeAccessor;
 
 private:
     bool allocated;
