@@ -57,7 +57,7 @@ private:
     }
 
     static auto GetConverter(const IGenerator& generator) {
-        return std::apply([&generator]<typename... E>(const E&...) { return std::make_tuple(::binary::GetConverter<E>(generator)...); }, ElementTupleType());
+        return std::apply([&generator]<typename... E>(const E&...) { return std::tuple{::binary::GetConverter<E>(generator)...}; }, ElementTupleType());
     }
 
     static auto GetConverterLength(const ElementConverterTupleType& converter) {

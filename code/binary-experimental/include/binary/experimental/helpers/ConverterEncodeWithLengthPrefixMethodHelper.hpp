@@ -13,13 +13,13 @@ struct ConverterEncodeWithLengthPrefixMethodHelper {
     BINARY_EXPERIMENTAL_DEFINE_STATIC_ENCODE_METHOD_WITH_NAME(C::ObjectType, Invoke) {
         using typename ::binary::internal::AllocatorUnsafeAccessor;
         constexpr size_t length = C::Length();
-        if constexpr (length == 0) {
+        if constexpr (length != 0) {
+            ::binary::Encode(allocator, length);
+            C::Encode(allocator, item);
+        } else {
             size_t anchor = AllocatorUnsafeAccessor::Anchor(allocator);
             C::Encode(allocator, item);
             AllocatorUnsafeAccessor::FinishAnchor(allocator, anchor);
-        } else {
-            ::binary::Encode(allocator, length);
-            C::Encode(allocator, item);
         }
     }
 };

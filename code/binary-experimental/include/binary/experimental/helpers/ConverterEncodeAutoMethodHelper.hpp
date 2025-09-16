@@ -11,10 +11,10 @@ template <typename C>
 struct ConverterEncodeAutoMethodHelper {
     BINARY_EXPERIMENTAL_DEFINE_STATIC_ENCODE_METHOD_WITH_NAME(C::ObjectType, Invoke) {
         constexpr size_t length = C::Length();
-        if constexpr (length == 0) {
-            ConverterEncodeWithLengthPrefixMethodHelper<C>::Invoke(allocator, item);
-        } else {
+        if constexpr (length != 0) {
             C::Encode(allocator, item);
+        } else {
+            ConverterEncodeWithLengthPrefixMethodHelper<C>::Invoke(allocator, item);
         }
     }
 };

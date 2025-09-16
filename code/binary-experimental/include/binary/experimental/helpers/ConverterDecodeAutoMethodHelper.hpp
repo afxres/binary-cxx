@@ -12,15 +12,15 @@ template <typename C>
 struct ConverterDecodeAutoMethodHelper {
     BINARY_EXPERIMENTAL_DEFINE_STATIC_DECODE_METHOD_WITH_NAME(C::ObjectType, Invoke) {
         constexpr size_t length = C::Length();
-        if constexpr (length == 0) {
-            return ConverterDecodeWithLengthPrefixMethodHelper<C>::Invoke(span);
-        } else {
+        if constexpr (length != 0) {
             if (span.size() < length) {
                 ::binary::internal::ThrowNotEnoughBytes();
             }
             std::span<const std::byte> copy = span;
             span = span.subspan(length);
             return C::Decode(copy);
+        } else {
+            return ConverterDecodeWithLengthPrefixMethodHelper<C>::Invoke(span);
         }
     }
 };
