@@ -1,8 +1,8 @@
 #ifndef BINARY_CONVERTERS_TUPLECONVERTER_HPP
 #define BINARY_CONVERTERS_TUPLECONVERTER_HPP
 
+#include "binary/GeneratorExtensions.hpp"
 #include "binary/internal/Define.hpp"
-#include "binary/internal/GeneratorInvokeFunction.hpp"
 #include "binary/internal/TupleElement.hpp"
 #include "binary/internal/TupleGetHelper.hpp"
 #include "binary/internal/TupleSize.hpp"
@@ -56,10 +56,12 @@ private:
         return T({DecodeInternal<IsAuto, Index>(span)...});
     }
 
-    static size_t GetConverterLength(const ElementConverterTupleType& converter) {
-        std::vector<size_t> vector;
-        std::apply([&vector](const auto&... converter) { (vector.emplace_back(converter->Length()), ...); }, converter);
-        return ::binary::internal::GetConverterLength(vector);
+    static auto GetConverter(const IGenerator& generator) {
+        return std::apply([&generator]<typename... E>(const E&...) { return std::make_tuple(::binary::GetConverter<E>(generator)...); }, ElementTupleType());
+    }
+
+    static auto GetConverterLength(const ElementConverterTupleType& converter) {
+        return std::apply([](const auto&... converter) { return ::binary::internal::GetConverterLength(std::initializer_list{converter->Length()...}); }, converter);
     }
 
     const ElementConverterTupleType converter;
@@ -70,7 +72,7 @@ public:
         , converter(converter) {}
 
     TupleConverter(const IGenerator& generator)
-        : TupleConverter(::binary::internal::GeneratorInvokeHelper<ElementTupleType>::Invoke(generator)) {}
+        : TupleConverter(GetConverter(generator)) {}
 
     BINARY_DEFINE_OVERRIDE_ENCODE_METHOD(T) {
         EncodeInternal<0>(allocator, item, ElementIndexSequence());
