@@ -1,36 +1,43 @@
 #ifndef BINARY_CONVERTERS_TUPLECONVERTER_HPP
 #define BINARY_CONVERTERS_TUPLECONVERTER_HPP
 
-#include <memory>
-#include <tuple>
-
-#include "binary/Converter.hpp"
 #include "binary/internal/Define.hpp"
-#include "binary/internal/Module.hpp"
+#include "binary/internal/GeneratorInvokeFunction.hpp"
+#include "binary/internal/TupleElement.hpp"
+#include "binary/internal/TupleGetHelper.hpp"
+#include "binary/internal/TupleSize.hpp"
 
 namespace binary::converters {
 template <typename T>
-class TupleConverter;
-
-template <template <typename...> typename T, typename... E>
-    requires requires { std::tuple_size<T<E...>>::value; }
-class TupleConverter<T<E...>> : public Converter<T<E...>> {
+class TupleConverter : public Converter<T> {
 private:
-    static constexpr size_t ElementCount = sizeof...(E);
-    using ObjectType = T<E...>;
+    template <typename Indices>
+    struct ElementHelper;
+
+    template <size_t... Index>
+    struct ElementHelper<std::index_sequence<Index...>> {
+        using TupleType = std::tuple<std::remove_cv_t<typename ::binary::internal::TupleElement<Index, T>::Type>...>;
+        using ConverterTupleType = std::tuple<std::shared_ptr<::binary::Converter<std::remove_cv_t<typename ::binary::internal::TupleElement<Index, T>::Type>>>...>;
+    };
+
+    static constexpr size_t ElementCount = ::binary::internal::TupleSize<T>::Value;
+    using ElementIndexSequence = std::make_index_sequence<ElementCount>;
+    using ElementTupleType = typename ElementHelper<ElementIndexSequence>::TupleType;
+    using ElementConverterTupleType = typename ElementHelper<ElementIndexSequence>::ConverterTupleType;
 
     template <size_t IsAuto, size_t Index>
-    void EncodeInternal(Allocator& allocator, const ObjectType& item) {
+    void EncodeInternal(Allocator& allocator, const T& item) {
+        using ElementGetHelper = ::binary::internal::TupleGetHelper<Index, T>;
         const auto& converter = std::get<Index>(this->converter);
         if constexpr (IsAuto == 0 && Index == ElementCount - 1) {
-            converter->Encode(allocator, std::get<Index>(item));
+            converter->Encode(allocator, ElementGetHelper::Invoke(item));
         } else {
-            converter->EncodeAuto(allocator, std::get<Index>(item));
+            converter->EncodeAuto(allocator, ElementGetHelper::Invoke(item));
         }
     }
 
     template <size_t IsAuto, size_t... Index>
-    void EncodeInternal(Allocator& allocator, const ObjectType& item, std::index_sequence<Index...>) {
+    void EncodeInternal(Allocator& allocator, const T& item, std::index_sequence<Index...>) {
         (EncodeInternal<IsAuto, Index>(allocator, item), ...);
     }
 
@@ -46,37 +53,40 @@ private:
 
     template <size_t IsAuto, size_t... Index>
     auto DecodeInternal(std::span<const std::byte>& span, std::index_sequence<Index...>) {
-        return ObjectType({DecodeInternal<IsAuto, Index>(span)...});
+        return T({DecodeInternal<IsAuto, Index>(span)...});
     }
 
-    static size_t GetConverterLength(const std::shared_ptr<Converter<std::remove_cv_t<E>>>&... converter) {
+    static size_t GetConverterLength(const ElementConverterTupleType& converter) {
         std::vector<size_t> vector;
-        (vector.emplace_back(converter->Length()), ...);
+        std::apply([&vector](const auto&... converter) { (vector.emplace_back(converter->Length()), ...); }, converter);
         return ::binary::internal::GetConverterLength(vector);
     }
 
-    const std::tuple<std::shared_ptr<Converter<std::remove_cv_t<E>>>...> converter;
+    const ElementConverterTupleType converter;
 
 public:
-    TupleConverter(const std::shared_ptr<Converter<std::remove_cv_t<E>>>&... converter)
-        : Converter<ObjectType>(GetConverterLength(converter...))
-        , converter({converter...}) {}
+    TupleConverter(const ElementConverterTupleType& converter)
+        : Converter<T>(GetConverterLength(converter))
+        , converter(converter) {}
 
-    BINARY_DEFINE_OVERRIDE_ENCODE_METHOD(ObjectType) {
-        EncodeInternal<0>(allocator, item, std::make_index_sequence<ElementCount>());
+    TupleConverter(const IGenerator& generator)
+        : TupleConverter(::binary::internal::GeneratorInvokeHelper<ElementTupleType>::Invoke(generator)) {}
+
+    BINARY_DEFINE_OVERRIDE_ENCODE_METHOD(T) {
+        EncodeInternal<0>(allocator, item, ElementIndexSequence());
     }
 
-    BINARY_DEFINE_OVERRIDE_ENCODE_AUTO_METHOD(ObjectType) {
-        EncodeInternal<1>(allocator, item, std::make_index_sequence<ElementCount>());
+    BINARY_DEFINE_OVERRIDE_ENCODE_AUTO_METHOD(T) {
+        EncodeInternal<1>(allocator, item, ElementIndexSequence());
     }
 
-    BINARY_DEFINE_OVERRIDE_DECODE_METHOD(ObjectType) {
+    BINARY_DEFINE_OVERRIDE_DECODE_METHOD(T) {
         std::span<const std::byte> copy = span;
-        return DecodeInternal<0>(copy, std::make_index_sequence<ElementCount>());
+        return DecodeInternal<0>(copy, ElementIndexSequence());
     }
 
-    BINARY_DEFINE_OVERRIDE_DECODE_AUTO_METHOD(ObjectType) {
-        return DecodeInternal<1>(span, std::make_index_sequence<ElementCount>());
+    BINARY_DEFINE_OVERRIDE_DECODE_AUTO_METHOD(T) {
+        return DecodeInternal<1>(span, ElementIndexSequence());
     }
 };
 }
