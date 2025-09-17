@@ -2,7 +2,7 @@
 #define BINARY_CONVERTERS_LITTLEENDIANSTRINGCONVERTER_HPP
 
 #include "binary/internal/Define.hpp"
-#include "binary/internal/Module.hpp"
+#include "binary/internal/String.hpp"
 
 namespace binary::converters {
 template <typename T>
@@ -20,7 +20,7 @@ public:
     BINARY_DEFINE_OVERRIDE_ENCODE_WITH_LENGTH_PREFIX_METHOD(T) {
         constexpr size_t size = sizeof(typename T::value_type);
         ::binary::Encode(allocator, size * item.size());
-        Encode(allocator, item);
+        ::binary::internal::EncodeLittleEndianString(allocator, item);
     }
 
     BINARY_DEFINE_OVERRIDE_DECODE_METHOD(T) {
@@ -28,11 +28,11 @@ public:
     }
 
     BINARY_DEFINE_OVERRIDE_DECODE_AUTO_METHOD(T) {
-        return Decode(::binary::DecodeWithLengthPrefix(span));
+        return DecodeWithLengthPrefix(span);
     }
 
     BINARY_DEFINE_OVERRIDE_DECODE_WITH_LENGTH_PREFIX_METHOD(T) {
-        return Decode(::binary::DecodeWithLengthPrefix(span));
+        return ::binary::internal::DecodeLittleEndianString<T>(::binary::DecodeWithLengthPrefix(span));
     }
 };
 }

@@ -19,11 +19,22 @@ public:
         ::binary::internal::EncodeLittleEndian(internal::AllocatorUnsafeAccessor::Assign(allocator, sizeof(T)), item);
     }
 
+    BINARY_DEFINE_OVERRIDE_ENCODE_WITH_LENGTH_PREFIX_METHOD(T) {
+        ::binary::Encode(allocator, sizeof(T));
+        Encode(allocator, item);
+    }
+
     BINARY_DEFINE_OVERRIDE_DECODE_METHOD(T) {
         if (span.size() < sizeof(T)) {
             ::binary::internal::ThrowNotEnoughBytes();
         }
         return ::binary::internal::DecodeLittleEndian<T>(span.data());
+    }
+
+    BINARY_DEFINE_OVERRIDE_DECODE_AUTO_METHOD(T) {
+        auto result = Decode(span);
+        span = span.subspan(sizeof(T));
+        return result;
     }
 };
 }

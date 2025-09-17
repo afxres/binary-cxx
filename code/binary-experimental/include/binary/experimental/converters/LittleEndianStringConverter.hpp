@@ -4,7 +4,7 @@
 #include <concepts>
 
 #include "binary/experimental/internal/Define.hpp"
-#include "binary/internal/Module.hpp"
+#include "binary/internal/String.hpp"
 
 namespace binary::experimental::converters {
 template <typename T>

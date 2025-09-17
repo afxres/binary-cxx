@@ -140,7 +140,7 @@ void Allocator::FinishCreate(size_t length) {
 void Allocator::Ensure(size_t length) {
     assert(this->bounds <= INT32_MAX);
     assert(this->offset <= this->bounds);
-    if (length > INT32_MAX || static_cast<uint64_t>(this->offset) + length > this->bounds) {
+    if (length > INT32_MAX || static_cast<uint64_t>(this->offset) + length > this->bounds) [[unlikely]] {
         Resize(length);
     }
     assert(this->bounds <= this->limits);
