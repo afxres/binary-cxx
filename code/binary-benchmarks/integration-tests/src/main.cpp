@@ -103,15 +103,16 @@ static TypeX1 GetTestDataOfTypeX1() {
     return data;
 }
 
+static constexpr size_t BufferLength = 1024;
+
 static void EncodeNamedObject(benchmark::State& state) {
     auto generator = GetTestGeneratorWithCommonTypes();
     ::binary::AddConverter<Type02NamedObjectConverter>(generator);
     ::binary::AddConverter<Type01NamedObjectConverter>(generator);
     auto converter = ::binary::GetConverter<Type01>(generator);
     auto data = GetTestDataOfType01();
-    auto length = static_cast<size_t>(state.range(0));
-    auto memory = std::make_unique<std::byte[]>(length);
-    std::span<std::byte> span(memory.get(), length);
+    auto memory = std::make_unique<std::byte[]>(BufferLength);
+    std::span<std::byte> span(memory.get(), BufferLength);
 
     for (auto _ : state) {
         ::binary::Allocator allocator(span);
@@ -125,9 +126,8 @@ static void EncodeTupleObject(benchmark::State& state) {
     ::binary::AddConverter<Type01TupleObjectConverter>(generator);
     auto converter = ::binary::GetConverter<Type01>(generator);
     auto data = GetTestDataOfType01();
-    auto length = static_cast<size_t>(state.range(0));
-    auto memory = std::make_unique<std::byte[]>(length);
-    std::span<std::byte> span(memory.get(), length);
+    auto memory = std::make_unique<std::byte[]>(BufferLength);
+    std::span<std::byte> span(memory.get(), BufferLength);
 
     for (auto _ : state) {
         ::binary::Allocator allocator(span);
@@ -141,9 +141,8 @@ static void EncodeSystemTuple(benchmark::State& state) {
     ::binary::AddConverter<::binary::converters::TupleConverter<TypeX1>>(generator);
     auto converter = ::binary::GetConverter<TypeX1>(generator);
     auto data = GetTestDataOfTypeX1();
-    auto length = static_cast<size_t>(state.range(0));
-    auto memory = std::make_unique<std::byte[]>(length);
-    std::span<std::byte> span(memory.get(), length);
+    auto memory = std::make_unique<std::byte[]>(BufferLength);
+    std::span<std::byte> span(memory.get(), BufferLength);
 
     for (auto _ : state) {
         ::binary::Allocator allocator(span);
@@ -199,9 +198,8 @@ static void DecodeSystemTuple(benchmark::State& state) {
 static void ExperimentalEncodeTupleObject(benchmark::State& state) {
     using ConverterType = ::binary::experimental::Converter<Type01>;
     auto data = GetTestDataOfType01();
-    auto length = static_cast<size_t>(state.range(0));
-    auto memory = std::make_unique<std::byte[]>(length);
-    std::span<std::byte> span(memory.get(), length);
+    auto memory = std::make_unique<std::byte[]>(BufferLength);
+    std::span<std::byte> span(memory.get(), BufferLength);
 
     for (auto _ : state) {
         ::binary::Allocator allocator(span);
@@ -212,9 +210,8 @@ static void ExperimentalEncodeTupleObject(benchmark::State& state) {
 static void ExperimentalEncodeSystemTuple(benchmark::State& state) {
     using ConverterType = ::binary::experimental::Converter<TypeX1>;
     auto data = GetTestDataOfTypeX1();
-    auto length = static_cast<size_t>(state.range(0));
-    auto memory = std::make_unique<std::byte[]>(length);
-    std::span<std::byte> span(memory.get(), length);
+    auto memory = std::make_unique<std::byte[]>(BufferLength);
+    std::span<std::byte> span(memory.get(), BufferLength);
 
     for (auto _ : state) {
         ::binary::Allocator allocator(span);
@@ -248,16 +245,6 @@ static void ExperimentalDecodeSystemTuple(benchmark::State& state) {
 
 static void BoostEncodeTupleObjectText(benchmark::State& state) {
     auto data = GetTestDataOfType01();
-
-    for (auto _ : state) {
-        std::stringstream stream;
-        boost::archive::text_oarchive target(stream);
-        target << data;
-    }
-}
-
-static void BoostEncodeTupleObjectTextReuseStream(benchmark::State& state) {
-    auto data = GetTestDataOfType01();
     std::stringstream stream;
 
     for (auto _ : state) {
@@ -269,16 +256,6 @@ static void BoostEncodeTupleObjectTextReuseStream(benchmark::State& state) {
 }
 
 static void BoostEncodeTupleObjectBinary(benchmark::State& state) {
-    auto data = GetTestDataOfType01();
-
-    for (auto _ : state) {
-        std::stringstream stream;
-        boost::archive::binary_oarchive target(stream);
-        target << data;
-    }
-}
-
-static void BoostEncodeTupleObjectBinaryReuseStream(benchmark::State& state) {
     auto data = GetTestDataOfType01();
     std::stringstream stream;
 
@@ -318,24 +295,22 @@ static void BoostDecodeTupleObjectBinary(benchmark::State& state) {
     }
 }
 
-BENCHMARK(EncodeNamedObject)->Name("Encode Custom Named Object, pre-allocate memory")->Arg(0)->Arg(1024);
-BENCHMARK(EncodeTupleObject)->Name("Encode Custom Tuple Object, pre-allocate memory")->Arg(0)->Arg(1024);
-BENCHMARK(EncodeSystemTuple)->Name("Encode System Tuple, pre-allocate memory")->Arg(0)->Arg(1024);
+BENCHMARK(EncodeNamedObject)->Name("Encode Custom Named Object");
+BENCHMARK(EncodeTupleObject)->Name("Encode Custom Tuple Object");
+BENCHMARK(EncodeSystemTuple)->Name("Encode System Tuple");
 
 BENCHMARK(DecodeNamedObject)->Name("Decode Custom Named Object");
 BENCHMARK(DecodeTupleObject)->Name("Decode Custom Tuple Object");
 BENCHMARK(DecodeSystemTuple)->Name("Decode System Tuple");
 
-BENCHMARK(ExperimentalEncodeTupleObject)->Name("Experimental Encode Custom Tuple Object, pre-allocate memory")->Arg(0)->Arg(1024);
-BENCHMARK(ExperimentalEncodeSystemTuple)->Name("Experimental Encode System Tuple, pre-allocate memory")->Arg(0)->Arg(1024);
+BENCHMARK(ExperimentalEncodeTupleObject)->Name("Experimental Encode Custom Tuple Object");
+BENCHMARK(ExperimentalEncodeSystemTuple)->Name("Experimental Encode System Tuple");
 
 BENCHMARK(ExperimentalDecodeTupleObject)->Name("Experimental Decode Custom Tuple Object");
 BENCHMARK(ExperimentalDecodeSystemTuple)->Name("Experimental Decode System Tuple");
 
 BENCHMARK(BoostEncodeTupleObjectText)->Name("Boost Encode Custom Tuple Object (text)");
-BENCHMARK(BoostEncodeTupleObjectTextReuseStream)->Name("Boost Encode Custom Tuple Object (text, reuse stream)");
 BENCHMARK(BoostEncodeTupleObjectBinary)->Name("Boost Encode Custom Tuple Object (binary)");
-BENCHMARK(BoostEncodeTupleObjectBinaryReuseStream)->Name("Boost Encode Custom Tuple Object (binary, reuse stream)");
 
 BENCHMARK(BoostDecodeTupleObjectText)->Name("Boost Decode Custom Tuple Object (text)");
 BENCHMARK(BoostDecodeTupleObjectBinary)->Name("Boost Decode Custom Tuple Object (binary)");
