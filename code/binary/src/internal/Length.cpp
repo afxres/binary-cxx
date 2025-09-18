@@ -1,7 +1,6 @@
 #include "binary/internal/Length.hpp"
 
 #include <cassert>
-#include <cstdint>
 #include <stdexcept>
 
 #include "binary/internal/Endian.hpp"
@@ -22,7 +21,7 @@ void EnsureLengthPrefixLength(const size_t number) {
 
 size_t EncodeLengthPrefixLength(const size_t number) {
     assert(number <= INT32_MAX);
-    if ((static_cast<uint32_t>(number) >> 7) == 0) {
+    if (number <= INT8_MAX) {
         return 1;
     } else {
         return 4;
