@@ -1,6 +1,7 @@
 #ifndef BINARY_CONVERTERS_LITTLEENDIANSTRINGCONVERTER_HPP
 #define BINARY_CONVERTERS_LITTLEENDIANSTRINGCONVERTER_HPP
 
+#include "binary/Converter.hpp"
 #include "binary/internal/Define.hpp"
 #include "binary/internal/String.hpp"
 

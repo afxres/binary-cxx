@@ -2,7 +2,7 @@
 #define BINARY_INTERNAL_STRING_HPP
 
 #include "binary/internal/Endian.hpp"
-#include "binary/internal/Module.hpp"
+#include "binary/internal/Length.hpp"
 
 namespace binary::internal {
 template <typename T>

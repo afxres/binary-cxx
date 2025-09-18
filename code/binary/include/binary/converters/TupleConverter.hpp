@@ -3,6 +3,7 @@
 
 #include "binary/GeneratorExtensions.hpp"
 #include "binary/internal/Define.hpp"
+#include "binary/internal/Module.hpp"
 #include "binary/internal/TupleElement.hpp"
 #include "binary/internal/TupleGetHelper.hpp"
 #include "binary/internal/TupleSize.hpp"

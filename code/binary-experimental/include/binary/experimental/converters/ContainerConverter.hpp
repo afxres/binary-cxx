@@ -10,7 +10,7 @@
 #include "binary/internal/ContainerLengthFunction.hpp"
 #include "binary/internal/ContainerResizeFunction.hpp"
 #include "binary/internal/Exception.hpp"
-#include "binary/internal/Module.hpp"
+#include "binary/internal/Length.hpp"
 
 namespace binary::experimental::converters {
 template <typename T>

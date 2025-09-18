@@ -6,7 +6,7 @@
 #include "binary/internal/ContainerResizeFunction.hpp"
 #include "binary/internal/Define.hpp"
 #include "binary/internal/Exception.hpp"
-#include "binary/internal/Module.hpp"
+#include "binary/internal/Length.hpp"
 
 namespace binary::converters {
 template <typename T>

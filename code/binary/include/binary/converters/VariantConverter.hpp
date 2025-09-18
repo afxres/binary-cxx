@@ -6,7 +6,6 @@
 #include "binary/Converter.hpp"
 #include "binary/ConverterExtensions.hpp"
 #include "binary/internal/Exception.hpp"
-#include "binary/internal/Module.hpp"
 
 namespace binary::converters {
 template <typename T>

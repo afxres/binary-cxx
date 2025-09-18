@@ -8,8 +8,6 @@
 #include "binary/internal/Exception.hpp"
 
 namespace binary::internal {
-size_t GetCapacity(size_t byteLength, size_t itemLength, std::type_index type);
-
 template <typename T>
     requires std::same_as<T, std::remove_cv_t<T>>
 std::shared_ptr<Converter<T>> GetConverter(const std::shared_ptr<IConverter>& converter) {
