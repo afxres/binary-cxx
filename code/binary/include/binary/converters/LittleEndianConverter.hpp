@@ -16,7 +16,7 @@ public:
         : Converter<T>(sizeof(T)) {}
 
     BINARY_DEFINE_OVERRIDE_ENCODE_METHOD(T) {
-        ::binary::internal::EncodeLittleEndian(internal::AllocatorUnsafeAccessor::Assign(allocator, sizeof(T)), item);
+        ::binary::internal::EncodeLittleEndian(::binary::internal::AllocatorUnsafeAccessor::Assign(allocator, sizeof(T)), item);
     }
 
     BINARY_DEFINE_OVERRIDE_ENCODE_WITH_LENGTH_PREFIX_METHOD(T) {

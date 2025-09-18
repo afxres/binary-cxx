@@ -28,7 +28,7 @@ public:
     }
 
     BINARY_DEFINE_OVERRIDE_DECODE_METHOD(T) {
-        if constexpr (!internal::ContainerInsertFunction<T>::IsEnable) {
+        if constexpr (!::binary::internal::ContainerInsertFunction<T>::IsEnable) {
             ::binary::internal::ThrowNoSuitableEmplaceMethod(typeid(T));
         } else {
             if (span.empty()) {
@@ -37,7 +37,7 @@ public:
             T result{};
             std::span<const std::byte> copy = span;
             const auto& converter = this->converter;
-            if constexpr (internal::ContainerResizeFunction<T>::IsEnable) {
+            if constexpr (::binary::internal::ContainerResizeFunction<T>::IsEnable) {
                 if (converter->Length() != 0) {
                     size_t capacity = ::binary::internal::GetCapacity(span.size(), converter->Length(), typeid(T));
                     ::binary::internal::ContainerResizeFunction<T>::Invoke(result, capacity);
