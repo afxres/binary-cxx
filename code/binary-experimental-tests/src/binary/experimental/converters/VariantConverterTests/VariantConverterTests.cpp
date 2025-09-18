@@ -8,9 +8,7 @@
 #include <binary/converters/LittleEndianStringConverter.hpp>
 #include <binary/converters/VariantConverter.hpp>
 
-#include <binary/experimental/converters/LittleEndianConverter.hpp>
-#include <binary/experimental/converters/LittleEndianStringConverter.hpp>
-#include <binary/experimental/converters/VariantConverter.hpp>
+#include <binary/experimental/Converter.hpp>
 
 #include <format>
 
@@ -27,12 +25,10 @@ using VariantConverterTestTypeData = boost::mpl::list<
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(VariantConverterLengthTest, T, VariantConverterTestTypeData) {
     using ConverterType = ::binary::experimental::Converter<T>;
-    using ActualConverterType = typename ConverterType::ActualConverterType;
-    std::string name = typeid(ActualConverterType).name();
+    std::string name = typeid(ConverterType).name();
     BOOST_REQUIRE(name.find("experimental") != 0);
     BOOST_REQUIRE(name.find("VariantConverter") != 0);
     BOOST_REQUIRE_EQUAL(0, ConverterType::Length());
-    BOOST_REQUIRE_EQUAL(0, ActualConverterType::Length());
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(VariantConverterEncodeDecodeBothMethodsWithDefaultValueTest, T, VariantConverterTestTypeData) {

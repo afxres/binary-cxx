@@ -9,10 +9,7 @@
 #include <binary/converters/LittleEndianStringConverter.hpp>
 #include <binary/converters/TupleConverter.hpp>
 
-#include <binary/experimental/converters/ContainerConverter.hpp>
-#include <binary/experimental/converters/LittleEndianConverter.hpp>
-#include <binary/experimental/converters/LittleEndianStringConverter.hpp>
-#include <binary/experimental/converters/TupleConverter.hpp>
+#include <binary/experimental/Converter.hpp>
 
 namespace tests::binary::experimental::converters::TupleConverterTests {
 BOOST_AUTO_TEST_SUITE(StructureTypeTupleConverterTests)
@@ -75,14 +72,11 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(ContantLengthStructureTypeTupleConverterLengthTest
     BOOST_REQUIRE_NE(0, converter->Length());
 
     using ConverterType = ::binary::experimental::Converter<T>;
-    using ActualConverterType = typename ConverterType::ActualConverterType;
-    std::string name = typeid(ActualConverterType).name();
+    std::string name = typeid(ConverterType).name();
     BOOST_REQUIRE(name.find("experimental") != 0);
     BOOST_REQUIRE(name.find("TupleConverter") != 0);
     BOOST_REQUIRE_NE(0, ConverterType::Length());
-    BOOST_REQUIRE_NE(0, ActualConverterType::Length());
     BOOST_REQUIRE_EQUAL(converter->Length(), ConverterType::Length());
-    BOOST_REQUIRE_EQUAL(converter->Length(), ActualConverterType::Length());
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(VariableLengthStructureTypeTupleConverterLengthTest, T, VariableLengthStructureTypeTupleConverterTestTypeData) {
@@ -92,14 +86,11 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(VariableLengthStructureTypeTupleConverterLengthTes
     BOOST_REQUIRE_EQUAL(0, converter->Length());
 
     using ConverterType = ::binary::experimental::Converter<T>;
-    using ActualConverterType = typename ConverterType::ActualConverterType;
-    std::string name = typeid(ActualConverterType).name();
+    std::string name = typeid(ConverterType).name();
     BOOST_REQUIRE(name.find("experimental") != 0);
     BOOST_REQUIRE(name.find("TupleConverter") != 0);
     BOOST_REQUIRE_EQUAL(0, ConverterType::Length());
-    BOOST_REQUIRE_EQUAL(0, ActualConverterType::Length());
     BOOST_REQUIRE_EQUAL(converter->Length(), ConverterType::Length());
-    BOOST_REQUIRE_EQUAL(converter->Length(), ActualConverterType::Length());
 }
 
 template <typename T>

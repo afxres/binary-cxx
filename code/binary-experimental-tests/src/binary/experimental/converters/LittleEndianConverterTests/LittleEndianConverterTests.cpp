@@ -2,7 +2,7 @@
 #include <boost/test/data/test_case.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include <binary/experimental/converters/LittleEndianConverter.hpp>
+#include <binary/experimental/Converter.hpp>
 
 #include <array>
 
@@ -13,12 +13,10 @@ using LittleEndianConverterTestTypeData = boost::mpl::list<int8_t, int16_t, int3
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(LittleEndianConverterLengthTest, T, LittleEndianConverterTestTypeData) {
     using ConverterType = ::binary::experimental::Converter<T>;
-    using ActualConverterType = typename ConverterType::ActualConverterType;
-    std::string name = typeid(ActualConverterType).name();
+    std::string name = typeid(ConverterType).name();
     BOOST_REQUIRE(name.find("experimental") != 0);
     BOOST_REQUIRE(name.find("LittleEndianConverter") != 0);
     BOOST_REQUIRE_EQUAL(sizeof(T), ConverterType::Length());
-    BOOST_REQUIRE_EQUAL(sizeof(T), ActualConverterType::Length());
 }
 
 template <typename T>

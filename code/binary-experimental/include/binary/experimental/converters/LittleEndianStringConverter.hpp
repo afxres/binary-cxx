@@ -3,6 +3,7 @@
 
 #include <concepts>
 
+#include "binary/experimental/helpers/GetConverterHelper.hpp"
 #include "binary/experimental/internal/Define.hpp"
 #include "binary/internal/String.hpp"
 
@@ -32,18 +33,13 @@ struct LittleEndianStringConverter {
 };
 }
 
-namespace binary::experimental {
+namespace binary::experimental::helpers {
 template <typename T>
     requires std::same_as<T, std::remove_cv_t<T>> &&
     requires { typename T::value_type; } &&
     requires(const T& item) { item.empty(); item.data(); item.size(); item.c_str(); }
-struct Converter<T> {
-    using ObjectType = T;
-    using ActualConverterType = ::binary::experimental::converters::LittleEndianStringConverter<T>;
-    BINARY_EXPERIMENTAL_FORWARD_STATIC_LENGTH_METHOD();
-    BINARY_EXPERIMENTAL_FORWARD_STATIC_ENCODE_METHOD();
-    BINARY_EXPERIMENTAL_FORWARD_STATIC_DECODE_METHOD();
-    BINARY_EXPERIMENTAL_FORWARD_STATIC_ENCODE_WITH_LENGTH_PREFIX_METHOD();
+struct GetConverterHelper<T> {
+    using Type = ::binary::experimental::converters::LittleEndianStringConverter<T>;
 };
 }
 

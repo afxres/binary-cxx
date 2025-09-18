@@ -5,6 +5,7 @@
 
 #include "binary/experimental/helpers/ConverterDecodeAutoMethodHelper.hpp"
 #include "binary/experimental/helpers/ConverterEncodeAutoMethodHelper.hpp"
+#include "binary/experimental/helpers/GetConverterHelper.hpp"
 #include "binary/internal/ContainerInsertFunction.hpp"
 #include "binary/internal/ContainerResizeFunction.hpp"
 #include "binary/internal/Exception.hpp"
@@ -15,7 +16,7 @@ template <typename T>
     requires std::same_as<T, std::remove_cv_t<T>>
 struct ContainerConverter {
     using ValueType = std::ranges::range_value_t<T>;
-    using ValueConverterType = ::binary::experimental::Converter<ValueType>;
+    using ValueConverterType = typename ::binary::experimental::helpers::GetConverterHelper<ValueType>::Type;
 
     BINARY_EXPERIMENTAL_DEFINE_STATIC_LENGTH_METHOD() {
         return 0;
@@ -24,6 +25,19 @@ struct ContainerConverter {
     BINARY_EXPERIMENTAL_DEFINE_STATIC_ENCODE_METHOD(T) {
         for (const auto& i : item) {
             ::binary::experimental::helpers::ConverterEncodeAutoMethodHelper<ValueConverterType>::Invoke(allocator, i);
+        }
+    }
+
+    BINARY_EXPERIMENTAL_DEFINE_STATIC_ENCODE_WITH_LENGTH_PREFIX_METHOD(T) {
+        using typename ::binary::internal::AllocatorUnsafeAccessor;
+        constexpr size_t length = ValueConverterType::Length();
+        if constexpr (length != 0) {
+            ::binary::Encode(allocator, item.size() * length);
+            Encode(allocator, item);
+        } else {
+            size_t anchor = AllocatorUnsafeAccessor::Anchor(allocator);
+            Encode(allocator, item);
+            AllocatorUnsafeAccessor::FinishAnchor(allocator, anchor);
         }
     }
 
@@ -52,16 +66,12 @@ struct ContainerConverter {
 };
 }
 
-namespace binary::experimental {
+namespace binary::experimental::helpers {
 template <typename T>
     requires std::same_as<T, std::remove_cv_t<T>> &&
     std::ranges::input_range<T> && (!requires(const T& item) { item.c_str(); })
-struct Converter<T> {
-    using ObjectType = T;
-    using ActualConverterType = ::binary::experimental::converters::ContainerConverter<T>;
-    BINARY_EXPERIMENTAL_FORWARD_STATIC_LENGTH_METHOD();
-    BINARY_EXPERIMENTAL_FORWARD_STATIC_ENCODE_METHOD();
-    BINARY_EXPERIMENTAL_FORWARD_STATIC_DECODE_METHOD();
+struct GetConverterHelper<T> {
+    using Type = ::binary::experimental::converters::ContainerConverter<T>;
 };
 }
 

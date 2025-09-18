@@ -2,7 +2,7 @@
 #include <boost/test/data/test_case.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include <binary/experimental/converters/LittleEndianStringConverter.hpp>
+#include <binary/experimental/Converter.hpp>
 
 template <>
 struct boost::test_tools::tt_detail::print_log_value<std::wstring> {
@@ -25,12 +25,10 @@ std::vector<std::string> StringTestData = {
 
 BOOST_AUTO_TEST_CASE(LittleEndianStringConverterForStringLengthTest) {
     using ConverterType = ::binary::experimental::Converter<std::string>;
-    using ActualConverterType = typename ConverterType::ActualConverterType;
-    std::string name = typeid(ActualConverterType).name();
+    std::string name = typeid(ConverterType).name();
     BOOST_REQUIRE(name.find("experimental") != 0);
     BOOST_REQUIRE(name.find("LittleEndianStringConverter") != 0);
     BOOST_REQUIRE_EQUAL(0, ConverterType::Length());
-    BOOST_REQUIRE_EQUAL(0, ActualConverterType::Length());
 }
 
 BOOST_DATA_TEST_CASE(LittleEndianStringConverterForStringEncodeDecodeTest, StringTestData, source) {

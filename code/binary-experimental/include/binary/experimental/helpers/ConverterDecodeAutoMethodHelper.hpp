@@ -10,7 +10,7 @@ struct ConverterDecodeAutoMethodHelper;
 
 template <typename C>
 struct ConverterDecodeAutoMethodHelper {
-    BINARY_EXPERIMENTAL_DEFINE_STATIC_DECODE_METHOD_WITH_NAME(C::ObjectType, Invoke) {
+    BINARY_EXPERIMENTAL_DEFINE_STATIC_DECODE_METHOD_WITH_NAME(auto, Invoke) {
         constexpr size_t length = C::Length();
         if constexpr (length != 0) {
             if (span.size() < length) {
@@ -28,7 +28,7 @@ struct ConverterDecodeAutoMethodHelper {
 template <typename C>
     requires requires { &C::DecodeAuto; }
 struct ConverterDecodeAutoMethodHelper<C> {
-    BINARY_EXPERIMENTAL_DEFINE_STATIC_DECODE_METHOD_WITH_NAME(C::ObjectType, Invoke) {
+    BINARY_EXPERIMENTAL_DEFINE_STATIC_DECODE_METHOD_WITH_NAME(auto, Invoke) {
         return C::DecodeAuto(span);
     }
 };

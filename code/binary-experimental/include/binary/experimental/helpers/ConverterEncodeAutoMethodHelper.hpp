@@ -9,7 +9,7 @@ struct ConverterEncodeAutoMethodHelper;
 
 template <typename C>
 struct ConverterEncodeAutoMethodHelper {
-    BINARY_EXPERIMENTAL_DEFINE_STATIC_ENCODE_METHOD_WITH_NAME(C::ObjectType, Invoke) {
+    BINARY_EXPERIMENTAL_DEFINE_STATIC_ENCODE_METHOD_WITH_NAME(auto, Invoke) {
         constexpr size_t length = C::Length();
         if constexpr (length != 0) {
             C::Encode(allocator, item);
@@ -22,7 +22,7 @@ struct ConverterEncodeAutoMethodHelper {
 template <typename C>
     requires requires { &C::EncodeAuto; }
 struct ConverterEncodeAutoMethodHelper<C> {
-    BINARY_EXPERIMENTAL_DEFINE_STATIC_ENCODE_METHOD_WITH_NAME(C::ObjectType, Invoke) {
+    BINARY_EXPERIMENTAL_DEFINE_STATIC_ENCODE_METHOD_WITH_NAME(auto, Invoke) {
         C::EncodeAuto(allocator, item);
     }
 };

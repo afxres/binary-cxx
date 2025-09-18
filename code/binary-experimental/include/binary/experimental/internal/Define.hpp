@@ -12,39 +12,4 @@
 #define BINARY_EXPERIMENTAL_DEFINE_STATIC_DECODE_METHOD(ARG_OBJECT_TYPE) static ARG_OBJECT_TYPE Decode(const std::span<const std::byte>& span)
 #define BINARY_EXPERIMENTAL_DEFINE_STATIC_DECODE_AUTO_METHOD(ARG_OBJECT_TYPE) BINARY_EXPERIMENTAL_DEFINE_STATIC_DECODE_METHOD_WITH_NAME(ARG_OBJECT_TYPE, DecodeAuto)
 
-#define BINARY_EXPERIMENTAL_FORWARD_STATIC_LENGTH_METHOD() \
-    BINARY_EXPERIMENTAL_DEFINE_STATIC_LENGTH_METHOD() {    \
-        return ActualConverterType::Length();              \
-    }
-
-#define BINARY_EXPERIMENTAL_FORWARD_STATIC_ENCODE_METHOD()        \
-    BINARY_EXPERIMENTAL_DEFINE_STATIC_ENCODE_METHOD(ObjectType) { \
-        ActualConverterType::Encode(allocator, item);             \
-    }
-
-#define BINARY_EXPERIMENTAL_FORWARD_STATIC_ENCODE_AUTO_METHOD()        \
-    BINARY_EXPERIMENTAL_DEFINE_STATIC_ENCODE_AUTO_METHOD(ObjectType) { \
-        ActualConverterType::EncodeAuto(allocator, item);              \
-    }
-
-#define BINARY_EXPERIMENTAL_FORWARD_STATIC_ENCODE_WITH_LENGTH_PREFIX_METHOD()        \
-    BINARY_EXPERIMENTAL_DEFINE_STATIC_ENCODE_WITH_LENGTH_PREFIX_METHOD(ObjectType) { \
-        ActualConverterType::EncodeWithLengthPrefix(allocator, item);                \
-    }
-
-#define BINARY_EXPERIMENTAL_FORWARD_STATIC_DECODE_METHOD()        \
-    BINARY_EXPERIMENTAL_DEFINE_STATIC_DECODE_METHOD(ObjectType) { \
-        return ActualConverterType::Decode(span);                 \
-    }
-
-#define BINARY_EXPERIMENTAL_FORWARD_STATIC_DECODE_AUTO_METHOD()        \
-    BINARY_EXPERIMENTAL_DEFINE_STATIC_DECODE_AUTO_METHOD(ObjectType) { \
-        return ActualConverterType::DecodeAuto(span);                  \
-    }
-
-namespace binary::experimental {
-template <typename T>
-struct Converter;
-}
-
 #endif

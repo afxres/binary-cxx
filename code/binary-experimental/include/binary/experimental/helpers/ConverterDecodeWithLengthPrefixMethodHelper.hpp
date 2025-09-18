@@ -10,7 +10,7 @@ struct ConverterDecodeWithLengthPrefixMethodHelper;
 
 template <typename C>
 struct ConverterDecodeWithLengthPrefixMethodHelper {
-    BINARY_EXPERIMENTAL_DEFINE_STATIC_DECODE_METHOD_WITH_NAME(C::ObjectType, Invoke) {
+    BINARY_EXPERIMENTAL_DEFINE_STATIC_DECODE_METHOD_WITH_NAME(auto, Invoke) {
         return C::Decode(::binary::DecodeWithLengthPrefix(span));
     }
 };

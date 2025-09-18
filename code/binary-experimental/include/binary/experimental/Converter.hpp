@@ -10,6 +10,10 @@
 namespace binary::experimental {
 template <typename T>
     requires std::same_as<T, std::remove_cv_t<T>>
+using Converter = typename ::binary::experimental::helpers::GetConverterHelper<T>::Type;
+
+template <typename T>
+    requires std::same_as<T, std::remove_cv_t<T>>
 std::vector<std::byte> Encode(const T& item) {
     Allocator allocator;
     ::binary::experimental::Converter<T>::Encode(allocator, item);

@@ -21,10 +21,7 @@
 #include <binary/converters/LittleEndianStringConverter.hpp>
 #include <binary/converters/TupleConverter.hpp>
 
-#include <binary/experimental/converters/ContainerConverter.hpp>
-#include <binary/experimental/converters/LittleEndianConverter.hpp>
-#include <binary/experimental/converters/LittleEndianStringConverter.hpp>
-#include <binary/experimental/converters/TupleConverter.hpp>
+#include <binary/experimental/Converter.hpp>
 
 struct Type02 {
     double Data;

@@ -2,10 +2,7 @@
 #include <boost/test/data/test_case.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include <binary/experimental/converters/ContainerConverter.hpp>
-#include <binary/experimental/converters/LittleEndianConverter.hpp>
-#include <binary/experimental/converters/LittleEndianStringConverter.hpp>
-#include <binary/experimental/converters/TupleConverter.hpp>
+#include <binary/experimental/Converter.hpp>
 
 #include <map>
 #include <set>
@@ -25,12 +22,10 @@ using ContainerConverterTestTypeData = boost::mpl::list<
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(ContainerConverterLengthTest, T, ContainerConverterTestTypeData) {
     using ConverterType = ::binary::experimental::Converter<T>;
-    using ActualConverterType = typename ConverterType::ActualConverterType;
-    std::string name = typeid(ActualConverterType).name();
+    std::string name = typeid(ConverterType).name();
     BOOST_REQUIRE(name.find("experimental") != 0);
     BOOST_REQUIRE(name.find("ContainerConverter") != 0);
     BOOST_REQUIRE_EQUAL(0, ConverterType::Length());
-    BOOST_REQUIRE_EQUAL(0, ActualConverterType::Length());
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(ContainerConverterEncodeDecodeEmptyContainerTest, T, ContainerConverterTestTypeData) {

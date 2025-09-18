@@ -5,6 +5,7 @@
 
 #include "binary/experimental/helpers/ConverterDecodeAutoMethodHelper.hpp"
 #include "binary/experimental/helpers/ConverterEncodeAutoMethodHelper.hpp"
+#include "binary/experimental/helpers/GetConverterHelper.hpp"
 #include "binary/experimental/internal/Define.hpp"
 #include "binary/internal/Exception.hpp"
 
@@ -14,7 +15,7 @@ struct VariantConverter {
     static constexpr size_t ElementCount = std::variant_size_v<T>;
 
     template <size_t Index>
-    using ElementConverterType = ::binary::experimental::Converter<std::remove_cv_t<std::variant_alternative_t<Index, T>>>;
+    using ElementConverterType = typename ::binary::experimental::helpers::GetConverterHelper<std::remove_cv_t<std::variant_alternative_t<Index, T>>>::Type;
 
     template <size_t IsAuto, size_t Index>
     static void EncodeInternal(Allocator& allocator, const T& item) {
@@ -89,18 +90,12 @@ struct VariantConverter {
 };
 }
 
-namespace binary::experimental {
+namespace binary::experimental::helpers {
 template <typename T>
     requires std::same_as<T, std::remove_cv_t<T>> &&
     requires { std::variant_size<T>::value; }
-struct Converter<T> {
-    using ObjectType = T;
-    using ActualConverterType = ::binary::experimental::converters::VariantConverter<T>;
-    BINARY_EXPERIMENTAL_FORWARD_STATIC_LENGTH_METHOD();
-    BINARY_EXPERIMENTAL_FORWARD_STATIC_ENCODE_METHOD();
-    BINARY_EXPERIMENTAL_FORWARD_STATIC_ENCODE_AUTO_METHOD();
-    BINARY_EXPERIMENTAL_FORWARD_STATIC_DECODE_METHOD();
-    BINARY_EXPERIMENTAL_FORWARD_STATIC_DECODE_AUTO_METHOD();
+struct GetConverterHelper<T> {
+    using Type = ::binary::experimental::converters::VariantConverter<T>;
 };
 }
 

@@ -3,6 +3,7 @@
 
 #include "binary/experimental/helpers/ConverterDecodeAutoMethodHelper.hpp"
 #include "binary/experimental/helpers/ConverterEncodeAutoMethodHelper.hpp"
+#include "binary/experimental/helpers/GetConverterHelper.hpp"
 #include "binary/experimental/internal/TupleElement.hpp"
 #include "binary/experimental/internal/TupleGetHelper.hpp"
 #include "binary/experimental/internal/TupleSize.hpp"
@@ -13,7 +14,7 @@ struct TupleConverter {
     static constexpr size_t ElementCount = ::binary::internal::TupleSize<T>::Value;
 
     template <size_t Index>
-    using ElementConverterType = ::binary::experimental::Converter<std::remove_cv_t<typename ::binary::internal::TupleElement<Index, T>::Type>>;
+    using ElementConverterType = typename ::binary::experimental::helpers::GetConverterHelper<std::remove_cv_t<typename ::binary::internal::TupleElement<Index, T>::Type>>::Type;
 
     template <size_t IsAuto, size_t Index>
     static void EncodeInternal(Allocator& allocator, const T& item) {
@@ -88,18 +89,12 @@ struct TupleConverter {
 };
 }
 
-namespace binary::experimental {
+namespace binary::experimental::helpers {
 template <typename T>
     requires std::same_as<T, std::remove_cv_t<T>> &&
     requires { ::binary::internal::TupleSize<T>::Value; }
-struct Converter<T> {
-    using ObjectType = T;
-    using ActualConverterType = ::binary::experimental::converters::TupleConverter<T>;
-    BINARY_EXPERIMENTAL_FORWARD_STATIC_LENGTH_METHOD();
-    BINARY_EXPERIMENTAL_FORWARD_STATIC_ENCODE_METHOD();
-    BINARY_EXPERIMENTAL_FORWARD_STATIC_ENCODE_AUTO_METHOD();
-    BINARY_EXPERIMENTAL_FORWARD_STATIC_DECODE_METHOD();
-    BINARY_EXPERIMENTAL_FORWARD_STATIC_DECODE_AUTO_METHOD();
+struct GetConverterHelper<T> {
+    using Type = ::binary::experimental::converters::TupleConverter<T>;
 };
 }
 
