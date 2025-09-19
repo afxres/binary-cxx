@@ -10,7 +10,6 @@
 
 namespace binary {
 constexpr size_t AllocatorAnchorSize = 4;
-constexpr size_t AllocatorAnchorShrinkLimits = 16;
 constexpr size_t AllocatorCapacitySeed = 256;
 
 Allocator::Allocator()
@@ -116,10 +115,9 @@ void Allocator::FinishAnchor(size_t anchor) {
     }
     size_t length = offset - static_cast<size_t>(refers);
     std::byte* target = this->buffer + anchor;
-    if (length <= AllocatorAnchorShrinkLimits) {
+    if (length == 0) {
         this->offset = offset - 3;
         ::binary::internal::EncodeLengthPrefix(target, length, 1);
-        memmove(target + 1, target + 4, length);
         assert(this->offset >= 1);
         assert(this->offset <= this->bounds);
     } else {
