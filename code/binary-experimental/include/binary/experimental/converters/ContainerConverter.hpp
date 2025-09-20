@@ -30,13 +30,13 @@ struct ContainerConverter {
     }
 
     BINARY_EXPERIMENTAL_DEFINE_STATIC_ENCODE_WITH_LENGTH_PREFIX_METHOD(T) {
-        using typename ::binary::internal::AllocatorUnsafeAccessor;
         constexpr size_t length = ValueConverterType::Length();
         if constexpr (length != 0 && ::binary::internal::ContainerLengthFunction<T>::IsEnable) {
             size_t size = ::binary::internal::ContainerLengthFunction<T>::Invoke(item);
             ::binary::Encode(allocator, size * length);
             Encode(allocator, item);
         } else {
+            using typename ::binary::internal::AllocatorUnsafeAccessor;
             size_t anchor = AllocatorUnsafeAccessor::Anchor(allocator);
             Encode(allocator, item);
             AllocatorUnsafeAccessor::FinishAnchor(allocator, anchor);
@@ -53,9 +53,8 @@ struct ContainerConverter {
             T result{};
             std::span<const std::byte> copy = span;
             if constexpr (::binary::internal::ContainerResizeFunction<T>::IsEnable) {
-                constexpr size_t length = ValueConverterType::Length();
-                if constexpr (length != 0) {
-                    size_t capacity = ::binary::internal::GetCapacity(span.size(), length, typeid(T));
+                if constexpr (ValueConverterType::Length() != 0) {
+                    size_t capacity = ::binary::internal::GetCapacity(span.size(), ValueConverterType::Length(), typeid(T));
                     ::binary::internal::ContainerResizeFunction<T>::Invoke(result, capacity);
                 }
             }

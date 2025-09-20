@@ -54,7 +54,7 @@ private:
 
     template <size_t IsAuto, size_t... Index>
     auto DecodeInternal(std::span<const std::byte>& span, std::index_sequence<Index...>) {
-        return T({DecodeInternal<IsAuto, Index>(span)...});
+        return T{DecodeInternal<IsAuto, Index>(span)...};
     }
 
     static auto GetConverter(const IGenerator& generator) {

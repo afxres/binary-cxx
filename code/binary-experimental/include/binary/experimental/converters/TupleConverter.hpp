@@ -46,7 +46,7 @@ struct TupleConverter {
 
     template <size_t IsAuto, size_t... Index>
     static auto DecodeInternal(std::span<const std::byte>& span, std::index_sequence<Index...>) {
-        return T({DecodeInternal<IsAuto, Index>(span)...});
+        return T{DecodeInternal<IsAuto, Index>(span)...};
     }
 
     template <size_t Index>
