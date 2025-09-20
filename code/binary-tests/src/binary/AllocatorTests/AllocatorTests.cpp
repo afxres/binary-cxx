@@ -1,3 +1,4 @@
+#include <boost/mpl/list.hpp>
 #include <boost/test/data/test_case.hpp>
 #include <boost/test/unit_test.hpp>
 
@@ -324,6 +325,27 @@ BOOST_DATA_TEST_CASE(AllocatorAnchorInvalidOperationTest, AllocatorAnchorInvalid
             BOOST_REQUIRE_EQUAL(e.what(), "allocator has been modified unexpectedly");
             return true;
         });
+}
+
+using AllocatorInvokeWithExplicitReturnTypeTestTypeData = boost::mpl::list<
+    std::vector<std::byte>,
+    std::vector<char>,
+    std::vector<uint8_t>,
+    std::string>;
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(AllocatorInvokeWithExplicitReturnTypeTest, T, AllocatorInvokeWithExplicitReturnTypeTestTypeData) {
+    std::string source(4, ' ');
+    auto result = ::binary::Allocator::Invoke<T>([&source](auto& allocator) {
+        BOOST_REQUIRE_EQUAL(0, allocator.Length());
+        BOOST_REQUIRE_EQUAL(0, allocator.Capacity());
+        BOOST_REQUIRE_EQUAL(INT32_MAX, allocator.MaxCapacity());
+        allocator.Append(std::span(reinterpret_cast<const std::byte*>(source.data()), source.size()));
+        BOOST_REQUIRE_EQUAL(4, allocator.Length());
+        BOOST_REQUIRE_EQUAL(256, allocator.Capacity());
+        BOOST_REQUIRE_EQUAL(INT32_MAX, allocator.MaxCapacity());
+    });
+    BOOST_REQUIRE_EQUAL(4, result.size());
+    BOOST_REQUIRE_EQUAL(source, std::string(reinterpret_cast<const char*>(source.data()), source.size()));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

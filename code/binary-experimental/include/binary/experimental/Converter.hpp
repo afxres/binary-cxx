@@ -12,13 +12,13 @@ template <typename T>
     requires std::same_as<T, std::remove_cv_t<T>>
 using Converter = typename ::binary::experimental::helpers::GetConverterHelper<T>::Type;
 
-template <typename T>
-    requires std::same_as<T, std::remove_cv_t<T>>
-std::vector<std::byte> Encode(const T& item) {
-    Allocator allocator;
-    ::binary::experimental::Converter<T>::Encode(allocator, item);
-    auto span = allocator.AsSpan();
-    return std::vector(span.begin(), span.end());
+template <typename T, typename R = std::invoke_result_t<decltype(Allocator::Invoke<>), const std::function<void(Allocator&)>&>>
+    requires std::same_as<T, std::remove_cv_t<T>> &&
+    requires { &Allocator::Invoke<R>; }
+R Encode(const T& item) {
+    return Allocator::Invoke<R>([&item](auto& allocator) {
+        ::binary::experimental::Converter<T>::Encode(allocator, item);
+    });
 }
 
 template <typename T>

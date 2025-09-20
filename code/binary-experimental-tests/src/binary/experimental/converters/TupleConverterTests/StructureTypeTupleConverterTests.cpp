@@ -128,7 +128,7 @@ void TestAllMethods(const T& source) {
 }
 
 template <typename T>
-void TestAll(const std::vector<T>& container, std::function<void(const T&)> action) {
+void TestAll(const std::vector<T>& container, const std::function<void(const T&)>& action) {
     for (const T& i : container) {
         action(i);
     }

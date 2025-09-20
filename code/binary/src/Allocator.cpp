@@ -18,15 +18,31 @@ Allocator::Allocator()
 Allocator::Allocator(std::span<std::byte> span)
     : Allocator(span, INT32_MAX) {}
 
-Allocator::Allocator(std::span<std::byte> span, size_t maxCapacity) {
+Allocator::Allocator(std::span<std::byte> span, size_t maxCapacity)
+    : allocated(false)
+    , bridge(nullptr)
+    , buffer(span.data())
+    , offset(0)
+    , bounds(std::min(span.size(), maxCapacity))
+    , limits(maxCapacity) {
     if (maxCapacity > INT32_MAX) {
         throw std::invalid_argument("maxCapacity > INT32_MAX");
     }
-    this->allocated = false;
-    this->buffer = span.data();
-    this->bounds = std::min(span.size(), maxCapacity);
-    this->offset = 0;
-    this->limits = maxCapacity;
+}
+
+Allocator::Allocator(IAllocator& allocator)
+    : Allocator(allocator, INT32_MAX) {}
+
+Allocator::Allocator(IAllocator& allocator, size_t maxCapacity)
+    : allocated(false)
+    , bridge(&allocator)
+    , buffer(nullptr)
+    , offset(0)
+    , bounds(0)
+    , limits(maxCapacity) {
+    if (maxCapacity > INT32_MAX) {
+        throw std::invalid_argument("maxCapacity > INT32_MAX");
+    }
 }
 
 Allocator::~Allocator() {
@@ -68,16 +84,22 @@ void Allocator::Resize(size_t length) {
     assert(cursor <= this->limits);
 
     size_t bounds = static_cast<size_t>(cursor);
-    auto target = static_cast<std::byte*>(malloc(bounds));
-    ::binary::internal::EnsureMemoryAccess(target);
-    if (offset != 0) {
-        memcpy(target, this->buffer, offset);
+    if (this->bridge == nullptr) {
+        auto target = static_cast<std::byte*>(malloc(bounds));
+        ::binary::internal::EnsureMemoryAccess(target);
+        if (offset != 0) {
+            memcpy(target, this->buffer, offset);
+        }
+        if (this->allocated) {
+            free(this->buffer);
+        }
+        this->allocated = true;
+        this->buffer = target;
+    } else {
+        this->buffer = this->bridge->Resize(bounds);
+        assert(this->buffer != nullptr);
+        assert(this->allocated == false);
     }
-    if (this->allocated) {
-        free(this->buffer);
-    }
-    this->allocated = true;
-    this->buffer = target;
     this->bounds = bounds;
     assert(offset <= source);
     assert(offset <= this->bounds);
@@ -163,14 +185,14 @@ void Allocator::Append(const std::span<const std::byte>& span) {
     memcpy(Assign(span.size()), span.data(), span.size());
 }
 
-void Allocator::Append(size_t length, std::function<void(std::span<std::byte>)> action) {
+void Allocator::Append(size_t length, const std::function<void(std::span<std::byte>)>& action) {
     if (length == 0) {
         return;
     }
     action(std::span<std::byte>(Assign(length), length));
 }
 
-void Allocator::Append(size_t maxLength, std::function<void(std::span<std::byte>, size_t&)> action) {
+void Allocator::Append(size_t maxLength, const std::function<void(std::span<std::byte>, size_t&)>& action) {
     if (maxLength == 0) {
         return;
     }
@@ -183,13 +205,13 @@ void Allocator::Append(size_t maxLength, std::function<void(std::span<std::byte>
     FinishCreate(actual);
 }
 
-void Allocator::AppendWithLengthPrefix(std::function<void(Allocator&)> action) {
+void Allocator::AppendWithLengthPrefix(const std::function<void(Allocator&)>& action) {
     size_t anchor = Anchor();
     action(*this);
     FinishAnchor(anchor);
 }
 
-void Allocator::AppendWithLengthPrefix(size_t maxLength, std::function<void(std::span<std::byte>, size_t&)> action) {
+void Allocator::AppendWithLengthPrefix(size_t maxLength, const std::function<void(std::span<std::byte>, size_t&)>& action) {
     ::binary::internal::EnsureLengthPrefixLength(maxLength);
     size_t actual;
     size_t prefixLength = ::binary::internal::EncodeLengthPrefixLength(maxLength);
@@ -205,12 +227,5 @@ void Allocator::AppendWithLengthPrefix(size_t maxLength, std::function<void(std:
     }
     ::binary::internal::EncodeLengthPrefix(target, actual, prefixLength);
     FinishCreate(actual + prefixLength);
-}
-
-std::vector<std::byte> Allocator::Invoke(std::function<void(Allocator&)> action) {
-    Allocator allocator;
-    action(allocator);
-    auto span = allocator.AsSpan();
-    return std::vector(span.begin(), span.end());
 }
 }

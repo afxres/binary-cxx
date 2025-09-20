@@ -10,7 +10,7 @@
 
 namespace binary::converters {
 template <typename T>
-    requires std::same_as<T, std::remove_cv_t<T>> && std::ranges::input_range<T>
+    requires std::same_as<T, std::remove_cv_t<T>>
 class ContainerConverter : public Converter<T> {
 private:
     const std::shared_ptr<Converter<std::ranges::range_value_t<T>>> converter;
