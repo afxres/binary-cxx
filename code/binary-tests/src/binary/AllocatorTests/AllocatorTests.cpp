@@ -37,6 +37,15 @@ BOOST_DATA_TEST_CASE(AllocatorInvalidMaxCapacityTest, boost::unit_test::data::ma
             BOOST_REQUIRE_EQUAL(e.what(), "maxCapacity > INT32_MAX");
             return true;
         });
+    std::vector<std::byte> vector;
+    ::binary::internal::TemplateResizeAllocator<decltype(vector)> origin(vector);
+    BOOST_REQUIRE_EXCEPTION(
+        ::binary::Allocator allocator(origin, maxCapacity),
+        std::invalid_argument,
+        [](const std::invalid_argument& e) {
+            BOOST_REQUIRE_EQUAL(e.what(), "maxCapacity > INT32_MAX");
+            return true;
+        });
 }
 
 BOOST_AUTO_TEST_CASE(AllocatorInitializeWithExternalMemoryIntegrationTest) {
