@@ -4,6 +4,7 @@
 #include <stdexcept>
 
 #include "binary/ConverterExtensions.hpp"
+#include "binary/external/BinaryObject.hpp"
 
 namespace binary::components {
 NamedObjectDecoder::NamedObjectDecoder(const std::vector<std::vector<std::byte>>& headers, const std::vector<std::string>& names, const std::vector<uint8_t>& optional)
@@ -14,30 +15,27 @@ NamedObjectDecoder::NamedObjectDecoder(const std::vector<std::vector<std::byte>>
     if (headers.size() != names.size() || headers.size() != optional.size()) {
         throw std::invalid_argument("sequence lengths not match");
     }
-    for (size_t i = 0; i < headers.size(); i++) {
-        const auto& head = headers.at(i);
-        std::string_view view(reinterpret_cast<const char*>(head.data()), head.size());
-        if (!this->record.try_emplace(view, i).second) {
-            ExceptKeyFound(i);
-        }
+    auto [code, list] = external::CreateByteViewList(headers);
+    if (code != SIZE_MAX) {
+        ExceptKeyFound(code);
+    } else {
+        this->record = std::move(list);
     }
 }
 
 std::vector<std::span<const std::byte>> NamedObjectDecoder::Invoke(const std::span<const std::byte>& span) {
     const auto& record = this->record;
     const auto& optional = this->optional;
-    std::vector<std::span<const std::byte>> slices(record.size());
+    std::vector<std::span<const std::byte>> slices(optional.size());
     std::span<const std::byte> copy = span;
     while (!copy.empty()) {
         auto head = DecodeWithLengthPrefix(copy);
         auto tail = DecodeWithLengthPrefix(copy);
         std::string_view view(reinterpret_cast<const char*>(head.data()), head.size());
-        auto iterator = record.find(view);
-        if (iterator == record.end()) {
+        auto cursor = record->Invoke(head);
+        if (cursor == SIZE_MAX) {
             continue;
         }
-
-        auto cursor = iterator->second;
         auto& intent = slices.at(cursor);
         if (intent.data() != nullptr) {
             ExceptKeyFound(cursor);
