@@ -115,6 +115,7 @@ class FakeCopyType {
 public:
     FakeCopyType() {}
     FakeCopyType(const FakeCopyType&) { throw std::logic_error("fake copy"); }
+    FakeCopyType& operator=(const FakeCopyType&) = default;
 };
 
 template <typename T>

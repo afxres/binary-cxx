@@ -25,8 +25,9 @@ BOOST_AUTO_TEST_CASE(SimpleCursorTupleObjectConverterLengthTest) {
     ::binary::AddConverter<::binary::converters::LittleEndianConverter<int32_t>>(generator);
     ::binary::AddConverter<SimpleCursorTupleObjectConverter>(generator);
     auto a = ::binary::GetConverter<SimpleCursor>(generator);
-    BOOST_REQUIRE_EQUAL(typeid(SimpleCursorTupleObjectConverter).name(), typeid(*a).name());
-    BOOST_REQUIRE_EQUAL(8, a->Length());
+    const auto& x = *a;
+    BOOST_REQUIRE_EQUAL(typeid(SimpleCursorTupleObjectConverter).name(), typeid(x).name());
+    BOOST_REQUIRE_EQUAL(8, x.Length());
 }
 
 std::vector<std::tuple<std::string, int32_t, int32_t>> SimpleCursorTestData = {

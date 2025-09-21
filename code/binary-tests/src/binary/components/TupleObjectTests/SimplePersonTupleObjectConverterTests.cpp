@@ -45,10 +45,12 @@ BOOST_AUTO_TEST_CASE(SimplePersonTupleObjectConverterLengthTest) {
     ::binary::AddConverter<SimplePersonCustomTupleObjectConverter>(generator);
     auto a = ::binary::GetConverter<SimplePerson>(generator);
     auto b = ::binary::GetConverter<SimplePersonCustom>(generator);
-    BOOST_REQUIRE_EQUAL(typeid(SimplePersonTupleObjectConverter).name(), typeid(*a).name());
-    BOOST_REQUIRE_EQUAL(typeid(SimplePersonCustomTupleObjectConverter).name(), typeid(*b).name());
-    BOOST_REQUIRE_EQUAL(0, a->Length());
-    BOOST_REQUIRE_EQUAL(0, b->Length());
+    const auto& x = *a;
+    const auto& y = *b;
+    BOOST_REQUIRE_EQUAL(typeid(SimplePersonTupleObjectConverter).name(), typeid(x).name());
+    BOOST_REQUIRE_EQUAL(typeid(SimplePersonCustomTupleObjectConverter).name(), typeid(y).name());
+    BOOST_REQUIRE_EQUAL(0, x.Length());
+    BOOST_REQUIRE_EQUAL(0, y.Length());
 }
 
 std::vector<std::tuple<int8_t, std::string, int32_t>> SimplePersonTestData = {
