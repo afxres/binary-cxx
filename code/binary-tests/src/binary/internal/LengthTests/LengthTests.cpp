@@ -9,8 +9,8 @@ BOOST_AUTO_TEST_SUITE(LengthTests)
 BOOST_AUTO_TEST_CASE(EnsureMemoryAssertFailedTest) {
     BOOST_REQUIRE_EXCEPTION(
         ::binary::internal::EnsureMemoryAccess(nullptr),
-        std::logic_error,
-        [](const std::logic_error& e) {
+        std::runtime_error,
+        [](const std::runtime_error& e) {
             BOOST_REQUIRE_EQUAL(e.what(), "invalid memory access or out of memory");
             return true;
         });

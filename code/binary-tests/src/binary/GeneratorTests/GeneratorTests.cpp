@@ -14,8 +14,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(GeneratorGetConverterWithUnknownTypeTest, T, Gener
     std::string output = std::string() + "converter not found, argument type: " + typeid(T).name();
     BOOST_REQUIRE_EXCEPTION(
         generator.GetConverter(typeid(T)),
-        std::out_of_range,
-        [&output](const std::out_of_range& e) {
+        std::invalid_argument,
+        [&output](const std::invalid_argument& e) {
             BOOST_REQUIRE_EQUAL(e.what(), output);
             return true;
         });

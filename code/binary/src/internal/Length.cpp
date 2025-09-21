@@ -19,7 +19,7 @@ size_t GetCapacity(size_t byteLength, size_t itemLength, std::type_index type) {
 
 void EnsureMemoryAccess(void* memory) {
     if (memory == nullptr) {
-        throw std::logic_error("invalid memory access or out of memory");
+        throw std::runtime_error("invalid memory access or out of memory");
     }
 }
 

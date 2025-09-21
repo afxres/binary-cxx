@@ -12,7 +12,7 @@ IConverter::IConverter(std::type_index type, size_t length)
     : type(type)
     , length(length) {
     if (length > INT32_MAX) {
-        throw std::out_of_range("length > INT32_MAX");
+        throw std::invalid_argument("length > INT32_MAX");
     }
 }
 

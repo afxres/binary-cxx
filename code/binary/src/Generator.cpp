@@ -13,6 +13,6 @@ std::shared_ptr<IConverter> Generator::GetConverter(std::type_index type) const 
     if (iterator != converters.end()) {
         return iterator->second;
     }
-    throw std::out_of_range(std::format("converter not found, argument type: {}", type.name()));
+    throw std::invalid_argument(std::format("converter not found, argument type: {}", type.name()));
 }
 }

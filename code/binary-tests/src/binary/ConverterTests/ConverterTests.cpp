@@ -39,8 +39,8 @@ std::vector<size_t> ConverterInvalidLengthData = {0x8000'0000, 0x8000'0001, 0xFF
 BOOST_DATA_TEST_CASE(ConverterInvalidLengthTest, ConverterInvalidLengthData) {
     BOOST_REQUIRE_EXCEPTION(
         FakeEmptyConverter<int32_t> ignore(sample),
-        std::out_of_range,
-        [](const std::out_of_range& e) {
+        std::invalid_argument,
+        [](const std::invalid_argument& e) {
             BOOST_REQUIRE_EQUAL(e.what(), "length > INT32_MAX");
             return true;
         });
