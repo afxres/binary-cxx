@@ -35,11 +35,8 @@ typename Token::TokenValue Token::DecodeTokens() const noexcept {
 
 const typename Token::TokenValue& Token::GetTokens() const noexcept {
     if (this->initialized == false) {
-        std::lock_guard locker(this->mutex);
-        if (this->initialized == false) {
-            this->intent = DecodeTokens();
-            this->initialized = true;
-        }
+        this->intent = DecodeTokens();
+        this->initialized = true;
     }
     assert(this->initialized == true);
     assert(this->self.lock().get() == this);

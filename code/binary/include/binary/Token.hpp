@@ -1,13 +1,10 @@
 #ifndef BINARY_TOKEN_HPP
 #define BINARY_TOKEN_HPP
 
-#include <atomic>
 #include <exception>
-#include <mutex>
 #include <string>
 #include <tuple>
 #include <unordered_map>
-#include <unordered_set>
 
 #include "binary/GeneratorExtensions.hpp"
 
@@ -22,8 +19,7 @@ private:
     std::weak_ptr<Token> self;
     std::weak_ptr<Token> parent;
     DecodeDelegate decode;
-    mutable std::mutex mutex;
-    mutable std::atomic_bool initialized;
+    mutable bool initialized;
     mutable TokenValue intent;
 
     Token(const IGenerator& generator, const std::span<const std::byte>& span) noexcept;
