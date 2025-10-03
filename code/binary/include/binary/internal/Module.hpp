@@ -18,6 +18,16 @@ std::shared_ptr<Converter<T>> GetConverter(const std::shared_ptr<IConverter>& co
     return result;
 }
 
+template <typename T>
+    requires std::same_as<T, std::remove_cv_t<T>>
+Converter<T>* GetConverterRawPtr(const std::shared_ptr<IConverter>& converter) {
+    Converter<T>* result = dynamic_cast<Converter<T>*>(converter.get());
+    if (result == nullptr) {
+        ::binary::internal::ThrowInvalidConverterType(converter == nullptr ? typeid(nullptr) : converter->GetGenericArgument(), typeid(T));
+    }
+    return result;
+}
+
 template <std::ranges::range Range>
     requires std::same_as<std::ranges::range_value_t<Range>, size_t>
 size_t GetConverterLength(const Range& lengths) {

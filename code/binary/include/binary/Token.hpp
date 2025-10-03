@@ -35,7 +35,7 @@ public:
     template <typename T>
         requires std::same_as<T, std::remove_cv_t<T>>
     T As() const {
-        return ::binary::GetConverter<T>(this->generator)->Decode(this->span);
+        return ::binary::GetConverterRawPtr<T>(this->generator)->Decode(this->span);
     }
 
     static std::shared_ptr<Token> Create(const IGenerator& generator, const std::span<const std::byte>& span);

@@ -13,9 +13,15 @@ std::shared_ptr<Converter<T>> GetConverter(const IGenerator& generator) {
     return ::binary::internal::GetConverter<T>(generator.GetConverter(typeid(T)));
 }
 
+template <typename T>
+    requires std::same_as<T, std::remove_cv_t<T>>
+Converter<T>* GetConverterRawPtr(const IGenerator& generator) {
+    return ::binary::internal::GetConverterRawPtr<T>(generator.GetConverter(typeid(T)));
+}
+
 template <typename TConverter>
     requires requires(const IGenerator& generator) { ::binary::internal::ConverterCreateFunction<TConverter>::Invoke(generator); }
-auto CreateConverter(const IGenerator& generator) {
+std::shared_ptr<TConverter> CreateConverter(const IGenerator& generator) {
     return ::binary::internal::ConverterCreateFunction<TConverter>::Invoke(generator);
 }
 

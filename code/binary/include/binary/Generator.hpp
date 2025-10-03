@@ -13,7 +13,7 @@ private:
 
 public:
     virtual void AddConverter(const std::shared_ptr<IConverter>& converter) override;
-    virtual std::shared_ptr<IConverter> GetConverter(std::type_index type) const override;
+    virtual const std::shared_ptr<IConverter>& GetConverter(std::type_index type) const override;
 };
 }
 

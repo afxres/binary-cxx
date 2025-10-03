@@ -17,13 +17,18 @@ BINARY_NAMED_OBJECT_CONVERTER(BoxConverter, Box) {
 }
 
 class FakeGenerator : public ::binary::IGenerator {
+private:
+    std::unordered_map<std::type_index, std::shared_ptr<::binary::IConverter>> converters = {
+        {typeid(std::string), std::make_shared<::binary::converters::LittleEndianStringConverter<std::string>>()},
+    };
+
 public:
     virtual void AddConverter([[maybe_unused]] const std::shared_ptr<::binary::IConverter>& converter) override {
         throw std::exception();
     }
 
-    virtual std::shared_ptr<::binary::IConverter> GetConverter([[maybe_unused]] std::type_index type) const override {
-        return std::make_shared<::binary::converters::LittleEndianStringConverter<std::string>>();
+    virtual const std::shared_ptr<::binary::IConverter>& GetConverter(std::type_index type) const override {
+        return converters.at(type);
     }
 };
 

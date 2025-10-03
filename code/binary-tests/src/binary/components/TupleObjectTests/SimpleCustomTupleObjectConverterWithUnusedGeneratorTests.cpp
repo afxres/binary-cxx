@@ -22,7 +22,7 @@ public:
         throw std::exception();
     }
 
-    virtual std::shared_ptr<::binary::IConverter> GetConverter([[maybe_unused]] std::type_index type) const override {
+    virtual const std::shared_ptr<::binary::IConverter>& GetConverter([[maybe_unused]] std::type_index type) const override {
         throw std::exception();
     }
 };
