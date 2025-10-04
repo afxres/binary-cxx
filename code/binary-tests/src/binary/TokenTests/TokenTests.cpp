@@ -14,10 +14,10 @@ BOOST_AUTO_TEST_SUITE(TokenTests)
 BOOST_AUTO_TEST_CASE(TokenWithDefaultValueTest) {
     ::binary::Generator generator;
     ::binary::AddConverter<::binary::converters::LittleEndianStringConverter<std::string>>(generator);
-    auto token = ::binary::Token::Create(generator, {});
-    BOOST_REQUIRE(token->Children().empty());
-    BOOST_REQUIRE(token->Span().empty());
-    BOOST_REQUIRE(token->Parent().lock() == nullptr);
+    auto token = ::binary::Token(generator, {});
+    BOOST_REQUIRE(token.Children().empty());
+    BOOST_REQUIRE(token.Span().empty());
+    BOOST_REQUIRE(token.Parent().has_value() == false);
 }
 
 std::vector<std::string> TokenWithInvalidBytesTestData = {
@@ -29,16 +29,16 @@ BOOST_DATA_TEST_CASE(TokenWithInvalidBytesTest, TokenWithInvalidBytesTestData, s
     ::binary::Generator generator;
     ::binary::AddConverter<::binary::converters::LittleEndianStringConverter<std::string>>(generator);
     auto span = std::span(reinterpret_cast<const std::byte*>(source.data()), source.size());
-    auto token = ::binary::Token::Create(generator, span);
-    BOOST_REQUIRE(token->Children().empty());
-    BOOST_REQUIRE(token->Span().data() == span.data() && token->Span().size() == span.size());
-    BOOST_REQUIRE(token->Parent().lock() == nullptr);
+    auto token = ::binary::Token(generator, span);
+    BOOST_REQUIRE(token.Children().empty());
+    BOOST_REQUIRE(token.Span().data() == span.data() && token.Span().size() == span.size());
+    BOOST_REQUIRE(token.Parent().has_value() == false);
     auto nestedHandler = [](const std::length_error& e) {
         BOOST_REQUIRE_EQUAL(e.what(), "not enough bytes or byte sequence invalid");
         return true;
     };
     BOOST_REQUIRE_EXCEPTION(
-        token->At(""),
+        token.At(""),
         std::invalid_argument,
         [nestedHandler](const std::invalid_argument& e) {
             BOOST_REQUIRE_EQUAL(e.what(), "key '' not found");
@@ -49,7 +49,7 @@ BOOST_DATA_TEST_CASE(TokenWithInvalidBytesTest, TokenWithInvalidBytesTestData, s
             return true;
         });
     BOOST_REQUIRE_EXCEPTION(
-        token->At("fake"),
+        token.At("fake"),
         std::invalid_argument,
         [nestedHandler](const std::invalid_argument& e) {
             BOOST_REQUIRE_EQUAL(e.what(), "key 'fake' not found");
@@ -104,42 +104,42 @@ BOOST_AUTO_TEST_CASE(TokenWithSimpleNamedObjectTest) {
         },
     };
     auto buffer = ::binary::Allocator::Invoke([&](auto& allocator) { return converter->Encode(allocator, source); });
-    auto token = ::binary::Token::Create(generator, buffer);
+    auto token = ::binary::Token(generator, buffer);
 
-    auto path = token->At("path");
-    auto main = token->At("main");
-    auto backup = token->At("backup");
-    BOOST_REQUIRE_EQUAL(3, token->Children().size());
-    BOOST_REQUIRE_EQUAL(token.get(), path->Parent().lock().get());
-    BOOST_REQUIRE_EQUAL(token.get(), main->Parent().lock().get());
-    BOOST_REQUIRE_EQUAL(token.get(), backup->Parent().lock().get());
+    auto path = token.At("path");
+    auto main = token.At("main");
+    auto backup = token.At("backup");
+    BOOST_REQUIRE_EQUAL(3, token.Children().size());
+    BOOST_REQUIRE(token == path.Parent().value());
+    BOOST_REQUIRE(token == main.Parent().value());
+    BOOST_REQUIRE(token == backup.Parent().value());
 
-    auto firstId = main->At("id");
-    auto firstName = main->At("name");
-    BOOST_REQUIRE_EQUAL(2, main->Children().size());
-    BOOST_REQUIRE_EQUAL(main.get(), firstId->Parent().lock().get());
-    BOOST_REQUIRE_EQUAL(main.get(), firstName->Parent().lock().get());
+    auto firstId = main.At("id");
+    auto firstName = main.At("name");
+    BOOST_REQUIRE_EQUAL(2, main.Children().size());
+    BOOST_REQUIRE(main == firstId.Parent().value());
+    BOOST_REQUIRE(main == firstName.Parent().value());
 
-    auto secondId = backup->At("id");
-    auto secondName = backup->At("name");
-    BOOST_REQUIRE_EQUAL(2, backup->Children().size());
-    BOOST_REQUIRE_EQUAL(backup.get(), secondId->Parent().lock().get());
-    BOOST_REQUIRE_EQUAL(backup.get(), secondName->Parent().lock().get());
+    auto secondId = backup.At("id");
+    auto secondName = backup.At("name");
+    BOOST_REQUIRE_EQUAL(2, backup.Children().size());
+    BOOST_REQUIRE(backup == secondId.Parent().value());
+    BOOST_REQUIRE(backup == secondName.Parent().value());
 
     Case actual;
-    actual.path = path->As<std::string>();
-    actual.main.id = firstId->As<int32_t>();
-    actual.main.name = firstName->As<std::string>();
-    actual.backup.id = secondId->As<int32_t>();
-    actual.backup.name = secondName->As<std::string>();
+    actual.path = path.As<std::string>();
+    actual.main.id = firstId.As<int32_t>();
+    actual.main.name = firstName.As<std::string>();
+    actual.backup.id = secondId.As<int32_t>();
+    actual.backup.name = secondName.As<std::string>();
     BOOST_REQUIRE(source == actual);
 
     for (auto& i : std::initializer_list{path, firstId, firstName, secondId, secondName}) {
-        BOOST_REQUIRE_EQUAL(0, i->Children().size());
+        BOOST_REQUIRE_EQUAL(0, i.Children().size());
     }
 
     BOOST_REQUIRE_EXCEPTION(
-        token->At("invalid"),
+        token.At("invalid"),
         std::invalid_argument,
         [](const std::invalid_argument& e) {
             BOOST_REQUIRE_EQUAL(e.what(), "key 'invalid' not found");
