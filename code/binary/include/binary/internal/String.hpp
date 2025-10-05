@@ -1,6 +1,7 @@
 #ifndef BINARY_INTERNAL_STRING_HPP
 #define BINARY_INTERNAL_STRING_HPP
 
+#include "binary/Allocator.hpp"
 #include "binary/internal/Endian.hpp"
 #include "binary/internal/Length.hpp"
 

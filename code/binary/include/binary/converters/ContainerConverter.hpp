@@ -1,6 +1,8 @@
 #ifndef BINARY_CONVERTERS_CONTAINERCONVERTER_HPP
 #define BINARY_CONVERTERS_CONTAINERCONVERTER_HPP
 
+#include <memory>
+
 #include "binary/Converter.hpp"
 #include "binary/internal/ContainerInsertFunction.hpp"
 #include "binary/internal/ContainerResizeFunction.hpp"

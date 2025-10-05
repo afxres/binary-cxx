@@ -3,6 +3,7 @@
 
 #include <concepts>
 
+#include "binary/ConverterExtensions.hpp"
 #include "binary/experimental/helpers/GetConverterHelper.hpp"
 #include "binary/experimental/internal/Define.hpp"
 #include "binary/internal/String.hpp"

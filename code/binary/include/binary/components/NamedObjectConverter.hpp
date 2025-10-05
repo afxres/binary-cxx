@@ -1,6 +1,8 @@
 #ifndef BINARY_COMPONENTS_NAMEDOBJECTCONVERTER_HPP
 #define BINARY_COMPONENTS_NAMEDOBJECTCONVERTER_HPP
 
+#include <cassert>
+
 #include "binary/Converter.hpp"
 #include "binary/ConverterExtensions.hpp"
 #include "binary/components/NamedObjectDecoder.hpp"

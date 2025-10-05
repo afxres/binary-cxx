@@ -3,7 +3,6 @@
 
 #include <cstddef>
 #include <tuple>
-#include <type_traits>
 
 namespace binary::internal {
 template <size_t Index, typename T>

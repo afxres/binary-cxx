@@ -2,6 +2,7 @@
 #define BINARY_EXPERIMENTAL_HELPERS_CONVERTERENCODEWITHLENGTHPREFIXMETHODHELPER_HPP
 
 #include "binary/ConverterExtensions.hpp"
+#include "binary/experimental/internal/Define.hpp"
 #include "binary/internal/AllocatorUnsafeAccessor.hpp"
 
 namespace binary::experimental::helpers {

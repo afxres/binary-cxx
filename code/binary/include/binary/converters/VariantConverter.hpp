@@ -1,10 +1,12 @@
 #ifndef BINARY_CONVERTERS_VARIANTCONVERTER_HPP
 #define BINARY_CONVERTERS_VARIANTCONVERTER_HPP
 
+#include <memory>
 #include <variant>
 
 #include "binary/Converter.hpp"
 #include "binary/ConverterExtensions.hpp"
+#include "binary/internal/Define.hpp"
 #include "binary/internal/Exception.hpp"
 
 namespace binary::converters {
