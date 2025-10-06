@@ -148,5 +148,15 @@ BOOST_AUTO_TEST_CASE(TokenWithSimpleNamedObjectTest) {
         });
 }
 
+BOOST_AUTO_TEST_CASE(TokenEqualityTest) {
+    ::binary::Generator generator;
+    ::binary::AddConverter<::binary::converters::LittleEndianStringConverter<std::string>>(generator);
+    std::string source("\x00\x00", 2);
+    auto span = std::span(reinterpret_cast<const std::byte*>(source.data()), source.size());
+    auto a = ::binary::Token(generator, span);
+    auto b = ::binary::Token(generator, span);
+    BOOST_REQUIRE(a != b);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 }
