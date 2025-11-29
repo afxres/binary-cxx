@@ -16,5 +16,24 @@ BOOST_AUTO_TEST_CASE(EnsureMemoryAssertFailedTest) {
         });
 }
 
+std::vector<uint32_t> LengthPrefixTestNumberData = {
+    0,
+    1,
+    127,
+    128,
+    INT32_MAX,
+};
+
+BOOST_DATA_TEST_CASE(EncodeDecodeLengthPrefixTest, LengthPrefixTestNumberData, source) {
+    std::array<std::byte, 4> buffer;
+    buffer.fill(static_cast<std::byte>(0));
+    size_t numberLength = ::binary::internal::EncodeLengthPrefixLength(source);
+    ::binary::internal::EncodeLengthPrefix(buffer.data(), source, numberLength);
+    size_t offset = 0;
+    size_t actual = ::binary::internal::DecodeLengthPrefix(buffer.data(), offset, buffer.size());
+    BOOST_REQUIRE_EQUAL(actual, source);
+    BOOST_REQUIRE_EQUAL(offset, numberLength);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 }

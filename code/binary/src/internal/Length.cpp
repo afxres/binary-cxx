@@ -45,7 +45,7 @@ void EncodeLengthPrefix(std::byte* buffer, const size_t number, const size_t len
     if (length == 1) {
         EncodeBigEndian<uint8_t>(buffer, static_cast<uint8_t>(number));
     } else {
-        EncodeBigEndian<uint32_t>(buffer, static_cast<uint32_t>(number) | 0x8000'0000);
+        EncodeBigEndian<uint32_t>(buffer, static_cast<uint32_t>(number) | 0x8000'0000U);
     }
 }
 
@@ -66,6 +66,6 @@ size_t DecodeLengthPrefix(const std::byte* buffer, size_t& offset, const size_t 
     }
     uint32_t result = DecodeBigEndian<uint32_t>(source);
     offset += 3;
-    return result & 0x7FFF'FFFU;
+    return result & 0x7FFF'FFFFU;
 }
 }
