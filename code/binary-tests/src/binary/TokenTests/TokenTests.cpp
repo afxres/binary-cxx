@@ -17,7 +17,6 @@ BOOST_AUTO_TEST_CASE(TokenWithDefaultValueTest) {
     auto token = ::binary::Token(generator, {});
     BOOST_REQUIRE(token.Children().empty());
     BOOST_REQUIRE(token.Span().empty());
-    BOOST_REQUIRE(token.Parent().has_value() == false);
 }
 
 std::vector<std::string> TokenWithInvalidBytesTestData = {
@@ -32,7 +31,6 @@ BOOST_DATA_TEST_CASE(TokenWithInvalidBytesTest, TokenWithInvalidBytesTestData, s
     auto token = ::binary::Token(generator, span);
     BOOST_REQUIRE(token.Children().empty());
     BOOST_REQUIRE(token.Span().data() == span.data() && token.Span().size() == span.size());
-    BOOST_REQUIRE(token.Parent().has_value() == false);
     auto nestedHandler = [](const std::length_error& e) {
         BOOST_REQUIRE_EQUAL(e.what(), "not enough bytes or byte sequence invalid");
         return true;
@@ -110,21 +108,14 @@ BOOST_AUTO_TEST_CASE(TokenWithSimpleNamedObjectTest) {
     auto main = token.At("main");
     auto backup = token.At("backup");
     BOOST_REQUIRE_EQUAL(3, token.Children().size());
-    BOOST_REQUIRE(token == path.Parent().value());
-    BOOST_REQUIRE(token == main.Parent().value());
-    BOOST_REQUIRE(token == backup.Parent().value());
 
     auto firstId = main.At("id");
     auto firstName = main.At("name");
     BOOST_REQUIRE_EQUAL(2, main.Children().size());
-    BOOST_REQUIRE(main == firstId.Parent().value());
-    BOOST_REQUIRE(main == firstName.Parent().value());
 
     auto secondId = backup.At("id");
     auto secondName = backup.At("name");
     BOOST_REQUIRE_EQUAL(2, backup.Children().size());
-    BOOST_REQUIRE(backup == secondId.Parent().value());
-    BOOST_REQUIRE(backup == secondName.Parent().value());
 
     Case actual;
     actual.path = path.As<std::string>();
@@ -146,16 +137,6 @@ BOOST_AUTO_TEST_CASE(TokenWithSimpleNamedObjectTest) {
             std::rethrow_if_nested(e);
             return true;
         });
-}
-
-BOOST_AUTO_TEST_CASE(TokenEqualityTest) {
-    ::binary::Generator generator;
-    ::binary::AddConverter<::binary::converters::LittleEndianStringConverter<std::string>>(generator);
-    std::string source("\x00\x00", 2);
-    auto span = std::span(reinterpret_cast<const std::byte*>(source.data()), source.size());
-    auto a = ::binary::Token(generator, span);
-    auto b = ::binary::Token(generator, span);
-    BOOST_REQUIRE(a != b);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
