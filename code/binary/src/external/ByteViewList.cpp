@@ -1,5 +1,5 @@
 #include "binary/external/ByteViewList.hpp"
 
 namespace binary::external {
-ByteViewList::~ByteViewList() {}
+ByteViewList::~ByteViewList() = default;
 }

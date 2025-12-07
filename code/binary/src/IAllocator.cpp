@@ -1,5 +1,5 @@
 #include "binary/IAllocator.hpp"
 
 namespace binary {
-IAllocator::~IAllocator() {}
+IAllocator::~IAllocator() = default;
 }

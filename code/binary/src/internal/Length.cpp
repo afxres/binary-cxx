@@ -23,13 +23,13 @@ void EnsureMemoryAccess(void* memory) {
     }
 }
 
-void EnsureLengthPrefixLength(const size_t number) {
+void EnsureLengthPrefixLength(size_t number) {
     if (number > INT32_MAX) {
         throw std::invalid_argument("number > INT32_MAX");
     }
 }
 
-size_t EncodeLengthPrefixLength(const size_t number) {
+size_t EncodeLengthPrefixLength(size_t number) {
     assert(number <= INT32_MAX);
     if (number <= INT8_MAX) {
         return 1;
@@ -38,7 +38,7 @@ size_t EncodeLengthPrefixLength(const size_t number) {
     }
 }
 
-void EncodeLengthPrefix(std::byte* buffer, const size_t number, const size_t length) {
+void EncodeLengthPrefix(std::byte* buffer, size_t number, size_t length) {
     assert(number <= INT32_MAX);
     assert(length == 1 || length == 4);
     assert(length >= EncodeLengthPrefixLength(number));
@@ -49,7 +49,7 @@ void EncodeLengthPrefix(std::byte* buffer, const size_t number, const size_t len
     }
 }
 
-size_t DecodeLengthPrefix(const std::byte* buffer, size_t& offset, const size_t limits) {
+size_t DecodeLengthPrefix(const std::byte* buffer, size_t& offset, size_t limits) {
     assert(limits >= offset);
     if (limits == offset) {
         ::binary::internal::ThrowNotEnoughBytes();

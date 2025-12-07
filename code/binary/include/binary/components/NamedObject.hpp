@@ -19,6 +19,7 @@
         static std::vector<MemberInfo> GetMemberInfoList(const ::binary::IGenerator& generator) {                                                 \
             static auto initializers = GetMemberInfoInitializerList();                                                                            \
             std::vector<MemberInfo> result;                                                                                                       \
+            result.reserve(initializers.size());                                                                                                  \
             for (size_t i = 0; i < initializers.size(); i++) {                                                                                    \
                 result.emplace_back(initializers.at(i)(generator));                                                                               \
             }                                                                                                                                     \
@@ -55,7 +56,7 @@
         ::binary::GetConverter<decltype(ObjectType::ARG_NAME)>(generator))
 
 #define BINARY_NAMED_MEMBER_CUSTOM(ARG_NAME, ARG_IS_OPTIONAL, ARG_GET_MEMBER_EXPRESSION, ARG_SET_MEMBER_EXPRESSION, ARG_GET_CONVERTER_EXPRESSION) \
-    initializers.push_back([](auto& generator) {                                                                                                  \
+    initializers.emplace_back([](auto& generator) {                                                                                               \
         auto converter = ARG_GET_CONVERTER_EXPRESSION;                                                                                            \
         MemberInfo info{};                                                                                                                        \
         info.Name = ARG_NAME;                                                                                                                     \

@@ -1,5 +1,5 @@
 #include "binary/IGenerator.hpp"
 
 namespace binary {
-IGenerator::~IGenerator() {}
+IGenerator::~IGenerator() = default;
 }

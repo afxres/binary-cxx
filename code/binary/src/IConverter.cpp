@@ -16,5 +16,5 @@ IConverter::IConverter(std::type_index type, size_t length)
     }
 }
 
-IConverter::~IConverter() {}
+IConverter::~IConverter() = default;
 }

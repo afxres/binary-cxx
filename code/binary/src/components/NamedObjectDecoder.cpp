@@ -44,7 +44,7 @@ std::vector<std::span<const std::byte>> NamedObjectDecoder::Invoke(const std::sp
     }
 
     for (size_t i = 0; i < slices.size(); i++) {
-        if (slices.at(i).data() == nullptr && !optional.at(i)) {
+        if (slices.at(i).data() == nullptr && optional.at(i) == 0) {
             ExceptNotFound(i);
         }
     }

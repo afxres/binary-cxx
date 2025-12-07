@@ -9,7 +9,7 @@
 namespace binary::external {
 LongDataList::LongDataList(std::vector<LongDataSlot>&& bits) {
     assert(bits.size() != 0);
-    assert(std::all_of(bits.begin(), bits.end(), [](const auto& x) { return (x.Head & 0xFFU) <= LongDataListItemBytesLimits; }));
+    assert(std::ranges::all_of(bits, [](const auto& x) { return (x.Head & 0xFFU) <= LongDataListItemBytesLimits; }));
     assert(bits.size() <= LongDataListItemCountLimits);
     this->bits = std::move(bits);
 }

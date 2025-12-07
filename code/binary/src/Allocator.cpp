@@ -1,5 +1,6 @@
 #include "binary/Allocator.hpp"
 
+#include <algorithm>
 #include <cassert>
 #include <cstdint>
 #include <cstring>
@@ -52,7 +53,7 @@ Allocator::~Allocator() {
 }
 
 std::span<const std::byte> Allocator::AsSpan() const {
-    return std::span<const std::byte>(this->buffer, this->offset);
+    return {this->buffer, this->offset};
 }
 
 void Allocator::Resize(size_t length) {
@@ -70,22 +71,20 @@ void Allocator::Resize(size_t length) {
         throw std::length_error("maximum capacity reached");
     }
     size_t source = this->bounds;
-    uint64_t cursor = static_cast<uint64_t>(source);
+    auto cursor = static_cast<uint64_t>(source);
     if (cursor == 0) {
         cursor = AllocatorCapacitySeed;
     }
     while (cursor < amount) {
         cursor *= 2;
     }
-    if (cursor > limits) {
-        cursor = limits;
-    }
+    cursor = std::min(cursor, limits);
     assert(amount <= cursor);
     assert(cursor <= this->limits);
 
-    size_t bounds = static_cast<size_t>(cursor);
+    auto bounds = static_cast<size_t>(cursor);
     if (this->bridge == nullptr) {
-        auto target = static_cast<std::byte*>(malloc(bounds));
+        auto* target = static_cast<std::byte*>(malloc(bounds));
         ::binary::internal::EnsureMemoryAccess(target);
         if (offset != 0) {
             memcpy(target, this->buffer, offset);
@@ -213,12 +212,10 @@ void Allocator::AppendWithLengthPrefix(const std::function<void(Allocator&)>& ac
 
 void Allocator::AppendWithLengthPrefix(size_t maxLength, const std::function<void(std::span<std::byte>, size_t&)>& action) {
     ::binary::internal::EnsureLengthPrefixLength(maxLength);
-    size_t actual;
+    size_t actual = 0;
     size_t prefixLength = ::binary::internal::EncodeLengthPrefixLength(maxLength);
     std::byte* target = Create(maxLength + prefixLength);
-    if (maxLength == 0) {
-        actual = 0;
-    } else {
+    if (maxLength != 0) {
         actual = SIZE_MAX;
         action(std::span<std::byte>(target + prefixLength, maxLength), actual);
         if (actual > maxLength) {

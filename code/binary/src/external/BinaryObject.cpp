@@ -26,7 +26,7 @@ std::tuple<size_t, std::unique_ptr<LongDataList>> CreateLongDataList(const std::
             return {SIZE_MAX, nullptr};
         }
         auto slot = GetLongData(span);
-        if (std::find_if(result.begin(), result.end(), [slot](const auto& x) { return x.Head == slot.Head && x.Tail == slot.Tail; }) != result.end()) {
+        if (std::ranges::find_if(result, [slot](const auto& x) { return x.Head == slot.Head && x.Tail == slot.Tail; }) != result.end()) {
             return {result.size(), nullptr};
         }
         result.emplace_back(slot);

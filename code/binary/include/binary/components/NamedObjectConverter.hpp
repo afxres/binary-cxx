@@ -23,14 +23,14 @@ public:
         DecodeFunction Decode;
     };
 
-    NamedObjectConverter(std::vector<MemberInfo>&& record) {
-        for (const auto& info : record) {
+    NamedObjectConverter(std::vector<MemberInfo>&& record)
+        : record(std::move(record)) {
+        for (const auto& info : this->record) {
             this->names.emplace_back(info.Name);
             this->headers.emplace_back(info.Header);
             this->optional.emplace_back(info.IsOptional);
         }
         this->decoder = std::make_unique<NamedObjectDecoder>(this->headers, this->names, this->optional);
-        this->record = std::move(record);
     }
 
     BINARY_DEFINE_OVERRIDE_ENCODE_METHOD(T) {
