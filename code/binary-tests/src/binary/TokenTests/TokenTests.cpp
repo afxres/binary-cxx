@@ -36,7 +36,7 @@ BOOST_DATA_TEST_CASE(TokenWithInvalidBytesTest, TokenWithInvalidBytesTestData, s
         return true;
     };
     BOOST_REQUIRE_EXCEPTION(
-        token.At(""),
+        (void)token.At(""),
         std::invalid_argument,
         [nestedHandler](const std::invalid_argument& e) {
             BOOST_REQUIRE_EQUAL(e.what(), "key '' not found");
@@ -47,7 +47,7 @@ BOOST_DATA_TEST_CASE(TokenWithInvalidBytesTest, TokenWithInvalidBytesTestData, s
             return true;
         });
     BOOST_REQUIRE_EXCEPTION(
-        token.At("fake"),
+        (void)token.At("fake"),
         std::invalid_argument,
         [nestedHandler](const std::invalid_argument& e) {
             BOOST_REQUIRE_EQUAL(e.what(), "key 'fake' not found");
@@ -130,7 +130,7 @@ BOOST_AUTO_TEST_CASE(TokenWithSimpleNamedObjectTest) {
     }
 
     BOOST_REQUIRE_EXCEPTION(
-        token.At("invalid"),
+        (void)token.At("invalid"),
         std::invalid_argument,
         [](const std::invalid_argument& e) {
             BOOST_REQUIRE_EQUAL(e.what(), "key 'invalid' not found");
