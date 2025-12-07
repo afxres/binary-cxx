@@ -55,7 +55,7 @@ size_t DecodeLengthPrefix(const std::byte* buffer, size_t& offset, size_t limits
         ::binary::internal::ThrowNotEnoughBytes();
     }
     const std::byte* source = buffer + offset;
-    uint32_t header = static_cast<uint32_t>(DecodeBigEndian<uint8_t>(source));
+    auto header = static_cast<uint32_t>(DecodeBigEndian<uint8_t>(source));
     offset += 1;
     if ((header & 0x80U) == 0U) {
         return header;
@@ -64,7 +64,7 @@ size_t DecodeLengthPrefix(const std::byte* buffer, size_t& offset, size_t limits
     if (limits < offset + 3U) {
         ::binary::internal::ThrowNotEnoughBytes();
     }
-    uint32_t result = DecodeBigEndian<uint32_t>(source);
+    auto result = DecodeBigEndian<uint32_t>(source);
     offset += 3;
     return result & 0x7FFF'FFFFU;
 }
