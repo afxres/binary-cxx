@@ -34,9 +34,10 @@ private:
     void FinishCreate(size_t length);
 
 public:
-    size_t Length() const { return this->offset; }
-    size_t Capacity() const { return this->bounds; }
-    size_t MaxCapacity() const { return this->limits; }
+    [[nodiscard]] size_t Length() const { return this->offset; }
+    [[nodiscard]] size_t Capacity() const { return this->bounds; }
+    [[nodiscard]] size_t MaxCapacity() const { return this->limits; }
+    [[nodiscard]] std::span<const std::byte> AsSpan() const { return {this->buffer, this->offset}; }
 
     Allocator();
     Allocator(std::span<std::byte> span);
@@ -45,8 +46,9 @@ public:
     Allocator(IAllocator& allocator, size_t maxCapacity);
     Allocator(Allocator&&) = delete;
     Allocator(const Allocator&) = delete;
+    Allocator& operator=(Allocator&&) = delete;
+    Allocator& operator=(const Allocator&) = delete;
     ~Allocator();
-    std::span<const std::byte> AsSpan() const;
     void Ensure(size_t length);
     void Expand(size_t length);
     void Append(std::byte data);

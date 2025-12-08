@@ -52,10 +52,6 @@ Allocator::~Allocator() {
     }
 }
 
-std::span<const std::byte> Allocator::AsSpan() const {
-    return {this->buffer, this->offset};
-}
-
 void Allocator::Resize(size_t length) {
     assert(this->limits <= INT32_MAX);
     assert(this->bounds <= INT32_MAX);
