@@ -1,3 +1,4 @@
+#include <boost/endian.hpp>
 #include <boost/mpl/list.hpp>
 #include <boost/test/data/test_case.hpp>
 #include <boost/test/unit_test.hpp>
@@ -15,6 +16,15 @@ struct boost::test_tools::tt_detail::print_log_value<std::wstring> {
 
 namespace tests::binary::converters::LittleEndianStringConverterTests {
 BOOST_AUTO_TEST_SUITE(LittleEndianStringConverterTests)
+
+template <typename T>
+T LittleToNative(const std::span<const std::byte>& span) {
+    T result(reinterpret_cast<const typename T::value_type*>(span.data()), span.size() / sizeof(typename T::value_type));
+    for (auto& i : result) {
+        boost::endian::little_to_native_inplace(i);
+    }
+    return result;
+}
 
 std::vector<std::string> StringTestData = {
     std::string(),
@@ -65,7 +75,7 @@ std::vector<std::wstring> WideStringTestData = {
 BOOST_DATA_TEST_CASE(LittleEndianStringConverterForWideStringEncodeDecodeTest, WideStringTestData, source) {
     auto a = ::binary::converters::LittleEndianStringConverter<std::wstring>();
     auto x = ::binary::Allocator::Invoke([&a, &source](auto& allocator) { a.Encode(allocator, source); });
-    BOOST_REQUIRE_EQUAL(source, std::wstring(reinterpret_cast<const wchar_t*>(x.data()), x.size() / sizeof(wchar_t)));
+    BOOST_REQUIRE_EQUAL(source, LittleToNative<std::wstring>(x));
     auto p = a.Decode(x);
     BOOST_REQUIRE_EQUAL(source, p);
 }
@@ -91,7 +101,7 @@ BOOST_DATA_TEST_CASE(LittleEndianStringConverterForWideStringAutoMethodsAndLengt
     BOOST_REQUIRE_EQUAL(read, 1);
     BOOST_REQUIRE_EQUAL(length, source.size() * sizeof(wchar_t));
     BOOST_REQUIRE_EQUAL(length + read, actual.size());
-    BOOST_REQUIRE_EQUAL(source, std::wstring(reinterpret_cast<const wchar_t*>(actual.data() + read), length / sizeof(wchar_t)));
+    BOOST_REQUIRE_EQUAL(source, LittleToNative<std::wstring>({actual.data() + read, length}));
 }
 
 BOOST_AUTO_TEST_CASE(LittleEndianStringConverterForWideStringDecodeNotEnoughBytesTest) {
