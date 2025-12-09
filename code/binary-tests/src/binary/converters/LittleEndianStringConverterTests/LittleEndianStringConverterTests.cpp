@@ -9,7 +9,7 @@ template <>
 struct boost::test_tools::tt_detail::print_log_value<std::wstring> {
     void operator()(std::ostream& os, std::wstring const& value) {
         for (auto x : value) {
-            os << ((char)x);
+            os << (static_cast<char>(x));
         }
     }
 };
