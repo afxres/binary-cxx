@@ -74,7 +74,7 @@ void Allocator::Resize(size_t length) {
     while (cursor < amount) {
         cursor *= 2;
     }
-    cursor = std::min(cursor, limits);
+    cursor = std::min(cursor, static_cast<uint64_t>(limits));
     assert(amount <= cursor);
     assert(cursor <= this->limits);
 

@@ -5,8 +5,16 @@ PROJECT_DIR="$PROJECT_ROOT/code"
 
 build_tests() {
     local arch="$1"
-    local cc="/usr/bin/$arch-linux-gnu-gcc"
-    local cx="/usr/bin/$arch-linux-gnu-g++"
+    case "$arch" in
+    "armhf")
+        local cc="/usr/bin/arm-linux-gnueabihf-gcc"
+        local cx="/usr/bin/arm-linux-gnueabihf-g++"
+        ;;
+    *)
+        local cc="/usr/bin/$arch-linux-gnu-gcc"
+        local cx="/usr/bin/$arch-linux-gnu-g++"
+        ;;
+    esac
     if [ ! -f "$cc" ] || [ ! -f "$cx" ]; then
         echo "error: missing compiler for '$arch'"
         return
