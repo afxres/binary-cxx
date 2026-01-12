@@ -3,6 +3,8 @@
 
 #include <binary/internal/Length.hpp>
 
+#include <array>
+
 namespace tests::binary::internal::LengthTests {
 BOOST_AUTO_TEST_SUITE(LengthTests)
 
