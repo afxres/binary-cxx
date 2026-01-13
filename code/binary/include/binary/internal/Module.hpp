@@ -40,7 +40,7 @@ size_t GetConverterLength(const Range& lengths) {
             ::binary::internal::ThrowConverterLengthOverflow();
         }
     }
-    return result;
+    return static_cast<size_t>(result);
 }
 }
 

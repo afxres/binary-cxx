@@ -50,7 +50,7 @@ void Save(void* target, Item item) {
         BINARY_INTERNAL_SWAP_SAVE_TEST(16);
         BINARY_INTERNAL_SWAP_SAVE_TEST(32);
         BINARY_INTERNAL_SWAP_SAVE_TEST(64);
-        static_assert("type not supported");
+        static_assert(sizeof(Item) == 2 || sizeof(Item) == 4 || sizeof(Item) == 8, "type not supported");
     }
 }
 
@@ -63,7 +63,7 @@ Item Load(const void* source) {
         BINARY_INTERNAL_SWAP_LOAD_TEST(16);
         BINARY_INTERNAL_SWAP_LOAD_TEST(32);
         BINARY_INTERNAL_SWAP_LOAD_TEST(64);
-        static_assert("type not supported");
+        static_assert(sizeof(Item) == 2 || sizeof(Item) == 4 || sizeof(Item) == 8, "type not supported");
     }
 }
 
