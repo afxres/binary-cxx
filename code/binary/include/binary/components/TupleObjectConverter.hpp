@@ -20,7 +20,7 @@ public:
         DecodeFunction DecodeAuto;
     };
 
-    TupleObjectConverter(std::vector<MemberInfo>&& record)
+    explicit TupleObjectConverter(std::vector<MemberInfo>&& record)
         : Converter<T>(::binary::internal::GetConverterLength(record | std::views::transform([](const auto& info) { return info.Length; })))
         , record(std::move(record)) {}
 

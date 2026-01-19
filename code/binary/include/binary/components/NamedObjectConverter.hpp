@@ -23,7 +23,7 @@ public:
         DecodeFunction Decode;
     };
 
-    NamedObjectConverter(std::vector<MemberInfo>&& record)
+    explicit NamedObjectConverter(std::vector<MemberInfo>&& record)
         : record(std::move(record)) {
         for (const auto& info : this->record) {
             this->names.emplace_back(info.Name);

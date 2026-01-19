@@ -79,7 +79,7 @@ private:
     const std::vector<MethodInfo> record;
 
 public:
-    VariantConverter(const std::shared_ptr<Converter<std::remove_cv_t<E>>>&... converter)
+    explicit VariantConverter(const std::shared_ptr<Converter<std::remove_cv_t<E>>>&... converter)
         : record(GetMethodInfoList(converter..., std::make_index_sequence<sizeof...(E)>())) {}
 
     BINARY_DEFINE_OVERRIDE_ENCODE_METHOD(T) {

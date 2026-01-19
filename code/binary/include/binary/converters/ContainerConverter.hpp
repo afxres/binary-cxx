@@ -18,7 +18,7 @@ private:
     const std::shared_ptr<Converter<std::ranges::range_value_t<T>>> converter;
 
 public:
-    ContainerConverter(const std::shared_ptr<Converter<std::ranges::range_value_t<T>>>& converter)
+    explicit ContainerConverter(const std::shared_ptr<Converter<std::ranges::range_value_t<T>>>& converter)
         : converter(converter) {
     }
 

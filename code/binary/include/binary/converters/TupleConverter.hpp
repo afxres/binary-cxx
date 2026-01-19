@@ -68,11 +68,11 @@ private:
     const ElementConverterTupleType converter;
 
 public:
-    TupleConverter(const ElementConverterTupleType& converter)
+    explicit TupleConverter(const ElementConverterTupleType& converter)
         : Converter<T>(GetConverterLength(converter))
         , converter(converter) {}
 
-    TupleConverter(const IGenerator& generator)
+    explicit TupleConverter(const IGenerator& generator)
         : TupleConverter(GetConverter(generator)) {}
 
     BINARY_DEFINE_OVERRIDE_ENCODE_METHOD(T) {

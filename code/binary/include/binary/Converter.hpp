@@ -15,10 +15,10 @@ template <typename T>
     requires std::same_as<T, std::remove_cv_t<T>>
 class Converter : public IConverter {
 public:
-    Converter()
+    explicit Converter()
         : IConverter(typeid(T)) {}
 
-    Converter(size_t length)
+    explicit Converter(size_t length)
         : IConverter(typeid(T), length) {}
 
     virtual void Encode(Allocator& allocator, const T& item) = 0;

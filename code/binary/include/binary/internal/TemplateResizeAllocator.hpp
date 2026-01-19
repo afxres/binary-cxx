@@ -15,7 +15,7 @@ private:
     T& origin;
 
 public:
-    TemplateResizeAllocator(T& container)
+    explicit TemplateResizeAllocator(T& container)
         : origin(container) {}
 
     std::byte* Resize(size_t length) override {

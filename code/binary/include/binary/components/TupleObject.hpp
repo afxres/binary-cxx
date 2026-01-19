@@ -8,7 +8,7 @@
     ARG_TEMPLATE_DEFINE                                                                                                                           \
     class ARG_CONVERTER_NAME : public ::binary::components::TupleObjectConverter<ARG_OBJECT_TYPE> {                                               \
     public:                                                                                                                                       \
-        ARG_CONVERTER_NAME(const ::binary::IGenerator& generator)                                                                                 \
+        explicit ARG_CONVERTER_NAME(const ::binary::IGenerator& generator)                                                                        \
             : ::binary::components::TupleObjectConverter<ARG_OBJECT_TYPE>(GetMemberInfoList(generator)) {}                                        \
                                                                                                                                                   \
     private:                                                                                                                                      \
