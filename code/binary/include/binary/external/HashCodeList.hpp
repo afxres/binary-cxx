@@ -10,7 +10,7 @@ namespace binary::external {
 class HashCodeList final : public ByteViewList {
 public:
     HashCodeList(std::unordered_map<std::string_view, size_t>&& record);
-    virtual size_t Invoke(const std::span<const std::byte>& span) override;
+    size_t Invoke(const std::span<const std::byte>& span) override;
 
 private:
     const std::unordered_map<std::string_view, size_t> record;

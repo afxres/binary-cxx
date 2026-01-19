@@ -19,11 +19,11 @@ public:
     FakeGenerator(std::map<std::type_index, std::shared_ptr<IConverter>>& map)
         : map(map) {}
 
-    virtual void AddConverter(const std::shared_ptr<IConverter>& converter) override {
+    void AddConverter(const std::shared_ptr<IConverter>& converter) override {
         map.emplace(converter->GetGenericArgument(), converter);
     }
 
-    virtual const std::shared_ptr<IConverter>& GetConverter(std::type_index type) const override {
+    const std::shared_ptr<IConverter>& GetConverter(std::type_index type) const override {
         return map.at(type);
     }
 };
@@ -33,11 +33,11 @@ class FakeType {};
 
 template <typename T>
 class FakeConverter : public Converter<T> {
-    virtual void Encode([[maybe_unused]] Allocator& allocator, [[maybe_unused]] const T& item) override {
+    void Encode([[maybe_unused]] Allocator& allocator, [[maybe_unused]] const T& item) override {
         throw std::logic_error("");
     }
 
-    virtual T Decode([[maybe_unused]] const std::span<const std::byte>& span) override {
+    T Decode([[maybe_unused]] const std::span<const std::byte>& span) override {
         throw std::logic_error("");
     }
 };

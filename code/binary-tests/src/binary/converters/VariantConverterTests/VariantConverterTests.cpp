@@ -121,8 +121,8 @@ public:
 template <typename T>
 class FakeConverter : public ::binary::Converter<T> {
 public:
-    virtual void Encode([[maybe_unused]] ::binary::Allocator& allocator, [[maybe_unused]] const FakeCopyType& item) override {}
-    virtual FakeCopyType Decode([[maybe_unused]] const std::span<const std::byte>& span) override { throw std::exception(); }
+    void Encode([[maybe_unused]] ::binary::Allocator& allocator, [[maybe_unused]] const FakeCopyType& item) override {}
+    FakeCopyType Decode([[maybe_unused]] const std::span<const std::byte>& span) override { throw std::exception(); }
 };
 
 BOOST_AUTO_TEST_CASE(VariantConverterEncodeInvalidVariantTest) {

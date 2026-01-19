@@ -13,11 +13,11 @@ template <typename T>
 class FakeEmptyConverter : public Converter<T> {
     using Converter<T>::Converter;
 
-    virtual void Encode([[maybe_unused]] Allocator& allocator, [[maybe_unused]] const T& item) override {
+    void Encode([[maybe_unused]] Allocator& allocator, [[maybe_unused]] const T& item) override {
         throw std::exception();
     }
 
-    virtual T Decode([[maybe_unused]] const std::span<const std::byte>& span) override {
+    T Decode([[maybe_unused]] const std::span<const std::byte>& span) override {
         throw std::exception();
     }
 };

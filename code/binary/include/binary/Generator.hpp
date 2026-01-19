@@ -12,8 +12,8 @@ private:
     std::unordered_map<std::type_index, std::shared_ptr<IConverter>> converters;
 
 public:
-    virtual void AddConverter(const std::shared_ptr<IConverter>& converter) override;
-    virtual const std::shared_ptr<IConverter>& GetConverter(std::type_index type) const override;
+    void AddConverter(const std::shared_ptr<IConverter>& converter) override;
+    const std::shared_ptr<IConverter>& GetConverter(std::type_index type) const override;
 };
 }
 

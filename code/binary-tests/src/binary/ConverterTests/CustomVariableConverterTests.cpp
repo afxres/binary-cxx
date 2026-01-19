@@ -12,12 +12,12 @@ using ::binary::Converter;
 
 class CustomVariableConverter : public Converter<int32_t> {
 public:
-    virtual void Encode(Allocator& allocator, const int32_t& item) override {
+    void Encode(Allocator& allocator, const int32_t& item) override {
         std::string source = std::to_string(item);
         allocator.Append(std::as_bytes(std::span(source)));
     }
 
-    virtual int32_t Decode(const std::span<const std::byte>& span) override {
+    int32_t Decode(const std::span<const std::byte>& span) override {
         std::string source(reinterpret_cast<const char*>(span.data()), span.size());
         return std::stoi(source);
     }

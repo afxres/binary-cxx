@@ -18,7 +18,7 @@ public:
     TemplateResizeAllocator(T& container)
         : origin(container) {}
 
-    virtual std::byte* Resize(size_t length) override {
+    std::byte* Resize(size_t length) override {
         auto& origin = this->origin;
         origin.resize(length);
         return reinterpret_cast<std::byte*>(origin.data());

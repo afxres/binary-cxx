@@ -23,11 +23,11 @@ private:
     };
 
 public:
-    virtual void AddConverter([[maybe_unused]] const std::shared_ptr<::binary::IConverter>& converter) override {
+    void AddConverter([[maybe_unused]] const std::shared_ptr<::binary::IConverter>& converter) override {
         throw std::exception();
     }
 
-    virtual const std::shared_ptr<::binary::IConverter>& GetConverter(std::type_index type) const override {
+    const std::shared_ptr<::binary::IConverter>& GetConverter(std::type_index type) const override {
         return converters.at(type);
     }
 };

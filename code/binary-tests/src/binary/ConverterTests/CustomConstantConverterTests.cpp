@@ -14,7 +14,7 @@ using ::binary::Converter;
 class CustomConstantConverter : public Converter<int8_t> {
     using Converter::Converter;
 
-    virtual void Encode(Allocator& allocator, const int8_t& item) override {
+    void Encode(Allocator& allocator, const int8_t& item) override {
         size_t length = Length();
         auto buffer = std::make_unique<std::byte[]>(length);
         std::span<std::byte> span(buffer.get(), length);
@@ -22,7 +22,7 @@ class CustomConstantConverter : public Converter<int8_t> {
         allocator.Append(span);
     }
 
-    virtual int8_t Decode(const std::span<const std::byte>& span) override {
+    int8_t Decode(const std::span<const std::byte>& span) override {
         return static_cast<int8_t>(span[0]);
     }
 };
