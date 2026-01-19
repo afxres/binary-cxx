@@ -39,11 +39,11 @@ public:
     [[nodiscard]] size_t MaxCapacity() const { return this->limits; }
     [[nodiscard]] std::span<const std::byte> AsSpan() const { return {this->buffer, this->offset}; }
 
-    Allocator();
-    Allocator(std::span<std::byte> span);
-    Allocator(std::span<std::byte> span, size_t maxCapacity);
-    Allocator(IAllocator& allocator);
-    Allocator(IAllocator& allocator, size_t maxCapacity);
+    explicit Allocator();
+    explicit Allocator(std::span<std::byte> span);
+    explicit Allocator(std::span<std::byte> span, size_t maxCapacity);
+    explicit Allocator(IAllocator& allocator);
+    explicit Allocator(IAllocator& allocator, size_t maxCapacity);
     Allocator(Allocator&&) = delete;
     Allocator(const Allocator&) = delete;
     Allocator& operator=(Allocator&&) = delete;
