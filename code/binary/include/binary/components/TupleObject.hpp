@@ -36,7 +36,7 @@
     };                                                                                                                                            \
                                                                                                                                                   \
     ARG_TEMPLATE_DEFINE                                                                                                                           \
-    void ARG_CONVERTER_TEMPLATE_NAME::GetMemberInfoInitializerList(std::vector<MemberInfoInitializer>& initializers)
+    inline void ARG_CONVERTER_TEMPLATE_NAME::GetMemberInfoInitializerList(std::vector<MemberInfoInitializer>& initializers)
 
 #define BINARY_TUPLE_OBJECT_CONVERTER(ARG_CONVERTER_NAME, ARG_OBJECT_TYPE) \
     BINARY_TUPLE_OBJECT_CONVERTER_INTERNAL_TYPE_DEFINE(                    \
