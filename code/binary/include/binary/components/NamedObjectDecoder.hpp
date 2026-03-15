@@ -8,12 +8,16 @@
 #include <vector>
 
 #include "binary/external/ByteViewList.hpp"
+#include "binary/internal/Define.hpp"
 
 namespace binary::components {
-class NamedObjectDecoder {
+class NamedObjectDecoder final {
 public:
+    BINARY_DISABLE_COPY_MOVE(NamedObjectDecoder)
+
     NamedObjectDecoder(const std::vector<std::vector<std::byte>>& headers, const std::vector<std::string>& names, const std::vector<uint8_t>& optional);
     std::vector<std::span<const std::byte>> Invoke(const std::span<const std::byte>& span);
+    ~NamedObjectDecoder() = default;
 
 private:
     [[noreturn]] void ExceptKeyFound(size_t index);

@@ -4,6 +4,7 @@
 #include <ranges>
 
 #include "binary/IAllocator.hpp"
+#include "binary/internal/Define.hpp"
 
 namespace binary::internal {
 template <typename T>
@@ -15,8 +16,12 @@ private:
     T& origin;
 
 public:
+    BINARY_DISABLE_COPY_MOVE(TemplateResizeAllocator)
+
     explicit TemplateResizeAllocator(T& container)
         : origin(container) {}
+
+    ~TemplateResizeAllocator() override = default;
 
     std::byte* Resize(size_t length) override {
         auto& origin = this->origin;

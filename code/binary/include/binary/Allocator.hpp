@@ -8,6 +8,7 @@
 #include <span>
 #include <vector>
 
+#include "binary/internal/Define.hpp"
 #include "binary/internal/TemplateResizeAllocator.hpp"
 
 namespace binary::internal {
@@ -34,6 +35,8 @@ private:
     void FinishCreate(size_t length);
 
 public:
+    BINARY_DISABLE_COPY_MOVE(Allocator)
+
     [[nodiscard]] size_t Length() const { return this->offset; }
     [[nodiscard]] size_t Capacity() const { return this->bounds; }
     [[nodiscard]] size_t MaxCapacity() const { return this->limits; }
@@ -44,10 +47,6 @@ public:
     explicit Allocator(std::span<std::byte> span, size_t maxCapacity);
     explicit Allocator(IAllocator& allocator);
     explicit Allocator(IAllocator& allocator, size_t maxCapacity);
-    Allocator(Allocator&&) = delete;
-    Allocator(const Allocator&) = delete;
-    Allocator& operator=(Allocator&&) = delete;
-    Allocator& operator=(const Allocator&) = delete;
     ~Allocator();
     void Ensure(size_t length);
     void Expand(size_t length);
