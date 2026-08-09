@@ -7,6 +7,7 @@
 
 #include "binary/Converter.hpp"
 #include "binary/IGenerator.hpp"
+#include "binary/internal/TupleSize.hpp"
 
 namespace binary::internal {
 template <typename TConverter>
@@ -17,6 +18,14 @@ template <typename TConverter>
 struct ConverterCreateFunction<TConverter> {
     static auto Invoke(const IGenerator& generator) {
         return std::make_shared<TConverter>(generator);
+    }
+};
+
+template <template <typename, typename...> typename TConverter, typename TTuple, typename... TElements>
+    requires std::derived_from<TConverter<TTuple, TElements...>, IConverter> && requires { ::binary::internal::TupleSize<TTuple>::Value; }
+struct ConverterCreateFunction<TConverter<TTuple, TElements...>> {
+    static auto Invoke(const IGenerator& generator) {
+        return std::make_shared<TConverter<TTuple, TElements...>>(GetConverter<TElements>(generator)...);
     }
 };
 
