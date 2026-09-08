@@ -1,6 +1,7 @@
 #ifndef BINARY_INTERNAL_MODULE_HPP
 #define BINARY_INTERNAL_MODULE_HPP
 
+#include <cstdint>
 #include <memory>
 #include <ranges>
 
