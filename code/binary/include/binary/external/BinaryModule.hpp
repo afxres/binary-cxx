@@ -7,7 +7,7 @@
 #include "binary/external/LongDataSlot.hpp"
 
 namespace binary::external {
-LongDataSlot GetLongData(const std::span<const std::byte>& span);
+LongDataSlot GetLongData(std::span<const std::byte> span);
 }
 
 #endif

@@ -10,7 +10,7 @@ namespace binary::external {
 class LongDataList final : public ByteViewList {
 public:
     explicit LongDataList(std::vector<LongDataSlot>&& bits);
-    size_t Invoke(const std::span<const std::byte>& span) override;
+    size_t Invoke(std::span<const std::byte> span) override;
 
 private:
     std::vector<LongDataSlot> bits;

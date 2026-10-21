@@ -23,7 +23,7 @@ NamedObjectDecoder::NamedObjectDecoder(const std::vector<std::vector<std::byte>>
     }
 }
 
-std::vector<std::span<const std::byte>> NamedObjectDecoder::Invoke(const std::span<const std::byte>& span) {
+std::vector<std::span<const std::byte>> NamedObjectDecoder::Invoke(std::span<const std::byte> span) {
     const auto& record = this->record;
     const auto& optional = this->optional;
     std::vector<std::span<const std::byte>> slices(optional.size());

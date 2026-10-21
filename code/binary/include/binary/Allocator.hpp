@@ -51,7 +51,7 @@ public:
     void Ensure(size_t length);
     void Expand(size_t length);
     void Append(std::byte data);
-    void Append(const std::span<const std::byte>& span);
+    void Append(std::span<const std::byte> span);
     void Append(size_t length, const std::function<void(std::span<std::byte>)>& action);
     void Append(size_t maxLength, const std::function<void(std::span<std::byte>, size_t& bytesWritten)>& action);
     void AppendWithLengthPrefix(const std::function<void(Allocator&)>& action);

@@ -13,7 +13,7 @@ template <typename T>
 class NamedObjectConverter : public Converter<T> {
 public:
     using EncodeFunction = std::function<void(Allocator&, const T&)>;
-    using DecodeFunction = std::function<void(T&, const std::span<const std::byte>&)>;
+    using DecodeFunction = std::function<void(T&, std::span<const std::byte>)>;
 
     struct MemberInfo {
         bool IsOptional = false;

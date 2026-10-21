@@ -28,7 +28,7 @@ void Encode(std::span<std::byte> span, size_t number, size_t& bytesWritten) {
     bytesWritten = prefixLength;
 }
 
-void EncodeWithLengthPrefix(Allocator& allocator, const std::span<const std::byte>& span) {
+void EncodeWithLengthPrefix(Allocator& allocator, std::span<const std::byte> span) {
     size_t number = span.size();
     ::binary::internal::EnsureLengthPrefixLength(number);
     size_t prefixLength = ::binary::internal::EncodeLengthPrefixLength(number);
@@ -47,7 +47,7 @@ size_t Decode(std::span<const std::byte>& span) {
     return length;
 }
 
-size_t Decode(const std::span<const std::byte>& span, size_t& bytesRead) {
+size_t Decode(std::span<const std::byte> span, size_t& bytesRead) {
     const std::byte* source = span.data();
     size_t offset = 0;
     size_t length = ::binary::internal::DecodeLengthPrefix(source, offset, span.size());

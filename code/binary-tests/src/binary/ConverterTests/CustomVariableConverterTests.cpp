@@ -17,7 +17,7 @@ public:
         allocator.Append(std::as_bytes(std::span(source)));
     }
 
-    int32_t Decode(const std::span<const std::byte>& span) override {
+    int32_t Decode(std::span<const std::byte> span) override {
         std::string source(reinterpret_cast<const char*>(span.data()), span.size());
         return std::stoi(source);
     }

@@ -14,7 +14,7 @@ LongDataList::LongDataList(std::vector<LongDataSlot>&& bits) {
     this->bits = std::move(bits);
 }
 
-size_t LongDataList::Invoke(const std::span<const std::byte>& span) {
+size_t LongDataList::Invoke(std::span<const std::byte> span) {
     if (span.size() > LongDataListItemBytesLimits) {
         return SIZE_MAX;
     }

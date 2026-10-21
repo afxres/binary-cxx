@@ -173,7 +173,7 @@ void Allocator::Append(std::byte data) {
     *Assign(sizeof(std::byte)) = data;
 }
 
-void Allocator::Append(const std::span<const std::byte>& span) {
+void Allocator::Append(std::span<const std::byte> span) {
     if (span.empty()) {
         return;
     }

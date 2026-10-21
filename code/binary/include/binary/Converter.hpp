@@ -39,7 +39,7 @@ public:
         AllocatorUnsafeAccessor::FinishAnchor(allocator, anchor);
     }
 
-    virtual T Decode(const std::span<const std::byte>& span) = 0;
+    virtual T Decode(std::span<const std::byte> span) = 0;
 
     virtual T DecodeAuto(std::span<const std::byte>& span) {
         size_t length = Length();

@@ -29,7 +29,7 @@ void EncodeLittleEndianString(Allocator& allocator, const T& item) {
 
 template <typename T>
     requires std::same_as<T, std::remove_cv_t<T>>
-T DecodeLittleEndianString(const std::span<const std::byte>& span) {
+T DecodeLittleEndianString(std::span<const std::byte> span) {
     if (span.empty()) {
         return {};
     }

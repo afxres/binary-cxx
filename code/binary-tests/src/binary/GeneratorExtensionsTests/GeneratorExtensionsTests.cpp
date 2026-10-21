@@ -37,7 +37,7 @@ class FakeConverter : public Converter<T> {
         throw std::logic_error("");
     }
 
-    T Decode([[maybe_unused]] const std::span<const std::byte>& span) override {
+    T Decode([[maybe_unused]] std::span<const std::byte> span) override {
         throw std::logic_error("");
     }
 };

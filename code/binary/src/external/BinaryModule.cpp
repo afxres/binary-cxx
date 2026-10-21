@@ -16,7 +16,7 @@ Item LoadUnaligned(const std::byte* source, size_t offset) {
     return item;
 }
 
-LongDataSlot GetLongData(const std::span<const std::byte>& span) {
+LongDataSlot GetLongData(std::span<const std::byte> span) {
     const std::byte* source = span.data();
     const size_t length = span.size();
     assert(length <= 0x0F);

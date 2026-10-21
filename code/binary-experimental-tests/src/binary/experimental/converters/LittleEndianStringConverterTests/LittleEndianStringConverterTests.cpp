@@ -18,7 +18,7 @@ namespace tests::binary::experimental::converters::LittleEndianStringConverterTe
 BOOST_AUTO_TEST_SUITE(LittleEndianStringConverterTests)
 
 template <typename T>
-T LittleToNative(const std::span<const std::byte>& span) {
+T LittleToNative(std::span<const std::byte> span) {
     T result(reinterpret_cast<const typename T::value_type*>(span.data()), span.size() / sizeof(typename T::value_type));
     for (auto& i : result) {
         boost::endian::little_to_native_inplace(i);

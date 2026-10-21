@@ -146,7 +146,7 @@ BOOST_AUTO_TEST_CASE(SimplePersonDuplicateKeyNamedObjectConverterTest) {
 class BadStringConverter : public ::binary::Converter<std::string> {
 public:
     void Encode([[maybe_unused]] ::binary::Allocator& allocator, [[maybe_unused]] const std::string& item) override {}
-    std::string Decode([[maybe_unused]] const std::span<const std::byte>& span) override { throw std::exception(); }
+    std::string Decode([[maybe_unused]] std::span<const std::byte> span) override { throw std::exception(); }
 };
 
 BOOST_AUTO_TEST_CASE(SimplePersonConverterWithBadStringConverterDuplicateKeyTest) {

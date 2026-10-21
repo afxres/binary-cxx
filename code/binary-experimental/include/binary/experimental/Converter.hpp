@@ -23,7 +23,7 @@ R Encode(const T& item) {
 
 template <typename T>
     requires std::same_as<T, std::remove_cv_t<T>>
-T Decode(const std::span<const std::byte>& span) {
+T Decode(std::span<const std::byte> span) {
     return ::binary::experimental::Converter<T>::Decode(span);
 }
 }

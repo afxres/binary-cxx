@@ -8,7 +8,7 @@ namespace binary::external {
 class ByteViewList {
 public:
     virtual ~ByteViewList() = 0;
-    virtual size_t Invoke(const std::span<const std::byte>& span) = 0;
+    virtual size_t Invoke(std::span<const std::byte> span) = 0;
 };
 }
 

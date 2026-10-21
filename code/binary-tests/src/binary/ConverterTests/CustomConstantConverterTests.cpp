@@ -22,7 +22,7 @@ class CustomConstantConverter : public Converter<int8_t> {
         allocator.Append(span);
     }
 
-    int8_t Decode(const std::span<const std::byte>& span) override {
+    int8_t Decode(std::span<const std::byte> span) override {
         return static_cast<int8_t>(span[0]);
     }
 };

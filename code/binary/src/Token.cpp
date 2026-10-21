@@ -21,7 +21,7 @@ struct TokenIntent {
     std::set<std::string> keys;
     std::map<std::string_view, Token> children;
 
-    TokenIntent(const IGenerator& generator, const std::span<const std::byte>& span) noexcept
+    TokenIntent(const IGenerator& generator, std::span<const std::byte> span) noexcept
         : initialized(span.empty()), generator(generator), span(span) {}
 };
 
@@ -61,12 +61,12 @@ const IGenerator& Token::GetGenerator() const {
     return GetTokenIntent().generator;
 }
 
-Token::Token(const IGenerator& generator, const std::span<const std::byte>& span)
+Token::Token(const IGenerator& generator, std::span<const std::byte> span)
     : intent(std::make_shared<TokenIntent>(generator, span)) {
     GetTokenIntent().converter = ::binary::GetConverter<std::string>(generator);
 }
 
-const std::span<const std::byte>& Token::Span() const {
+std::span<const std::byte> Token::Span() const {
     return GetTokenIntent().span;
 }
 
@@ -75,7 +75,7 @@ const std::map<std::string_view, Token>& Token::Children() const {
     return GetTokenIntent().children;
 }
 
-const Token& Token::At(const std::string_view& key) const {
+const Token& Token::At(std::string_view key) const {
     UpdateIntent();
     const auto& intent = GetTokenIntent();
     const auto& children = intent.children;

@@ -17,7 +17,7 @@ class FakeEmptyConverter : public Converter<T> {
         throw std::exception();
     }
 
-    T Decode([[maybe_unused]] const std::span<const std::byte>& span) override {
+    T Decode([[maybe_unused]] std::span<const std::byte> span) override {
         throw std::exception();
     }
 };
