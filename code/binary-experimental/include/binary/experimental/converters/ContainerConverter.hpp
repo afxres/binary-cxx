@@ -1,8 +1,11 @@
 #ifndef BINARY_EXPERIMENTAL_CONVERTERS_CONTAINERCONVERTER_HPP
 #define BINARY_EXPERIMENTAL_CONVERTERS_CONTAINERCONVERTER_HPP
 
+#include <bit>
 #include <concepts>
+#include <type_traits>
 
+#include "binary/experimental/converters/LittleEndianConverter.hpp"
 #include "binary/experimental/helpers/ConverterDecodeAutoMethodHelper.hpp"
 #include "binary/experimental/helpers/ConverterEncodeAutoMethodHelper.hpp"
 #include "binary/experimental/helpers/GetConverterHelper.hpp"
@@ -18,14 +21,19 @@ template <typename T>
 struct ContainerConverter {
     using ValueType = std::ranges::range_value_t<T>;
     using ValueConverterType = typename ::binary::experimental::helpers::GetConverterHelper<ValueType>::Type;
+    static constexpr bool Copyable = std::same_as<ValueConverterType, ::binary::experimental::converters::LittleEndianConverter<ValueType>> && std::is_trivially_copyable_v<ValueType> && std::endian::native == std::endian::little && requires(T& item) { item.data(); item.size(); };
 
     BINARY_EXPERIMENTAL_DEFINE_STATIC_LENGTH_METHOD() {
         return 0;
     }
 
     BINARY_EXPERIMENTAL_DEFINE_STATIC_ENCODE_METHOD(T) {
-        for (const auto& i : item) {
-            ::binary::experimental::helpers::ConverterEncodeAutoMethodHelper<ValueConverterType>::Invoke(allocator, i);
+        if constexpr (Copyable) {
+            allocator.Append(std::span(reinterpret_cast<const std::byte*>(item.data()), sizeof(ValueType) * item.size()));
+        } else {
+            for (const auto& i : item) {
+                ::binary::experimental::helpers::ConverterEncodeAutoMethodHelper<ValueConverterType>::Invoke(allocator, i);
+            }
         }
     }
 
@@ -50,18 +58,24 @@ struct ContainerConverter {
             if (span.empty()) {
                 return {};
             }
-            T result{};
-            std::span<const std::byte> copy = span;
-            if constexpr (::binary::internal::ContainerResizeFunction<T>::IsEnable) {
-                if constexpr (ValueConverterType::Length() != 0) {
-                    size_t capacity = ::binary::internal::GetCapacity(span.size(), ValueConverterType::Length(), typeid(T));
-                    ::binary::internal::ContainerResizeFunction<T>::Invoke(result, capacity);
+            if constexpr (Copyable) {
+                auto capacity = ::binary::internal::GetCapacity(span.size(), sizeof(ValueType), typeid(T));
+                auto data = std::span<const ValueType>(reinterpret_cast<const ValueType*>(span.data()), capacity);
+                return T(data.begin(), data.end());
+            } else {
+                T result{};
+                std::span<const std::byte> copy = span;
+                if constexpr (::binary::internal::ContainerResizeFunction<T>::IsEnable) {
+                    if constexpr (ValueConverterType::Length() != 0) {
+                        size_t capacity = ::binary::internal::GetCapacity(span.size(), ValueConverterType::Length(), typeid(T));
+                        ::binary::internal::ContainerResizeFunction<T>::Invoke(result, capacity);
+                    }
                 }
+                while (!copy.empty()) {
+                    ::binary::internal::ContainerInsertFunction<T>::Invoke(result, ::binary::experimental::helpers::ConverterDecodeAutoMethodHelper<ValueConverterType>::Invoke(copy));
+                }
+                return result;
             }
-            while (!copy.empty()) {
-                ::binary::internal::ContainerInsertFunction<T>::Invoke(result, ::binary::experimental::helpers::ConverterDecodeAutoMethodHelper<ValueConverterType>::Invoke(copy));
-            }
-            return result;
         }
     }
 };

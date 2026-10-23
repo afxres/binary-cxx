@@ -1,5 +1,7 @@
 #include "binary/components/NamedObjectDecoder.hpp"
 
+#include <algorithm>
+#include <cassert>
 #include <format>
 #include <stdexcept>
 
@@ -23,10 +25,11 @@ NamedObjectDecoder::NamedObjectDecoder(const std::vector<std::vector<std::byte>>
     }
 }
 
-std::vector<std::span<const std::byte>> NamedObjectDecoder::Invoke(std::span<const std::byte> span) {
+void NamedObjectDecoder::Invoke(std::span<const std::byte> span, std::span<std::span<const std::byte>> slices) {
     const auto& record = this->record;
     const auto& optional = this->optional;
-    std::vector<std::span<const std::byte>> slices(optional.size());
+    assert(slices.size() == optional.size());
+    std::fill(slices.begin(), slices.end(), std::span<const std::byte>{});
     std::span<const std::byte> copy = span;
     while (!copy.empty()) {
         auto head = DecodeWithLengthPrefix(copy);
@@ -36,7 +39,7 @@ std::vector<std::span<const std::byte>> NamedObjectDecoder::Invoke(std::span<con
         if (cursor == SIZE_MAX) {
             continue;
         }
-        auto& intent = slices.at(cursor);
+        auto& intent = slices[cursor];
         if (intent.data() != nullptr) {
             ExceptKeyFound(cursor);
         }
@@ -44,11 +47,10 @@ std::vector<std::span<const std::byte>> NamedObjectDecoder::Invoke(std::span<con
     }
 
     for (size_t i = 0; i < slices.size(); i++) {
-        if (slices.at(i).data() == nullptr && optional.at(i) == 0) {
+        if (slices[i].data() == nullptr && optional.at(i) == 0) {
             ExceptNotFound(i);
         }
     }
-    return slices;
 }
 
 void NamedObjectDecoder::ExceptKeyFound(size_t index) {

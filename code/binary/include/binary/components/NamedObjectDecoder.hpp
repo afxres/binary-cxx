@@ -16,7 +16,7 @@ public:
     BINARY_DISABLE_COPY_MOVE(NamedObjectDecoder)
 
     NamedObjectDecoder(const std::vector<std::vector<std::byte>>& headers, const std::vector<std::string>& names, const std::vector<uint8_t>& optional);
-    std::vector<std::span<const std::byte>> Invoke(std::span<const std::byte> span);
+    void Invoke(std::span<const std::byte> span, std::span<std::span<const std::byte>> slices);
     ~NamedObjectDecoder() = default;
 
 private:

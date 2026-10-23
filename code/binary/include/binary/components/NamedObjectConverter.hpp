@@ -2,11 +2,19 @@
 #define BINARY_COMPONENTS_NAMEDOBJECTCONVERTER_HPP
 
 #include <cassert>
+#include <span>
 
 #include "binary/Converter.hpp"
 #include "binary/ConverterExtensions.hpp"
 #include "binary/components/NamedObjectDecoder.hpp"
 #include "binary/internal/Define.hpp"
+
+#if defined(_MSC_VER)
+#include <malloc.h>
+#define BINARY_NAMED_OBJECT_ALLOCA _alloca
+#elif defined(__GNUC__)
+#define BINARY_NAMED_OBJECT_ALLOCA __builtin_alloca
+#endif
 
 namespace binary::components {
 template <typename T>
@@ -43,12 +51,15 @@ public:
     }
 
     BINARY_DEFINE_OVERRIDE_DECODE_METHOD(T) {
-        auto slices = this->decoder->Invoke(span);
+        const auto& record = this->record;
+        const auto length = record.size();
+        auto* memory = static_cast<std::span<const std::byte>*>(BINARY_NAMED_OBJECT_ALLOCA(sizeof(std::span<const std::byte>) * length));
+        const std::span<std::span<const std::byte>> slices(memory, length);
+        this->decoder->Invoke(span, slices);
 
         T result{};
-        const auto& record = this->record;
-        for (size_t i = 0; i < record.size(); i++) {
-            const auto& intent = slices.at(i);
+        for (size_t i = 0; i < length; i++) {
+            const auto& intent = slices[i];
             assert(intent.data() != nullptr || this->optional.at(i));
             if (intent.data() != nullptr) {
                 record.at(i).Decode(result, intent);
