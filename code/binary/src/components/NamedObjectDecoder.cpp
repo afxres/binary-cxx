@@ -1,6 +1,5 @@
 #include "binary/components/NamedObjectDecoder.hpp"
 
-#include <algorithm>
 #include <cassert>
 #include <format>
 #include <stdexcept>
@@ -29,7 +28,6 @@ void NamedObjectDecoder::Invoke(std::span<const std::byte> span, std::span<std::
     const auto& record = this->record;
     const auto& optional = this->optional;
     assert(slices.size() == optional.size());
-    std::fill(slices.begin(), slices.end(), std::span<const std::byte>{});
     std::span<const std::byte> copy = span;
     while (!copy.empty()) {
         auto head = DecodeWithLengthPrefix(copy);

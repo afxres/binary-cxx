@@ -28,14 +28,16 @@ BOOST_AUTO_TEST_CASE(CastFromNullToStringConverterTest) {
         [&output](const std::invalid_argument& e) {
             BOOST_REQUIRE_EQUAL(e.what(), output);
             return true;
-        });
+        }
+    );
     BOOST_REQUIRE_EXCEPTION(
         ::binary::internal::GetConverterRawPtr<std::string>(std::shared_ptr<::binary::IConverter>(nullptr)),
         std::invalid_argument,
         [&output](const std::invalid_argument& e) {
             BOOST_REQUIRE_EQUAL(e.what(), output);
             return true;
-        });
+        }
+    );
 }
 
 BOOST_AUTO_TEST_CASE(CastFromStringConverterToByteConverterTest) {
@@ -46,14 +48,16 @@ BOOST_AUTO_TEST_CASE(CastFromStringConverterToByteConverterTest) {
         [&output](const std::invalid_argument& e) {
             BOOST_REQUIRE_EQUAL(e.what(), output);
             return true;
-        });
+        }
+    );
     BOOST_REQUIRE_EXCEPTION(
         ::binary::internal::GetConverterRawPtr<std::byte>(std::make_shared<::binary::converters::LittleEndianStringConverter<std::string>>()),
         std::invalid_argument,
         [&output](const std::invalid_argument& e) {
             BOOST_REQUIRE_EQUAL(e.what(), output);
             return true;
-        });
+        }
+    );
 }
 
 BOOST_AUTO_TEST_CASE(GetConverterUseCountTest) {
@@ -95,7 +99,8 @@ BOOST_DATA_TEST_CASE(GetConverterLengthOverflowTest, GetConverterLengthOverflowT
         [](const std::overflow_error& e) {
             BOOST_REQUIRE_EQUAL(e.what(), "converter length overflow");
             return true;
-        });
+        }
+    );
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -15,7 +15,8 @@ BOOST_AUTO_TEST_CASE(EnsureMemoryAssertFailedTest) {
         [](const std::runtime_error& e) {
             BOOST_REQUIRE_EQUAL(e.what(), "invalid memory access or out of memory");
             return true;
-        });
+        }
+    );
 }
 
 std::vector<uint32_t> LengthPrefixTestNumberData = {

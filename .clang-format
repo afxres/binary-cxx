@@ -1,10 +1,10 @@
 ---
 AccessModifierOffset: -4
-AlignAfterOpenBracket: DontAlign
+AlignAfterOpenBracket: BlockIndent
 AlignOperands: DontAlign
 AllowShortBlocksOnASingleLine: Empty
 AllowShortFunctionsOnASingleLine: Inline
-AlwaysBreakTemplateDeclarations: true
+BreakTemplateDeclarations: Yes
 BasedOnStyle: LLVM
 BreakAfterAttributes: Leave
 BreakConstructorInitializers: BeforeComma
@@ -18,4 +18,3 @@ InsertNewlineAtEOF: true
 Language: Cpp
 PackConstructorInitializers: NextLine
 PointerAlignment: Left
----

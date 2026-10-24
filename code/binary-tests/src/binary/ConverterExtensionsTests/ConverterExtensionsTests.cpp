@@ -35,7 +35,8 @@ BOOST_DATA_TEST_CASE(EncodeNumberWithAllocatorInvalidNumberTest, boost::unit_tes
         [](const std::invalid_argument& e) {
             BOOST_REQUIRE_EQUAL(e.what(), "number > INT32_MAX");
             return true;
-        });
+        }
+    );
     BOOST_REQUIRE_EQUAL(0, allocator.Length());
     BOOST_REQUIRE_EQUAL(0, allocator.Capacity());
 }
@@ -57,7 +58,8 @@ BOOST_DATA_TEST_CASE(EncodeNumberWithSpanValueInvalidNumberTest, boost::unit_tes
         [](const std::invalid_argument& e) {
             BOOST_REQUIRE_EQUAL(e.what(), "number > INT32_MAX");
             return true;
-        });
+        }
+    );
     BOOST_REQUIRE(std::all_of(target.begin(), target.end(), [](auto i) { return i == std::byte{0}; }));
     BOOST_REQUIRE_EQUAL(0, bytesWritten);
 }
@@ -72,7 +74,8 @@ BOOST_DATA_TEST_CASE(EncodeNumberWithSpanValueNotEnoughBytesToWriteTest, EncodeN
         [](const std::length_error& e) {
             BOOST_REQUIRE_EQUAL(e.what(), "not enough bytes to write");
             return true;
-        });
+        }
+    );
     BOOST_REQUIRE(std::all_of(values.begin(), values.end(), [](auto i) { return i == std::byte{0}; }));
     BOOST_REQUIRE_EQUAL(0, bytesWritten);
 }
@@ -112,7 +115,8 @@ BOOST_DATA_TEST_CASE(EncodeWithLengthPrefixMaxCapacityExceededTest, EncodeWithLe
         [](const std::length_error& e) {
             BOOST_REQUIRE_EQUAL(e.what(), "maximum capacity reached");
             return true;
-        });
+        }
+    );
     BOOST_REQUIRE_EQUAL(0, allocator.Length());
     BOOST_REQUIRE_EQUAL(0, allocator.Capacity());
 }
@@ -157,7 +161,8 @@ BOOST_DATA_TEST_CASE(DecodeNumberWithSpanReferenceInvalidBytesTest, DecodeNumber
         [](const std::length_error& e) {
             BOOST_REQUIRE_EQUAL(e.what(), "not enough bytes or byte sequence invalid");
             return true;
-        });
+        }
+    );
     BOOST_REQUIRE_EQUAL(buffer.size(), source.size());
 }
 
@@ -170,7 +175,8 @@ BOOST_DATA_TEST_CASE(DecodeNumberWithSpanValueOutputBytesReadInvalidBytesTest, D
         [](const std::length_error& e) {
             BOOST_REQUIRE_EQUAL(e.what(), "not enough bytes or byte sequence invalid");
             return true;
-        });
+        }
+    );
     BOOST_REQUIRE_EQUAL(buffer.size(), source.size());
     BOOST_REQUIRE_EQUAL(0, bytesRead);
 }
@@ -208,7 +214,8 @@ BOOST_DATA_TEST_CASE(DecodeWithLengthPrefixInvalidBytesTest, DecodeWithLengthPre
         [](const std::length_error& e) {
             BOOST_REQUIRE_EQUAL(e.what(), "not enough bytes or byte sequence invalid");
             return true;
-        });
+        }
+    );
     BOOST_REQUIRE_EQUAL(buffer.size(), source.size());
 }
 

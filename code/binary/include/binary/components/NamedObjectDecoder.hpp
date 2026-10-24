@@ -23,8 +23,8 @@ private:
     [[noreturn]] void ExceptKeyFound(size_t index);
     [[noreturn]] void ExceptNotFound(size_t index);
 
-    const std::vector<uint8_t>& optional;
-    const std::vector<std::string>& names;
+    std::vector<uint8_t> optional;
+    std::vector<std::string> names;
     std::unique_ptr<external::ByteViewList> record;
 };
 }

@@ -76,14 +76,16 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(VariantConverterDecodeBothMethodsWithInvalidVarian
         [message](const std::invalid_argument& e) {
             BOOST_REQUIRE_EQUAL(e.what(), message);
             return true;
-        });
+        }
+    );
     BOOST_REQUIRE_EXCEPTION(
         converter->DecodeAuto(autoSpan),
         std::invalid_argument,
         [message](const std::invalid_argument& e) {
             BOOST_REQUIRE_EQUAL(e.what(), message);
             return true;
-        });
+        }
+    );
     BOOST_REQUIRE_EQUAL(autoSpan.size(), 0);
 }
 
@@ -134,12 +136,14 @@ BOOST_AUTO_TEST_CASE(VariantConverterEncodeInvalidVariantTest) {
         [](const std::logic_error& e) {
             BOOST_REQUIRE_EQUAL(e.what(), "fake copy");
             return true;
-        });
+        }
+    );
     BOOST_REQUIRE(source.valueless_by_exception());
     BOOST_REQUIRE_EQUAL(std::variant_npos, source.index());
     ::binary::converters::VariantConverter<std::variant<int32_t, FakeCopyType>> converter(
         std::make_shared<::binary::converters::LittleEndianConverter<int32_t>>(),
-        std::make_shared<FakeConverter<FakeCopyType>>());
+        std::make_shared<FakeConverter<FakeCopyType>>()
+    );
     ::binary::Allocator allocator;
     auto message = std::format("invalid variant index: {}", SIZE_MAX);
     BOOST_REQUIRE_EXCEPTION(
@@ -148,7 +152,8 @@ BOOST_AUTO_TEST_CASE(VariantConverterEncodeInvalidVariantTest) {
         [message](const std::invalid_argument& e) {
             BOOST_REQUIRE_EQUAL(e.what(), message);
             return true;
-        });
+        }
+    );
 }
 
 BOOST_AUTO_TEST_SUITE_END()

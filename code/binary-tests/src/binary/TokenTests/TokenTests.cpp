@@ -4,7 +4,7 @@
 #include <binary/Generator.hpp>
 #include <binary/GeneratorExtensions.hpp>
 #include <binary/Token.hpp>
-#include <binary/components/NamedObject.hpp>
+#include <binary/components/NamedObjectConverter.hpp>
 #include <binary/converters/LittleEndianConverter.hpp>
 #include <binary/converters/LittleEndianStringConverter.hpp>
 
@@ -43,9 +43,11 @@ BOOST_DATA_TEST_CASE(TokenWithInvalidBytesTest, TokenWithInvalidBytesTestData, s
             BOOST_REQUIRE_EXCEPTION(
                 std::rethrow_if_nested(e),
                 std::length_error,
-                nestedHandler);
+                nestedHandler
+            );
             return true;
-        });
+        }
+    );
     BOOST_REQUIRE_EXCEPTION(
         (void)token.At("fake"),
         std::invalid_argument,
@@ -54,9 +56,11 @@ BOOST_DATA_TEST_CASE(TokenWithInvalidBytesTest, TokenWithInvalidBytesTestData, s
             BOOST_REQUIRE_EXCEPTION(
                 std::rethrow_if_nested(e),
                 std::length_error,
-                nestedHandler);
+                nestedHandler
+            );
             return true;
-        });
+        }
+    );
 }
 
 struct Item {
@@ -72,16 +76,24 @@ struct Case {
     bool operator==(const Case&) const = default;
 };
 
-BINARY_NAMED_OBJECT_CONVERTER(ItemConverter, Item) {
-    BINARY_NAMED_MEMBER(id);
-    BINARY_NAMED_MEMBER(name);
-}
+struct ItemSchema {
+    static constexpr auto Members = std::tuple{
+        ::binary::components::NamedMember{"id", &Item::id},
+        ::binary::components::NamedMember{"name", &Item::name},
+    };
+};
 
-BINARY_NAMED_OBJECT_CONVERTER(CaseConverter, Case) {
-    BINARY_NAMED_MEMBER(path);
-    BINARY_NAMED_MEMBER(main);
-    BINARY_NAMED_MEMBER(backup);
-}
+using ItemConverter = ::binary::components::NamedObjectConverter<Item, ItemSchema>;
+
+struct CaseSchema {
+    static constexpr auto Members = std::tuple{
+        ::binary::components::NamedMember{"path", &Case::path},
+        ::binary::components::NamedMember{"main", &Case::main},
+        ::binary::components::NamedMember{"backup", &Case::backup},
+    };
+};
+
+using CaseConverter = ::binary::components::NamedObjectConverter<Case, CaseSchema>;
 
 BOOST_AUTO_TEST_CASE(TokenWithSimpleNamedObjectTest) {
     ::binary::Generator generator;
@@ -136,7 +148,8 @@ BOOST_AUTO_TEST_CASE(TokenWithSimpleNamedObjectTest) {
             BOOST_REQUIRE_EQUAL(e.what(), "key 'invalid' not found");
             std::rethrow_if_nested(e);
             return true;
-        });
+        }
+    );
 }
 
 BOOST_AUTO_TEST_SUITE_END()

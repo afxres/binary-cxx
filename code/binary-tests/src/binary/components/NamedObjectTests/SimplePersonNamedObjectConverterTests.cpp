@@ -3,7 +3,7 @@
 
 #include <binary/Generator.hpp>
 #include <binary/GeneratorExtensions.hpp>
-#include <binary/components/NamedObject.hpp>
+#include <binary/components/NamedObjectConverter.hpp>
 #include <binary/converters/LittleEndianConverter.hpp>
 #include <binary/converters/LittleEndianStringConverter.hpp>
 
@@ -27,15 +27,33 @@ private:
     std::string name;
 };
 
-BINARY_NAMED_OBJECT_CONVERTER(SimplePersonNamedObjectConverter, SimplePerson) {
-    BINARY_NAMED_MEMBER(Age);
-    BINARY_NAMED_MEMBER(Name);
-}
+struct SimplePersonSchema {
+    static constexpr auto Members = std::tuple{
+        ::binary::components::NamedMember{"Age", &SimplePerson::Age},
+        ::binary::components::NamedMember{"Name", &SimplePerson::Name},
+    };
+};
 
-BINARY_NAMED_OBJECT_CONVERTER(SimplePersonCustomNamedObjectConverter, SimplePersonCustom) {
-    BINARY_NAMED_MEMBER_CUSTOM("Age", true, item.GetAge(), item.SetAge(result), std::make_shared<::binary::converters::LittleEndianConverter<int8_t>>());
-    BINARY_NAMED_MEMBER_CUSTOM("Name", true, item.GetName(), item.SetName(result), std::make_shared<::binary::converters::LittleEndianStringConverter<std::string>>());
-}
+using SimplePersonNamedObjectConverter = ::binary::components::NamedObjectConverter<SimplePerson, SimplePersonSchema>;
+
+struct SimplePersonCustomSchema {
+    static constexpr auto Members = std::tuple{
+        ::binary::components::NamedMember{
+            "Age",
+            [](const SimplePersonCustom& item) { return item.GetAge(); },
+            [](SimplePersonCustom& item, auto&& result) { item.SetAge(result); },
+            true
+        },
+        ::binary::components::NamedMember{
+            "Name",
+            [](const SimplePersonCustom& item) { return item.GetName(); },
+            [](SimplePersonCustom& item, auto&& result) { item.SetName(std::move(result)); },
+            true
+        },
+    };
+};
+
+using SimplePersonCustomNamedObjectConverter = ::binary::components::NamedObjectConverter<SimplePersonCustom, SimplePersonCustomSchema>;
 
 BOOST_AUTO_TEST_CASE(SimplePersonNamedObjectConverterLengthTest) {
     ::binary::Generator generator;
@@ -105,7 +123,8 @@ BOOST_DATA_TEST_CASE(SimplePersonDecodeKeyNotFoundTest, SimplePersonDecodeKeyNot
         [&output](const std::invalid_argument& e) {
             BOOST_REQUIRE_EQUAL(e.what(), output);
             return true;
-        });
+        }
+    );
 }
 
 std::vector<std::tuple<std::string, int8_t, std::string>> SimplePersonDecodeOptionalMemberTestData = {
@@ -117,6 +136,7 @@ std::vector<std::tuple<std::string, int8_t, std::string>> SimplePersonDecodeOpti
 BOOST_DATA_TEST_CASE(SimplePersonDecodeOptionalMemberTest, SimplePersonDecodeOptionalMemberTestData, buffer, age, name) {
     std::span<const std::byte> span(reinterpret_cast<const std::byte*>(buffer.data()), buffer.size());
     ::binary::Generator generator;
+    ::binary::AddConverter<::binary::converters::LittleEndianConverter<int8_t>>(generator);
     ::binary::AddConverter<::binary::converters::LittleEndianStringConverter<std::string>>(generator);
     ::binary::AddConverter<SimplePersonCustomNamedObjectConverter>(generator);
     auto converter = ::binary::GetConverter<SimplePersonCustom>(generator);
@@ -125,10 +145,15 @@ BOOST_DATA_TEST_CASE(SimplePersonDecodeOptionalMemberTest, SimplePersonDecodeOpt
     BOOST_REQUIRE_EQUAL(name, result.GetName());
 }
 
-BINARY_NAMED_OBJECT_CONVERTER(SimplePersonDuplicateKeyNamedObjectConverter, SimplePerson) {
-    BINARY_NAMED_MEMBER(Age);
-    BINARY_NAMED_MEMBER(Age);
-}
+struct SimplePersonDuplicateKeySchema {
+    static constexpr auto Members = std::tuple{
+        ::binary::components::NamedMember{"Age", &SimplePerson::Age},
+        ::binary::components::NamedMember{"Age", &SimplePerson::Age},
+    };
+};
+
+using SimplePersonDuplicateKeyNamedObjectConverter =
+    ::binary::components::NamedObjectConverter<SimplePerson, SimplePersonDuplicateKeySchema>;
 
 BOOST_AUTO_TEST_CASE(SimplePersonDuplicateKeyNamedObjectConverterTest) {
     ::binary::Generator generator;
@@ -140,7 +165,8 @@ BOOST_AUTO_TEST_CASE(SimplePersonDuplicateKeyNamedObjectConverterTest) {
         [](const std::invalid_argument& e) {
             BOOST_REQUIRE_EQUAL(e.what(), "named key 'Age' already exists");
             return true;
-        });
+        }
+    );
 }
 
 class BadStringConverter : public ::binary::Converter<std::string> {
@@ -159,7 +185,8 @@ BOOST_AUTO_TEST_CASE(SimplePersonConverterWithBadStringConverterDuplicateKeyTest
         [](const std::invalid_argument& e) {
             BOOST_REQUIRE_EQUAL(e.what(), "named key 'Name' already exists");
             return true;
-        });
+        }
+    );
 }
 
 std::vector<std::tuple<std::string, std::string>> SimplePersonConverterDecodeWithDuplicateKeyTestData = {
@@ -181,12 +208,14 @@ BOOST_DATA_TEST_CASE(SimplePersonConverterDecodeWithDuplicateKeyTest, SimplePers
         [&output](const std::invalid_argument& e) {
             BOOST_REQUIRE_EQUAL(e.what(), output);
             return true;
-        });
+        }
+    );
 }
 
 std::vector<std::tuple<std::string, uint8_t, std::string>> SimplePersonConverterDecodeWithUnknownKeyTestData = {
     {std::string() + "\x03" + "Age\x01\x16\x02" + "Id\x01\x20\x04" + "Name\x05" + "Alice", 22, "Alice"},
-    {std::string() + "\x01" + "X\x01\xFF\x04" + "Name\x03" + "Tom\x03" + "Age\x01\x20\x04" + "Fake\x01\x80", 32, "Tom"}};
+    {std::string() + "\x01" + "X\x01\xFF\x04" + "Name\x03" + "Tom\x03" + "Age\x01\x20\x04" + "Fake\x01\x80", 32, "Tom"}
+};
 
 BOOST_DATA_TEST_CASE(SimplePersonConverterDecodeWithUnknownKeyTest, SimplePersonConverterDecodeWithUnknownKeyTestData, buffer, age, name) {
     std::span<const std::byte> span(reinterpret_cast<const std::byte*>(buffer.data()), buffer.size());

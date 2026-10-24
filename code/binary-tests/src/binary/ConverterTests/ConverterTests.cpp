@@ -43,7 +43,8 @@ BOOST_DATA_TEST_CASE(ConverterInvalidLengthTest, ConverterInvalidLengthData) {
         [](const std::invalid_argument& e) {
             BOOST_REQUIRE_EQUAL(e.what(), "length > INT32_MAX");
             return true;
-        });
+        }
+    );
 }
 
 std::vector<size_t> ConverterDecodeAutoNotEnoughBytesData = {1, 2, 4, 8};
@@ -60,7 +61,8 @@ BOOST_DATA_TEST_CASE(ConverterDecodeAutoNotEnoughBytesTest, ConverterDecodeAutoN
         [](const std::length_error& e) {
             BOOST_REQUIRE_EQUAL(e.what(), "not enough bytes or byte sequence invalid");
             return true;
-        });
+        }
+    );
     BOOST_REQUIRE_EQUAL(span.data(), nullptr);
     BOOST_REQUIRE_EQUAL(span.size(), sample - 1);
 }

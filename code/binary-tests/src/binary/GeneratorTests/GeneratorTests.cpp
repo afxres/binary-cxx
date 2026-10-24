@@ -18,7 +18,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(GeneratorGetConverterWithUnknownTypeTest, T, Gener
         [&output](const std::invalid_argument& e) {
             BOOST_REQUIRE_EQUAL(e.what(), output);
             return true;
-        });
+        }
+    );
 }
 
 BOOST_AUTO_TEST_SUITE_END()

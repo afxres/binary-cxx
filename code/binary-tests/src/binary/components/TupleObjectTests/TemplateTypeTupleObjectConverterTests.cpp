@@ -3,7 +3,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include <binary/Generator.hpp>
-#include <binary/components/TupleObject.hpp>
+#include <binary/components/TupleObjectConverter.hpp>
 #include <binary/converters/LittleEndianConverter.hpp>
 #include <binary/converters/LittleEndianStringConverter.hpp>
 
@@ -17,15 +17,21 @@ struct Box {
     T Item;
 };
 
-BINARY_TUPLE_OBJECT_CONVERTER_TEMPLATE(BoxConverter, T) {
-    BINARY_TUPLE_MEMBER(Item);
-}
+template <typename T>
+struct BoxSchema {
+    static constexpr auto Members = std::tuple{
+        ::binary::components::TupleMember{&Box<T>::Item},
+    };
+};
+
+template <typename T>
+using BoxConverter = ::binary::components::TupleObjectConverter<Box<T>, BoxSchema<T>>;
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(TemplateBoxTupleObjectConverterTest, T, BoxConverterTestTypeData) {
     ::binary::Generator generator;
     ::binary::AddConverter<::binary::converters::LittleEndianConverter<int32_t>>(generator);
     ::binary::AddConverter<::binary::converters::LittleEndianStringConverter<std::string>>(generator);
-    ::binary::AddConverter<BoxConverter<Box<T>>>(generator);
+    ::binary::AddConverter<BoxConverter<T>>(generator);
     auto converter = ::binary::GetConverter<Box<T>>(generator);
     BOOST_REQUIRE_EQUAL(converter->Length(), ::binary::GetConverter<T>(generator)->Length());
     Box<T> source;

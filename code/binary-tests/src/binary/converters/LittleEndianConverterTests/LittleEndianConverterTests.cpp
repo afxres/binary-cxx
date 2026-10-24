@@ -48,7 +48,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(LittleEndianConverterDecodeNotEnoughBytesTest, T, 
         [](const std::length_error& e) {
             BOOST_REQUIRE_EQUAL(e.what(), "not enough bytes or byte sequence invalid");
             return true;
-        });
+        }
+    );
 }
 
 BOOST_AUTO_TEST_SUITE_END()

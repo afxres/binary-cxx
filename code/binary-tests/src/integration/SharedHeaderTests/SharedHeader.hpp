@@ -1,8 +1,9 @@
-#include <binary/components/NamedObject.hpp>
-#include <binary/components/TupleObject.hpp>
+#include <binary/components/NamedObjectConverter.hpp>
+#include <binary/components/TupleObjectConverter.hpp>
 
 #include <cstdint>
 #include <string>
+#include <tuple>
 
 namespace tests::integration::SharedHeaderTests {
 struct SharedIntent {
@@ -15,13 +16,21 @@ struct SharedObject {
     std::u8string Name;
 };
 
-BINARY_TUPLE_OBJECT_CONVERTER(SharedIntentTupleObjectConverter, SharedIntent) {
-    BINARY_TUPLE_MEMBER(X);
-    BINARY_TUPLE_MEMBER(Y);
-}
+struct SharedIntentSchema {
+    static constexpr auto Members = std::tuple{
+        ::binary::components::TupleMember{&SharedIntent::X},
+        ::binary::components::TupleMember{&SharedIntent::Y},
+    };
+};
 
-BINARY_NAMED_OBJECT_CONVERTER(SharedObjectNamedObjectConverter, SharedObject) {
-    BINARY_NAMED_MEMBER(Id);
-    BINARY_NAMED_MEMBER(Name);
-}
+using SharedIntentTupleObjectConverter = ::binary::components::TupleObjectConverter<SharedIntent, SharedIntentSchema>;
+
+struct SharedObjectSchema {
+    static constexpr auto Members = std::tuple{
+        ::binary::components::NamedMember{"Id", &SharedObject::Id},
+        ::binary::components::NamedMember{"Name", &SharedObject::Name},
+    };
+};
+
+using SharedObjectNamedObjectConverter = ::binary::components::NamedObjectConverter<SharedObject, SharedObjectSchema>;
 }

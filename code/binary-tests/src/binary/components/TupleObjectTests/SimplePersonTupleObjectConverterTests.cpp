@@ -3,7 +3,7 @@
 
 #include <binary/Generator.hpp>
 #include <binary/GeneratorExtensions.hpp>
-#include <binary/components/TupleObject.hpp>
+#include <binary/components/TupleObjectConverter.hpp>
 #include <binary/converters/LittleEndianConverter.hpp>
 #include <binary/converters/LittleEndianStringConverter.hpp>
 
@@ -27,15 +27,29 @@ private:
     std::string name;
 };
 
-BINARY_TUPLE_OBJECT_CONVERTER(SimplePersonTupleObjectConverter, SimplePerson) {
-    BINARY_TUPLE_MEMBER(Age);
-    BINARY_TUPLE_MEMBER(Name);
-}
+struct SimplePersonSchema {
+    static constexpr auto Members = std::tuple{
+        ::binary::components::TupleMember{&SimplePerson::Age},
+        ::binary::components::TupleMember{&SimplePerson::Name},
+    };
+};
 
-BINARY_TUPLE_OBJECT_CONVERTER(SimplePersonCustomTupleObjectConverter, SimplePersonCustom) {
-    BINARY_TUPLE_MEMBER_CUSTOM(item.GetAge(), item.SetAge(result), std::make_shared<::binary::converters::LittleEndianConverter<int8_t>>());
-    BINARY_TUPLE_MEMBER_CUSTOM(item.GetName(), item.SetName(result), std::make_shared<::binary::converters::LittleEndianStringConverter<std::string>>());
-}
+using SimplePersonTupleObjectConverter = ::binary::components::TupleObjectConverter<SimplePerson, SimplePersonSchema>;
+
+struct SimplePersonCustomSchema {
+    static constexpr auto Members = std::tuple{
+        ::binary::components::TupleMember{
+            [](const SimplePersonCustom& item) { return item.GetAge(); },
+            [](SimplePersonCustom& item, auto&& result) { item.SetAge(result); },
+        },
+        ::binary::components::TupleMember{
+            [](const SimplePersonCustom& item) { return item.GetName(); },
+            [](SimplePersonCustom& item, auto&& result) { item.SetName(std::move(result)); },
+        },
+    };
+};
+
+using SimplePersonCustomTupleObjectConverter = ::binary::components::TupleObjectConverter<SimplePersonCustom, SimplePersonCustomSchema>;
 
 BOOST_AUTO_TEST_CASE(SimplePersonTupleObjectConverterLengthTest) {
     ::binary::Generator generator;

@@ -36,7 +36,8 @@ BOOST_DATA_TEST_CASE(AllocatorInvalidMaxCapacityTest, boost::unit_test::data::ma
         [](const std::invalid_argument& e) {
             BOOST_REQUIRE_EQUAL(e.what(), "maxCapacity > INT32_MAX");
             return true;
-        });
+        }
+    );
     std::vector<std::byte> vector;
     ::binary::internal::TemplateResizeAllocator<decltype(vector)> origin(vector);
     BOOST_REQUIRE_EXCEPTION(
@@ -45,7 +46,8 @@ BOOST_DATA_TEST_CASE(AllocatorInvalidMaxCapacityTest, boost::unit_test::data::ma
         [](const std::invalid_argument& e) {
             BOOST_REQUIRE_EQUAL(e.what(), "maxCapacity > INT32_MAX");
             return true;
-        });
+        }
+    );
 }
 
 BOOST_AUTO_TEST_CASE(AllocatorInitializeWithExternalMemoryIntegrationTest) {
@@ -95,7 +97,8 @@ BOOST_DATA_TEST_CASE(AllocatorEnsureInvalidLengthTest, boost::unit_test::data::m
         [](const std::length_error& e) {
             BOOST_REQUIRE_EQUAL(e.what(), "maximum capacity reached");
             return true;
-        });
+        }
+    );
 }
 
 BOOST_DATA_TEST_CASE(AllocatorExpandTest, boost::unit_test::data::make<size_t>({0, 1, 65567}), length) {
@@ -242,7 +245,8 @@ BOOST_DATA_TEST_CASE(AllocatorAppendFunctionWithMaxLengthIntegrationInvalidRetur
         [](const std::logic_error& e) {
             BOOST_REQUIRE_EQUAL(e.what(), "value for bytes written is invalid or not set");
             return true;
-        });
+        }
+    );
     BOOST_REQUIRE_EQUAL(allocator.Length(), 0);
     BOOST_REQUIRE_GE(allocator.Capacity(), length);
 }
@@ -308,7 +312,8 @@ BOOST_DATA_TEST_CASE(AllocatorAppendWithLengthPrefixFunctionWithMaxLengthIntegra
         [](const std::logic_error& e) {
             BOOST_REQUIRE_EQUAL(e.what(), "value for bytes written is invalid or not set");
             return true;
-        });
+        }
+    );
     BOOST_REQUIRE_EQUAL(allocator.Length(), 0);
     BOOST_REQUIRE_GT(allocator.Capacity(), length);
 }
@@ -333,7 +338,8 @@ BOOST_DATA_TEST_CASE(AllocatorAnchorInvalidOperationTest, AllocatorAnchorInvalid
         [](const std::logic_error& e) {
             BOOST_REQUIRE_EQUAL(e.what(), "allocator has been modified unexpectedly");
             return true;
-        });
+        }
+    );
 }
 
 using AllocatorInvokeWithExplicitReturnTypeTestTypeData = boost::mpl::list<

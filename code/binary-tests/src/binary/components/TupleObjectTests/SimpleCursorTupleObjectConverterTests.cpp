@@ -3,7 +3,7 @@
 
 #include <binary/Generator.hpp>
 #include <binary/GeneratorExtensions.hpp>
-#include <binary/components/TupleObject.hpp>
+#include <binary/components/TupleObjectConverter.hpp>
 #include <binary/converters/LittleEndianConverter.hpp>
 #include <binary/converters/LittleEndianStringConverter.hpp>
 
@@ -15,10 +15,14 @@ struct SimpleCursor {
     int32_t Y;
 };
 
-BINARY_TUPLE_OBJECT_CONVERTER(SimpleCursorTupleObjectConverter, SimpleCursor) {
-    BINARY_TUPLE_MEMBER(X);
-    BINARY_TUPLE_MEMBER(Y);
-}
+struct SimpleCursorSchema {
+    static constexpr auto Members = std::tuple{
+        ::binary::components::TupleMember{&SimpleCursor::X},
+        ::binary::components::TupleMember{&SimpleCursor::Y},
+    };
+};
+
+using SimpleCursorTupleObjectConverter = ::binary::components::TupleObjectConverter<SimpleCursor, SimpleCursorSchema>;
 
 BOOST_AUTO_TEST_CASE(SimpleCursorTupleObjectConverterLengthTest) {
     ::binary::Generator generator;

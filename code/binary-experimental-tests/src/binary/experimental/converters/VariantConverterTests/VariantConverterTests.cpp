@@ -74,14 +74,16 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(VariantConverterDecodeBothMethodsWithInvalidVarian
         [message](const std::invalid_argument& e) {
             BOOST_REQUIRE_EQUAL(e.what(), message);
             return true;
-        });
+        }
+    );
     BOOST_REQUIRE_EXCEPTION(
         ConverterType::DecodeAuto(autoSpan),
         std::invalid_argument,
         [message](const std::invalid_argument& e) {
             BOOST_REQUIRE_EQUAL(e.what(), message);
             return true;
-        });
+        }
+    );
     BOOST_REQUIRE_EQUAL(autoSpan.size(), 0);
 }
 

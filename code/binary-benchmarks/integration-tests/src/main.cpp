@@ -14,8 +14,8 @@
 #include <binary/Allocator.hpp>
 #include <binary/Generator.hpp>
 #include <binary/GeneratorExtensions.hpp>
-#include <binary/components/NamedObject.hpp>
-#include <binary/components/TupleObject.hpp>
+#include <binary/components/NamedObjectConverter.hpp>
+#include <binary/components/TupleObjectConverter.hpp>
 #include <binary/converters/ContainerConverter.hpp>
 #include <binary/converters/LittleEndianConverter.hpp>
 #include <binary/converters/LittleEndianStringConverter.hpp>
@@ -38,29 +38,45 @@ struct Type01 {
 using TypeX2 = std::tuple<double, std::vector<std::string>>;
 using TypeX1 = std::tuple<int32_t, std::string, std::vector<int32_t>, TypeX2>;
 
-BINARY_NAMED_OBJECT_CONVERTER(Type02NamedObjectConverter, Type02) {
-    BINARY_NAMED_MEMBER(Data);
-    BINARY_NAMED_MEMBER(Tags);
-}
+struct Type02Schema {
+    static constexpr auto Members = std::tuple{
+        ::binary::components::NamedMember{"Data", &Type02::Data},
+        ::binary::components::NamedMember{"Tags", &Type02::Tags},
+    };
+};
 
-BINARY_NAMED_OBJECT_CONVERTER(Type01NamedObjectConverter, Type01) {
-    BINARY_NAMED_MEMBER(Id);
-    BINARY_NAMED_MEMBER(Name);
-    BINARY_NAMED_MEMBER(List);
-    BINARY_NAMED_MEMBER(Item);
-}
+using Type02NamedObjectConverter = ::binary::components::NamedObjectConverter<Type02, Type02Schema>;
 
-BINARY_TUPLE_OBJECT_CONVERTER(Type02TupleObjectConverter, Type02) {
-    BINARY_TUPLE_MEMBER(Data);
-    BINARY_TUPLE_MEMBER(Tags);
-}
+struct Type01Schema {
+    static constexpr auto Members = std::tuple{
+        ::binary::components::NamedMember{"Id", &Type01::Id},
+        ::binary::components::NamedMember{"Name", &Type01::Name},
+        ::binary::components::NamedMember{"List", &Type01::List},
+        ::binary::components::NamedMember{"Item", &Type01::Item},
+    };
+};
 
-BINARY_TUPLE_OBJECT_CONVERTER(Type01TupleObjectConverter, Type01) {
-    BINARY_TUPLE_MEMBER(Id);
-    BINARY_TUPLE_MEMBER(Name);
-    BINARY_TUPLE_MEMBER(List);
-    BINARY_TUPLE_MEMBER(Item);
-}
+using Type01NamedObjectConverter = ::binary::components::NamedObjectConverter<Type01, Type01Schema>;
+
+struct Type02TupleSchema {
+    static constexpr auto Members = std::tuple{
+        ::binary::components::TupleMember{&Type02::Data},
+        ::binary::components::TupleMember{&Type02::Tags},
+    };
+};
+
+using Type02TupleObjectConverter = ::binary::components::TupleObjectConverter<Type02, Type02TupleSchema>;
+
+struct Type01TupleSchema {
+    static constexpr auto Members = std::tuple{
+        ::binary::components::TupleMember{&Type01::Id},
+        ::binary::components::TupleMember{&Type01::Name},
+        ::binary::components::TupleMember{&Type01::List},
+        ::binary::components::TupleMember{&Type01::Item},
+    };
+};
+
+using Type01TupleObjectConverter = ::binary::components::TupleObjectConverter<Type01, Type01TupleSchema>;
 
 template <typename Archive>
 void serialize(Archive& archive, Type02& item, [[maybe_unused]] const unsigned int version) {

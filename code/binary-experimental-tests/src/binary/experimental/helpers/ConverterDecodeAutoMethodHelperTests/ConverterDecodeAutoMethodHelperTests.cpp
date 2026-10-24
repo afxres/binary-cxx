@@ -19,14 +19,16 @@ BOOST_AUTO_TEST_CASE(ConverterDecodeAutoMethodHelperInvokeWithNotEnoughBytesTest
         [message](const std::length_error& e) {
             BOOST_REQUIRE_EQUAL(e.what(), message);
             return true;
-        });
+        }
+    );
     BOOST_REQUIRE_EXCEPTION(
         ConverterDecodeAutoMethodHelper::Invoke(b),
         std::length_error,
         [message](const std::length_error& e) {
             BOOST_REQUIRE_EQUAL(e.what(), message);
             return true;
-        });
+        }
+    );
 }
 
 BOOST_AUTO_TEST_SUITE_END()

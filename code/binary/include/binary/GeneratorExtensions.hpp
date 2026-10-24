@@ -33,7 +33,8 @@ void AddConverter(IGenerator& generator) {
 }
 
 template <typename TConverter, typename... TArguments>
-    requires std::derived_from<TConverter, IConverter> && std::constructible_from<TConverter, const std::shared_ptr<Converter<TArguments>>&...>
+    requires(sizeof...(TArguments) > 0 || !std::constructible_from<TConverter, const IGenerator&>) &&
+    std::derived_from<TConverter, IConverter> && std::constructible_from<TConverter, const std::shared_ptr<Converter<TArguments>>&...>
 void AddConverter(IGenerator& generator) {
     std::shared_ptr<IConverter> converter = std::make_shared<TConverter>(GetConverter<TArguments>(generator)...);
     generator.AddConverter(converter);

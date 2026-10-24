@@ -41,7 +41,8 @@ BOOST_AUTO_TEST_CASE(CustomNoEmplaceFunctionContainerDecodeStringTypeNotSupporte
         [&output](const std::logic_error& e) {
             BOOST_REQUIRE_EQUAL(e.what(), output);
             return true;
-        });
+        }
+    );
 }
 
 BOOST_AUTO_TEST_SUITE_END()
