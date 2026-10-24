@@ -2,6 +2,10 @@
 #include <boost/test/data/test_case.hpp>
 #include <boost/test/unit_test.hpp>
 
+#include <algorithm>
+#include <cstddef>
+#include <vector>
+
 #include <binary/Allocator.hpp>
 #include <binary/ConverterExtensions.hpp>
 #include <binary/internal/AllocatorUnsafeAccessor.hpp>
@@ -340,6 +344,33 @@ BOOST_DATA_TEST_CASE(AllocatorAnchorInvalidOperationTest, AllocatorAnchorInvalid
             return true;
         }
     );
+}
+
+BOOST_AUTO_TEST_CASE(AllocatorAnchorShrinkIntegrationTest) {
+    constexpr size_t limits = 16;
+    std::vector<std::byte> payload(64);
+    for (size_t i = 0; i < payload.size(); i++) {
+        payload[i] = static_cast<std::byte>(i);
+    }
+    for (size_t length = 0; length <= payload.size(); length++) {
+        for (size_t additional = 0; additional <= 16; additional++) {
+            size_t capacity = length + additional + 4;
+            std::vector<std::byte> memory(capacity);
+            ::binary::Allocator allocator(std::span<std::byte>(memory), capacity);
+            size_t anchor = ::binary::internal::AllocatorUnsafeAccessor::Anchor(allocator);
+            BOOST_REQUIRE_EQUAL(allocator.Length(), 4);
+            allocator.Append(std::span<const std::byte>(payload).first(length));
+            BOOST_REQUIRE_EQUAL(allocator.Length(), length + 4);
+            ::binary::internal::AllocatorUnsafeAccessor::FinishAnchor(allocator, anchor);
+            bool shrink = length <= limits && additional >= ((0 - length) & 7);
+            BOOST_REQUIRE_EQUAL(allocator.Length(), length + (shrink ? 1 : 4));
+            auto span = allocator.AsSpan();
+            auto result = ::binary::DecodeWithLengthPrefix(span);
+            BOOST_REQUIRE_EQUAL(span.size(), 0);
+            BOOST_REQUIRE_EQUAL(result.size(), length);
+            BOOST_REQUIRE(std::equal(result.begin(), result.end(), payload.begin()));
+        }
+    }
 }
 
 using AllocatorInvokeWithExplicitReturnTypeTestTypeData = boost::mpl::list<

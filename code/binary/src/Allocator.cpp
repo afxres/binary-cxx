@@ -6,11 +6,13 @@
 #include <cstring>
 #include <stdexcept>
 
+#include "binary/internal/Endian.hpp"
 #include "binary/internal/Exception.hpp"
 #include "binary/internal/Length.hpp"
 
 namespace binary {
 constexpr size_t AllocatorAnchorSize = 4;
+constexpr size_t AllocatorAnchorShrinkLimits = 16;
 constexpr size_t AllocatorCapacitySeed = 256;
 
 Allocator::Allocator()
@@ -132,9 +134,16 @@ void Allocator::FinishAnchor(size_t anchor) {
     }
     size_t length = offset - static_cast<size_t>(refers);
     std::byte* target = this->buffer + anchor;
-    if (length == 0) {
+    if (length <= AllocatorAnchorShrinkLimits && this->bounds - offset >= static_cast<size_t>(-static_cast<ptrdiff_t>(length) & 7)) {
         this->offset = offset - 3;
         ::binary::internal::EncodeLengthPrefix(target, length, 1);
+        size_t header = (length + 7) >> 3;
+        if (header != 0) {
+            ::binary::internal::SaveUnaligned(target + 1, ::binary::internal::LoadUnaligned<uint64_t>(target + 4));
+        }
+        if (header == 2) {
+            ::binary::internal::SaveUnaligned(target + 9, ::binary::internal::LoadUnaligned<uint64_t>(target + 12));
+        }
         assert(this->offset >= 1);
         assert(this->offset <= this->bounds);
     } else {
