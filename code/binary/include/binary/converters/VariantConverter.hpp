@@ -1,7 +1,9 @@
 #ifndef BINARY_CONVERTERS_VARIANTCONVERTER_HPP
 #define BINARY_CONVERTERS_VARIANTCONVERTER_HPP
 
+#include <array>
 #include <memory>
+#include <tuple>
 #include <variant>
 
 #include "binary/Converter.hpp"
@@ -18,69 +20,69 @@ template <template <typename...> typename V, typename... E>
 class VariantConverter<V<E...>> : public Converter<V<E...>> {
 private:
     using T = V<E...>;
-    using EncodeFunction = std::function<void(Allocator&, const T&)>;
-    using DecodeFunction = std::function<T(std::span<const std::byte>&)>;
+    using EncodeFunction = void (VariantConverter::*)(Allocator&, const T&);
+    using DecodeFunction = T (VariantConverter::*)(std::span<const std::byte>&);
 
-    struct MethodInfo {
-        EncodeFunction Encode;
-        EncodeFunction EncodeAuto;
-        DecodeFunction Decode;
-        DecodeFunction DecodeAuto;
-    };
+    static constexpr size_t ElementCount = sizeof...(E);
 
-    template <size_t Index>
-    static MethodInfo GetMethodInfo(const auto& converter) {
-        MethodInfo result;
-        result.Encode = [converter](auto& allocator, const auto& item) { converter->Encode(allocator, std::get<Index>(item)); };
-        result.EncodeAuto = [converter](auto& allocator, const auto& item) { converter->EncodeAuto(allocator, std::get<Index>(item)); };
-        result.Decode = [converter](auto& span) { return T(std::in_place_index<Index>, converter->Decode(span)); };
-        result.DecodeAuto = [converter](auto& span) { return T(std::in_place_index<Index>, converter->DecodeAuto(span)); };
-        return result;
+    template <size_t IsAuto, size_t Index>
+    void EncodeElement(Allocator& allocator, const T& item) {
+        const auto& element = std::get<Index>(this->converter);
+        if constexpr (IsAuto == 0) {
+            element->Encode(allocator, std::get<Index>(item));
+        } else {
+            element->EncodeAuto(allocator, std::get<Index>(item));
+        }
     }
 
-    template <size_t... Index>
-    static std::vector<MethodInfo> GetMethodInfoList(const std::shared_ptr<Converter<std::remove_cv_t<E>>>&... converter, std::index_sequence<Index...>) {
-        std::vector<MethodInfo> result;
-        (result.emplace_back(GetMethodInfo<Index>(converter)), ...);
-        return result;
+    template <size_t IsAuto, size_t Index>
+    T DecodeElement(std::span<const std::byte>& span) {
+        const auto& element = std::get<Index>(this->converter);
+        if constexpr (IsAuto == 0) {
+            return T(std::in_place_index<Index>, element->Decode(span));
+        } else {
+            return T(std::in_place_index<Index>, element->DecodeAuto(span));
+        }
+    }
+
+    template <size_t IsAuto, size_t... Index>
+    static constexpr std::array<EncodeFunction, sizeof...(Index)> MakeEncodeTable(std::index_sequence<Index...>) {
+        return std::array<EncodeFunction, sizeof...(Index)>{&VariantConverter::template EncodeElement<IsAuto, Index>...};
+    }
+
+    template <size_t IsAuto, size_t... Index>
+    static constexpr std::array<DecodeFunction, sizeof...(Index)> MakeDecodeTable(std::index_sequence<Index...>) {
+        return std::array<DecodeFunction, sizeof...(Index)>{&VariantConverter::template DecodeElement<IsAuto, Index>...};
     }
 
     template <size_t IsAuto>
     void EncodeInternal(Allocator& allocator, const T& item) {
         auto header = item.index();
-        const auto& record = this->record;
-        if (header >= record.size()) {
+        if (header >= ElementCount) {
             ::binary::internal::ThrowInvalidVariantIndex(header);
         }
 
         ::binary::Encode(allocator, header);
-        if constexpr (IsAuto == 0) {
-            record.at(header).Encode(allocator, item);
-        } else {
-            record.at(header).EncodeAuto(allocator, item);
-        }
+        static constexpr auto table = MakeEncodeTable<IsAuto>(std::make_index_sequence<ElementCount>());
+        (this->*table[header])(allocator, item);
     }
 
     template <size_t IsAuto>
-    auto DecodeInternal(std::span<const std::byte>& span) {
+    T DecodeInternal(std::span<const std::byte>& span) {
         auto header = ::binary::Decode(span);
-        const auto& record = this->record;
-        if (header >= record.size()) {
+        if (header >= ElementCount) {
             ::binary::internal::ThrowInvalidVariantIndex(header);
         }
 
-        if constexpr (IsAuto == 0) {
-            return record.at(header).Decode(span);
-        } else {
-            return record.at(header).DecodeAuto(span);
-        }
+        static constexpr auto table = MakeDecodeTable<IsAuto>(std::make_index_sequence<ElementCount>());
+        return (this->*table[header])(span);
     }
 
-    const std::vector<MethodInfo> record;
+    std::tuple<std::shared_ptr<Converter<std::remove_cv_t<E>>>...> converter;
 
 public:
     explicit VariantConverter(const std::shared_ptr<Converter<std::remove_cv_t<E>>>&... converter)
-        : record(GetMethodInfoList(converter..., std::make_index_sequence<sizeof...(E)>())) {}
+        : converter({converter...}) {}
 
     BINARY_DEFINE_OVERRIDE_ENCODE_METHOD(T) {
         EncodeInternal<0>(allocator, item);
