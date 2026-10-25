@@ -145,50 +145,6 @@ BOOST_DATA_TEST_CASE(SimplePersonDecodeOptionalMemberTest, SimplePersonDecodeOpt
     BOOST_REQUIRE_EQUAL(name, result.GetName());
 }
 
-struct SimplePersonDuplicateKeySchema {
-    static constexpr auto Members = std::tuple{
-        ::binary::components::NamedMember{"Age", &SimplePerson::Age},
-        ::binary::components::NamedMember{"Age", &SimplePerson::Age},
-    };
-};
-
-using SimplePersonDuplicateKeyNamedObjectConverter =
-    ::binary::components::NamedObjectConverter<SimplePerson, SimplePersonDuplicateKeySchema>;
-
-BOOST_AUTO_TEST_CASE(SimplePersonDuplicateKeyNamedObjectConverterTest) {
-    ::binary::Generator generator;
-    ::binary::AddConverter<::binary::converters::LittleEndianConverter<int8_t>>(generator);
-    ::binary::AddConverter<::binary::converters::LittleEndianStringConverter<std::string>>(generator);
-    BOOST_REQUIRE_EXCEPTION(
-        ::binary::AddConverter<SimplePersonDuplicateKeyNamedObjectConverter>(generator),
-        std::invalid_argument,
-        [](const std::invalid_argument& e) {
-            BOOST_REQUIRE_EQUAL(e.what(), "named key 'Age' already exists");
-            return true;
-        }
-    );
-}
-
-class BadStringConverter : public ::binary::Converter<std::string> {
-public:
-    void Encode([[maybe_unused]] ::binary::Allocator& allocator, [[maybe_unused]] const std::string& item) override {}
-    std::string Decode([[maybe_unused]] std::span<const std::byte> span) override { throw std::exception(); }
-};
-
-BOOST_AUTO_TEST_CASE(SimplePersonConverterWithBadStringConverterDuplicateKeyTest) {
-    ::binary::Generator generator;
-    ::binary::AddConverter<::binary::converters::LittleEndianConverter<int8_t>>(generator);
-    ::binary::AddConverter<BadStringConverter>(generator);
-    BOOST_REQUIRE_EXCEPTION(
-        ::binary::AddConverter<SimplePersonNamedObjectConverter>(generator),
-        std::invalid_argument,
-        [](const std::invalid_argument& e) {
-            BOOST_REQUIRE_EQUAL(e.what(), "named key 'Name' already exists");
-            return true;
-        }
-    );
-}
-
 std::vector<std::tuple<std::string, std::string>> SimplePersonConverterDecodeWithDuplicateKeyTestData = {
     {std::string() + "\x03" + "Age\x01\x14\x03" + "Age\x01\x14", "Age"},
     {std::string() + "\x04" + "Name\03" + "Bob\x04" + "Name\01" + "X", "Name"},

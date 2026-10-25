@@ -2,30 +2,23 @@
 #define BINARY_COMPONENTS_NAMEDOBJECTCONVERTER_HPP
 
 #include <array>
-#include <cassert>
 #include <memory>
 #include <span>
-#include <string>
+#include <string_view>
 #include <tuple>
 #include <utility>
-#include <vector>
 
 #include "binary/Converter.hpp"
 #include "binary/ConverterExtensions.hpp"
 #include "binary/GeneratorExtensions.hpp"
 #include "binary/components/MemberDescriptor.hpp"
-#include "binary/components/NamedObjectDecoder.hpp"
+#include "binary/components/NamedObjectLayout.hpp"
 
 namespace binary::components {
+namespace detail {
 template <typename T, typename M, typename Accessor, typename Policy>
 class NamedObjectMember {
 public:
-    static std::vector<std::byte> MakeHeader(const IGenerator& generator, std::string_view name) {
-        return Allocator::Invoke([&](Allocator& allocator) {
-            ::binary::GetConverter<std::string>(generator)->Encode(allocator, std::string(name));
-        });
-    }
-
     static std::shared_ptr<Converter<M>> MakeConverter(const IGenerator& generator, const NamedMember<Accessor, Policy>& descriptor) {
         if constexpr (std::is_void_v<Policy>) {
             return ::binary::GetConverter<M>(generator);
@@ -35,15 +28,11 @@ public:
     }
 
     NamedObjectMember(const IGenerator& generator, const NamedMember<Accessor, Policy>& descriptor)
-        : Name(descriptor.Name)
-        , IsOptional(descriptor.IsOptional)
-        , Header(MakeHeader(generator, descriptor.Name))
-        , converter(MakeConverter(generator, descriptor))
+        : converter(MakeConverter(generator, descriptor))
         , Access(descriptor.Access) {
     }
 
     void Encode(Allocator& allocator, const T& item) const {
-        ::binary::EncodeWithLengthPrefix(allocator, this->Header);
         if constexpr (std::same_as<Accessor, MemberAccessor<T, M>>) {
             this->converter->EncodeWithLengthPrefix(allocator, item.*this->Access.Member);
         } else {
@@ -61,9 +50,7 @@ public:
         }
     }
 
-    std::string Name;
-    bool IsOptional;
-    std::vector<std::byte> Header;
+private:
     std::shared_ptr<Converter<M>> converter;
     Accessor Access;
 };
@@ -85,71 +72,65 @@ struct NamedObjectMembersType<T, std::tuple<TDescriptor...>> {
 };
 
 template <typename T, typename Schema>
+using NamedObjectRuntimeMembers = typename NamedObjectMembersType<T, std::remove_const_t<decltype(Schema::Members)>>::Type;
+
+template <typename T, typename Descriptor>
+typename NamedObjectMemberType<T, Descriptor>::Type MakeNamedObjectMember(const IGenerator& generator, const Descriptor& descriptor) {
+    return typename NamedObjectMemberType<T, Descriptor>::Type{generator, descriptor};
+}
+
+template <typename T, typename Schema>
+NamedObjectRuntimeMembers<T, Schema> MakeNamedObjectMembers(const IGenerator& generator) {
+    return std::apply(
+        [&](const auto&... descriptor) {
+            return NamedObjectRuntimeMembers<T, Schema>{MakeNamedObjectMember<T>(generator, descriptor)...};
+        },
+        Schema::Members
+    );
+}
+}
+
+template <typename T, typename Schema>
 class NamedObjectConverter : public Converter<T> {
-private:
-    using RuntimeMembers = typename NamedObjectMembersType<T, std::remove_const_t<decltype(Schema::Members)>>::Type;
-
-    template <typename Descriptor>
-    static typename NamedObjectMemberType<T, Descriptor>::Type MakeMember(const IGenerator& generator, const Descriptor& descriptor) {
-        return typename NamedObjectMemberType<T, Descriptor>::Type{generator, descriptor};
-    }
-
-    static RuntimeMembers MakeMembers(const IGenerator& generator) {
-        return std::apply(
-            [&](const auto&... descriptor) {
-                return RuntimeMembers{MakeMember(generator, descriptor)...};
-            },
-            Schema::Members
-        );
-    }
-
-    static std::unique_ptr<NamedObjectDecoder> MakeDecoder(const RuntimeMembers& members) {
-        std::vector<std::vector<std::byte>> headers;
-        std::vector<std::string> names;
-        std::vector<uint8_t> optional;
-        std::apply(
-            [&](const auto&... member) {
-                (headers.push_back(member.Header), ...);
-                (names.push_back(member.Name), ...);
-                (optional.push_back(member.IsOptional ? 1 : 0), ...);
-            },
-            members
-        );
-        return std::make_unique<NamedObjectDecoder>(headers, names, optional);
-    }
-
 public:
     explicit NamedObjectConverter(const IGenerator& generator)
-        : members(MakeMembers(generator))
-        , decoder(MakeDecoder(this->members)) {
+        : members(detail::MakeNamedObjectMembers<T, Schema>(generator)) {
     }
 
     void Encode(Allocator& allocator, const T& item) override {
-        std::apply(
-            [&](const auto&... member) {
-                (member.Encode(allocator, item), ...);
-            },
-            this->members
-        );
+        EncodeInternal(allocator, item, std::make_index_sequence<Layout::Count>{});
     }
 
     T Decode(std::span<const std::byte> span) override {
-        constexpr size_t count = std::tuple_size_v<RuntimeMembers>;
-        return DecodeInternal(span, std::make_index_sequence<count>{});
+        return DecodeInternal(span, std::make_index_sequence<Layout::Count>{});
     }
 
 private:
-    template <size_t... I>
-    T DecodeInternal(std::span<const std::byte> span, std::index_sequence<I...>) {
-        std::array<std::span<const std::byte>, sizeof...(I)> slices{};
-        this->decoder->Invoke(span, slices);
+    using Layout = NamedObjectLayout<Schema>;
+    using RuntimeMembers = detail::NamedObjectRuntimeMembers<T, Schema>;
+
+    template <size_t Index>
+    void EncodeInternal(Allocator& allocator, const T& item) const {
+        const std::string_view name = Layout::Names[Index];
+        ::binary::EncodeWithLengthPrefix(allocator, std::span<const std::byte>(reinterpret_cast<const std::byte*>(name.data()), name.size()));
+        std::get<Index>(this->members).Encode(allocator, item);
+    }
+
+    template <size_t... Index>
+    void EncodeInternal(Allocator& allocator, const T& item, std::index_sequence<Index...>) const {
+        (EncodeInternal<Index>(allocator, item), ...);
+    }
+
+    template <size_t... Index>
+    T DecodeInternal(std::span<const std::byte> span, std::index_sequence<Index...>) {
+        std::array<std::span<const std::byte>, sizeof...(Index)> slices{};
+        Layout::Parse(span, slices);
         T result{};
-        ((std::get<I>(this->members).Decode(result, slices[I])), ...);
+        ((std::get<Index>(this->members).Decode(result, slices[Index])), ...);
         return result;
     }
 
     RuntimeMembers members;
-    std::unique_ptr<NamedObjectDecoder> decoder;
 };
 }
 
