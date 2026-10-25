@@ -16,15 +16,15 @@ struct SimplePerson {
 };
 
 class SimplePersonCustom {
+private:
+    int8_t age{};
+    std::string name;
+
 public:
     auto GetAge() const { return this->age; }
     void SetAge(int8_t age) { this->age = age; }
     auto GetName() const { return this->name; }
     void SetName(std::string name) { this->name = name; }
-
-private:
-    int8_t age{};
-    std::string name;
 };
 
 struct SimplePersonSchema {

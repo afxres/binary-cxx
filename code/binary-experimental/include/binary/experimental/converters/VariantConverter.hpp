@@ -14,10 +14,10 @@
 namespace binary::experimental::converters {
 template <typename T>
 struct VariantConverter {
-    static constexpr size_t ElementCount = std::variant_size_v<T>;
-
+private:
     using EncodeFunction = void (*)(Allocator&, const T&);
     using DecodeFunction = T (*)(std::span<const std::byte>&);
+    static constexpr size_t ElementCount = std::variant_size_v<T>;
 
     template <size_t Index>
     using ElementConverterType = typename ::binary::experimental::helpers::GetConverterHelper<std::remove_cv_t<std::variant_alternative_t<Index, T>>>::Type;
@@ -75,6 +75,7 @@ struct VariantConverter {
         return table[header](span);
     }
 
+public:
     BINARY_EXPERIMENTAL_DEFINE_STATIC_LENGTH_METHOD() {
         return 0;
     }

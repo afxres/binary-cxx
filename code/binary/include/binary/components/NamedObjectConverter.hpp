@@ -18,6 +18,10 @@ namespace binary::components {
 namespace detail {
 template <typename T, typename M, typename Accessor, typename Policy>
 class NamedObjectMember {
+private:
+    std::shared_ptr<Converter<M>> converter;
+    Accessor accessor;
+
 public:
     static std::shared_ptr<Converter<M>> MakeConverter(const IGenerator& generator, const NamedMember<Accessor, Policy>& descriptor) {
         if constexpr (std::is_void_v<Policy>) {
@@ -29,30 +33,26 @@ public:
 
     NamedObjectMember(const IGenerator& generator, const NamedMember<Accessor, Policy>& descriptor)
         : converter(MakeConverter(generator, descriptor))
-        , Access(descriptor.Access) {
+        , accessor(descriptor.Accessor) {
     }
 
     void Encode(Allocator& allocator, const T& item) const {
         if constexpr (std::same_as<Accessor, MemberAccessor<T, M>>) {
-            this->converter->EncodeWithLengthPrefix(allocator, item.*this->Access.Member);
+            this->converter->EncodeWithLengthPrefix(allocator, item.*this->accessor.Member);
         } else {
-            this->converter->EncodeWithLengthPrefix(allocator, this->Access.Get(item));
+            this->converter->EncodeWithLengthPrefix(allocator, this->accessor.Get(item));
         }
     }
 
     void Decode(T& item, std::span<const std::byte> span) const {
         if (span.data() != nullptr) {
             if constexpr (std::same_as<Accessor, MemberAccessor<T, M>>) {
-                item.*this->Access.Member = this->converter->Decode(span);
+                item.*this->accessor.Member = this->converter->Decode(span);
             } else {
-                this->Access.Set(item, this->converter->Decode(span));
+                this->accessor.Set(item, this->converter->Decode(span));
             }
         }
     }
-
-private:
-    std::shared_ptr<Converter<M>> converter;
-    Accessor Access;
 };
 
 template <typename T, typename Descriptor>
@@ -92,19 +92,6 @@ NamedObjectRuntimeMembers<T, Schema> MakeNamedObjectMembers(const IGenerator& ge
 
 template <typename T, typename Schema>
 class NamedObjectConverter : public Converter<T> {
-public:
-    explicit NamedObjectConverter(const IGenerator& generator)
-        : members(detail::MakeNamedObjectMembers<T, Schema>(generator)) {
-    }
-
-    void Encode(Allocator& allocator, const T& item) override {
-        EncodeInternal(allocator, item, std::make_index_sequence<Layout::Count>{});
-    }
-
-    T Decode(std::span<const std::byte> span) override {
-        return DecodeInternal(span, std::make_index_sequence<Layout::Count>{});
-    }
-
 private:
     using Layout = NamedObjectLayout<Schema>;
     using RuntimeMembers = detail::NamedObjectRuntimeMembers<T, Schema>;
@@ -131,6 +118,19 @@ private:
     }
 
     RuntimeMembers members;
+
+public:
+    explicit NamedObjectConverter(const IGenerator& generator)
+        : members(detail::MakeNamedObjectMembers<T, Schema>(generator)) {
+    }
+
+    void Encode(Allocator& allocator, const T& item) override {
+        EncodeInternal(allocator, item, std::make_index_sequence<Layout::Count>());
+    }
+
+    T Decode(std::span<const std::byte> span) override {
+        return DecodeInternal(span, std::make_index_sequence<Layout::Count>());
+    }
 };
 }
 

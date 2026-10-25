@@ -22,7 +22,6 @@ private:
     using T = V<E...>;
     using EncodeFunction = void (VariantConverter::*)(Allocator&, const T&);
     using DecodeFunction = T (VariantConverter::*)(std::span<const std::byte>&);
-
     static constexpr size_t ElementCount = sizeof...(E);
 
     template <size_t IsAuto, size_t Index>

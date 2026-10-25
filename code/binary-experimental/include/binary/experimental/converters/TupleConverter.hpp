@@ -11,6 +11,7 @@
 namespace binary::experimental::converters {
 template <typename T>
 struct TupleConverter {
+private:
     static constexpr size_t ElementCount = ::binary::internal::TupleSize<T>::Value;
 
     template <size_t Index>
@@ -66,6 +67,7 @@ struct TupleConverter {
         }
     }
 
+public:
     BINARY_EXPERIMENTAL_DEFINE_STATIC_LENGTH_METHOD() {
         return GetConverterLengthRecursively<0>();
     }
@@ -92,7 +94,9 @@ struct TupleConverter {
 namespace binary::experimental::helpers {
 template <typename T>
     requires std::same_as<T, std::remove_cv_t<T>> &&
-    requires { ::binary::internal::TupleSize<T>::Value; } && (!requires { GetNamedObjectSchema(static_cast<std::remove_cv_t<T>*>(nullptr)); })
+    requires { ::binary::internal::TupleSize<T>::Value; } &&
+    (!requires { GetNamedObjectSchema(static_cast<std::remove_cv_t<T>*>(nullptr)); }) &&
+    (!requires { GetTupleObjectSchema(static_cast<std::remove_cv_t<T>*>(nullptr)); })
 struct GetConverterHelper<T> {
     using Type = ::binary::experimental::converters::TupleConverter<T>;
 };

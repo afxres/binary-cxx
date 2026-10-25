@@ -13,8 +13,13 @@
 #include "binary/internal/Module.hpp"
 
 namespace binary::components {
+namespace detail {
 template <typename T, typename M, typename Accessor, typename Policy>
 class TupleObjectMember {
+private:
+    std::shared_ptr<Converter<M>> converter;
+    Accessor accessor;
+
 public:
     static std::shared_ptr<Converter<M>> MakeConverter(const IGenerator& generator, const TupleMember<Accessor, Policy>& descriptor) {
         if constexpr (std::is_void_v<Policy>) {
@@ -26,32 +31,27 @@ public:
 
     TupleObjectMember(const IGenerator& generator, const TupleMember<Accessor, Policy>& descriptor)
         : converter(MakeConverter(generator, descriptor))
-        , Access(descriptor.Access) {
-        this->Length = this->converter->Length();
+        , accessor(descriptor.Accessor) {
+    }
+
+    size_t Length() const {
+        return this->converter->Length();
     }
 
     template <bool Last>
     void Encode(Allocator& allocator, const T& item) const {
         if constexpr (std::same_as<Accessor, MemberAccessor<T, M>>) {
             if constexpr (Last) {
-                this->converter->Encode(allocator, item.*this->Access.Member);
+                this->converter->Encode(allocator, item.*this->accessor.Member);
             } else {
-                this->converter->EncodeAuto(allocator, item.*this->Access.Member);
+                this->converter->EncodeAuto(allocator, item.*this->accessor.Member);
             }
         } else {
             if constexpr (Last) {
-                this->converter->Encode(allocator, this->Access.Get(item));
+                this->converter->Encode(allocator, this->accessor.Get(item));
             } else {
-                this->converter->EncodeAuto(allocator, this->Access.Get(item));
+                this->converter->EncodeAuto(allocator, this->accessor.Get(item));
             }
-        }
-    }
-
-    void EncodeAuto(Allocator& allocator, const T& item) const {
-        if constexpr (std::same_as<Accessor, MemberAccessor<T, M>>) {
-            this->converter->EncodeAuto(allocator, item.*this->Access.Member);
-        } else {
-            this->converter->EncodeAuto(allocator, this->Access.Get(item));
         }
     }
 
@@ -59,30 +59,18 @@ public:
     void Decode(T& item, std::span<const std::byte>& span) const {
         if constexpr (std::same_as<Accessor, MemberAccessor<T, M>>) {
             if constexpr (Last) {
-                item.*this->Access.Member = this->converter->Decode(span);
+                item.*this->accessor.Member = this->converter->Decode(span);
             } else {
-                item.*this->Access.Member = this->converter->DecodeAuto(span);
+                item.*this->accessor.Member = this->converter->DecodeAuto(span);
             }
         } else {
             if constexpr (Last) {
-                this->Access.Set(item, this->converter->Decode(span));
+                this->accessor.Set(item, this->converter->Decode(span));
             } else {
-                this->Access.Set(item, this->converter->DecodeAuto(span));
+                this->accessor.Set(item, this->converter->DecodeAuto(span));
             }
         }
     }
-
-    void DecodeAuto(T& item, std::span<const std::byte>& span) const {
-        if constexpr (std::same_as<Accessor, MemberAccessor<T, M>>) {
-            item.*this->Access.Member = this->converter->DecodeAuto(span);
-        } else {
-            this->Access.Set(item, this->converter->DecodeAuto(span));
-        }
-    }
-
-    size_t Length;
-    std::shared_ptr<Converter<M>> converter;
-    Accessor Access;
 };
 
 template <typename T, typename Descriptor>
@@ -102,86 +90,75 @@ struct TupleObjectMembersType<T, std::tuple<TDescriptor...>> {
 };
 
 template <typename T, typename Schema>
+using TupleObjectRuntimeMembers = typename TupleObjectMembersType<T, std::remove_const_t<decltype(Schema::Members)>>::Type;
+
+template <typename T, typename Descriptor>
+typename TupleObjectMemberType<T, Descriptor>::Type MakeTupleObjectMember(const IGenerator& generator, const Descriptor& descriptor) {
+    return typename TupleObjectMemberType<T, Descriptor>::Type{generator, descriptor};
+}
+
+template <typename T, typename Schema>
+TupleObjectRuntimeMembers<T, Schema> MakeTupleObjectMembers(const IGenerator& generator) {
+    return std::apply(
+        [&](const auto&... descriptor) {
+            return TupleObjectRuntimeMembers<T, Schema>{MakeTupleObjectMember<T>(generator, descriptor)...};
+        },
+        Schema::Members
+    );
+}
+
+template <typename T, typename Schema>
+size_t GetTupleObjectLength(const IGenerator& generator) {
+    auto members = MakeTupleObjectMembers<T, Schema>(generator);
+    std::vector<size_t> lengths;
+    std::apply([&](const auto&... member) { (lengths.push_back(member.Length()), ...); }, members);
+    return ::binary::internal::GetConverterLength(lengths);
+}
+}
+
+template <typename T, typename Schema>
 class TupleObjectConverter : public Converter<T> {
 private:
-    using RuntimeMembers = typename TupleObjectMembersType<T, std::remove_const_t<decltype(Schema::Members)>>::Type;
+    using Members = detail::TupleObjectRuntimeMembers<T, Schema>;
+    static constexpr size_t MemberCount = std::tuple_size_v<Members>;
 
-    template <typename Descriptor>
-    static typename TupleObjectMemberType<T, Descriptor>::Type MakeMember(const IGenerator& generator, const Descriptor& descriptor) {
-        return typename TupleObjectMemberType<T, Descriptor>::Type{generator, descriptor};
+    template <size_t IsAuto, size_t... Index>
+    void EncodeInternal(Allocator& allocator, const T& item, std::index_sequence<Index...>) const {
+        (std::get<Index>(this->members).template Encode<(IsAuto == 0 && Index + 1 == MemberCount)>(allocator, item), ...);
     }
 
-    static RuntimeMembers MakeMembers(const IGenerator& generator) {
-        return std::apply(
-            [&](const auto&... descriptor) {
-                return RuntimeMembers{MakeMember(generator, descriptor)...};
-            },
-            Schema::Members
-        );
+    template <size_t IsAuto, size_t... Index>
+    void DecodeInternal(T& result, std::span<const std::byte>& span, std::index_sequence<Index...>) const {
+        (std::get<Index>(this->members).template Decode<(IsAuto == 0 && Index + 1 == MemberCount)>(result, span), ...);
     }
 
-    static size_t ComputeLength(const IGenerator& generator) {
-        auto members = MakeMembers(generator);
-        std::vector<size_t> lengths;
-        std::apply(
-            [&](const auto&... member) {
-                (lengths.push_back(member.Length), ...);
-            },
-            members
-        );
-        return ::binary::internal::GetConverterLength(lengths);
-    }
+    Members members;
 
 public:
     explicit TupleObjectConverter(const IGenerator& generator)
-        : Converter<T>(ComputeLength(generator))
-        , members(MakeMembers(generator)) {
+        : Converter<T>(detail::GetTupleObjectLength<T, Schema>(generator))
+        , members(detail::MakeTupleObjectMembers<T, Schema>(generator)) {
     }
 
     void Encode(Allocator& allocator, const T& item) override {
-        EncodeInternal(allocator, item, std::make_index_sequence<std::tuple_size_v<RuntimeMembers>>{});
+        EncodeInternal<0>(allocator, item, std::make_index_sequence<MemberCount>());
     }
 
     void EncodeAuto(Allocator& allocator, const T& item) override {
-        std::apply(
-            [&](const auto&... member) {
-                (member.EncodeAuto(allocator, item), ...);
-            },
-            this->members
-        );
+        EncodeInternal<1>(allocator, item, std::make_index_sequence<MemberCount>());
     }
 
     T Decode(std::span<const std::byte> span) override {
         T result{};
-        DecodeInternal(result, span, std::make_index_sequence<std::tuple_size_v<RuntimeMembers>>{});
+        DecodeInternal<0>(result, span, std::make_index_sequence<MemberCount>());
         return result;
     }
 
     T DecodeAuto(std::span<const std::byte>& span) override {
         T result{};
-        std::apply(
-            [&](const auto&... member) {
-                (member.DecodeAuto(result, span), ...);
-            },
-            this->members
-        );
+        DecodeInternal<1>(result, span, std::make_index_sequence<MemberCount>());
         return result;
     }
-
-private:
-    template <size_t... I>
-    void EncodeInternal(Allocator& allocator, const T& item, std::index_sequence<I...>) const {
-        constexpr size_t count = sizeof...(I);
-        ((std::get<I>(this->members).template Encode<(I + 1 == count)>(allocator, item)), ...);
-    }
-
-    template <size_t... I>
-    void DecodeInternal(T& result, std::span<const std::byte>& span, std::index_sequence<I...>) const {
-        constexpr size_t count = sizeof...(I);
-        ((std::get<I>(this->members).template Decode<(I + 1 == count)>(result, span)), ...);
-    }
-
-    RuntimeMembers members;
 };
 }
 

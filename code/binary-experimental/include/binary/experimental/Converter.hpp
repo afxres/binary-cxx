@@ -2,6 +2,7 @@
 #define BINARY_EXPERIMENTAL_CONVERTER_HPP
 
 #include "binary/experimental/components/NamedObjectConverter.hpp"
+#include "binary/experimental/components/TupleObjectConverter.hpp"
 #include "binary/experimental/converters/ContainerConverter.hpp"
 #include "binary/experimental/converters/LittleEndianConverter.hpp"
 #include "binary/experimental/converters/LittleEndianStringConverter.hpp"

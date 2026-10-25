@@ -118,12 +118,12 @@ constexpr auto MakeOptionalFlags(std::index_sequence<Index...>) {
 }
 
 template <typename Schema>
-class NamedObjectLayout {
-public:
+struct NamedObjectLayout {
     using Members = std::remove_const_t<decltype(Schema::Members)>;
     static constexpr auto Count = std::tuple_size_v<Members>;
     static constexpr auto Names = detail::MakeNames<Schema>(std::make_index_sequence<Count>());
-
+    static constexpr auto Slots = detail::MakeSlots(Names, std::make_index_sequence<Count>());
+    static constexpr auto Chain = detail::MakeChain(Names);
     static_assert(detail::GetDuplicateIndex(Names) == SIZE_MAX, "named object member names must be unique");
 
     static constexpr auto Query(std::string_view name) noexcept {
@@ -172,10 +172,6 @@ public:
             }
         }
     }
-
-private:
-    static constexpr auto Slots = detail::MakeSlots(Names, std::make_index_sequence<Count>());
-    static constexpr auto Chain = detail::MakeChain(Names);
 };
 }
 

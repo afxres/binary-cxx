@@ -31,7 +31,7 @@ Converter<T>* GetConverterRawPtr(const std::shared_ptr<IConverter>& converter) {
 
 template <std::ranges::range Range>
     requires std::same_as<std::ranges::range_value_t<Range>, size_t>
-size_t GetConverterLength(const Range& lengths) {
+constexpr size_t GetConverterLength(const Range& lengths) {
     uint64_t result = 0;
     for (auto length : lengths) {
         if (length == 0) {

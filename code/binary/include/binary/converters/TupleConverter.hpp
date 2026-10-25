@@ -13,7 +13,6 @@ template <typename T, typename... E>
 class TupleConverter : public ::binary::Converter<T> {
 private:
     static constexpr size_t ElementCount = ::binary::internal::TupleSize<T>::Value;
-    using ElementIndexSequence = std::make_index_sequence<ElementCount>;
 
     template <size_t IsAuto, size_t Index>
     void EncodeInternal(Allocator& allocator, const T& item) {
@@ -54,20 +53,20 @@ public:
         , converter({converter...}) {}
 
     BINARY_DEFINE_OVERRIDE_ENCODE_METHOD(T) {
-        EncodeInternal<0>(allocator, item, ElementIndexSequence());
+        EncodeInternal<0>(allocator, item, std::make_index_sequence<ElementCount>());
     }
 
     BINARY_DEFINE_OVERRIDE_ENCODE_AUTO_METHOD(T) {
-        EncodeInternal<1>(allocator, item, ElementIndexSequence());
+        EncodeInternal<1>(allocator, item, std::make_index_sequence<ElementCount>());
     }
 
     BINARY_DEFINE_OVERRIDE_DECODE_METHOD(T) {
         std::span<const std::byte> copy = span;
-        return DecodeInternal<0>(copy, ElementIndexSequence());
+        return DecodeInternal<0>(copy, std::make_index_sequence<ElementCount>());
     }
 
     BINARY_DEFINE_OVERRIDE_DECODE_AUTO_METHOD(T) {
-        return DecodeInternal<1>(span, ElementIndexSequence());
+        return DecodeInternal<1>(span, std::make_index_sequence<ElementCount>());
     }
 };
 
