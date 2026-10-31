@@ -10,7 +10,38 @@
 
 #include <binary/experimental/Converter.hpp>
 
+#include <cstdint>
 #include <format>
+#include <stdexcept>
+#include <variant>
+
+namespace tests::binary::experimental::converters::VariantConverterTests {
+class FakeCopyType {
+public:
+    FakeCopyType() {}
+    FakeCopyType(const FakeCopyType&) { throw std::logic_error("fake copy"); }
+    FakeCopyType& operator=(const FakeCopyType&) = default;
+};
+
+struct FakeCopyTypeConverter {
+    static constexpr size_t Length() {
+        return 0;
+    }
+
+    static void Encode(::binary::Allocator&, const FakeCopyType&) {}
+
+    static FakeCopyType Decode(std::span<const std::byte>) {
+        throw std::logic_error("fake copy");
+    }
+};
+}
+
+namespace binary::experimental::helpers {
+template <>
+struct GetConverterHelper<::tests::binary::experimental::converters::VariantConverterTests::FakeCopyType> {
+    using Type = ::tests::binary::experimental::converters::VariantConverterTests::FakeCopyTypeConverter;
+};
+}
 
 namespace tests::binary::experimental::converters::VariantConverterTests {
 BOOST_AUTO_TEST_SUITE(VariantConverterTests)
@@ -85,6 +116,33 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(VariantConverterDecodeBothMethodsWithInvalidVarian
         }
     );
     BOOST_REQUIRE_EQUAL(autoSpan.size(), 0);
+}
+
+BOOST_AUTO_TEST_CASE(VariantConverterEncodeInvalidVariantTest) {
+    using Type = std::variant<std::int32_t, FakeCopyType>;
+    using ConverterType = ::binary::experimental::Converter<Type>;
+    Type source;
+    BOOST_REQUIRE_EQUAL(0, source.index());
+    BOOST_REQUIRE_EXCEPTION(
+        source = FakeCopyType(),
+        std::logic_error,
+        [](const std::logic_error& e) {
+            BOOST_REQUIRE_EQUAL(e.what(), "fake copy");
+            return true;
+        }
+    );
+    BOOST_REQUIRE(source.valueless_by_exception());
+    BOOST_REQUIRE_EQUAL(std::variant_npos, source.index());
+    ::binary::Allocator allocator;
+    auto message = std::format("invalid variant index: {}", SIZE_MAX);
+    BOOST_REQUIRE_EXCEPTION(
+        ConverterType::Encode(allocator, source),
+        std::invalid_argument,
+        [message](const std::invalid_argument& e) {
+            BOOST_REQUIRE_EQUAL(e.what(), message);
+            return true;
+        }
+    );
 }
 
 std::vector<std::string> StringData = {

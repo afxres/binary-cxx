@@ -57,11 +57,12 @@ private:
     template <size_t IsAuto>
     static void EncodeInternal(Allocator& allocator, const T& item) {
         auto header = item.index();
-        ::binary::Encode(allocator, header);
-        static constexpr auto table = MakeEncodeTable<IsAuto>(std::make_index_sequence<ElementCount>());
         if (header >= ElementCount) {
             ::binary::internal::ThrowInvalidVariantIndex(header);
         }
+
+        ::binary::Encode(allocator, header);
+        static constexpr auto table = MakeEncodeTable<IsAuto>(std::make_index_sequence<ElementCount>());
         table[header](allocator, item);
     }
 

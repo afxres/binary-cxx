@@ -152,5 +152,19 @@ BOOST_AUTO_TEST_CASE(TokenWithSimpleNamedObjectTest) {
     );
 }
 
+BOOST_AUTO_TEST_CASE(TokenWithDuplicateKeyTest) {
+    ::binary::Generator generator;
+    ::binary::AddConverter<::binary::converters::LittleEndianStringConverter<std::string>>(generator);
+    auto buffer = ::binary::Allocator::Invoke([](auto& allocator) {
+        ::binary::EncodeWithLengthPrefix(allocator, std::span<const std::byte>(reinterpret_cast<const std::byte*>("id"), 2));
+        ::binary::EncodeWithLengthPrefix(allocator, std::span<const std::byte>(reinterpret_cast<const std::byte*>("first"), 5));
+        ::binary::EncodeWithLengthPrefix(allocator, std::span<const std::byte>(reinterpret_cast<const std::byte*>("id"), 2));
+        ::binary::EncodeWithLengthPrefix(allocator, std::span<const std::byte>(reinterpret_cast<const std::byte*>("second"), 6));
+    });
+    auto token = ::binary::Token(generator, buffer);
+    BOOST_REQUIRE_EQUAL(1, token.Children().size());
+    BOOST_REQUIRE_EQUAL(std::string("first"), token.At("id").As<std::string>());
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 }
