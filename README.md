@@ -154,37 +154,38 @@ automatically. A few details are worth knowing:
 | `0 ~ 0x7F`           | `0`         | 1                           | `7F` → 127           |
 | `0x80 ~ 0x7FFF'FFFF` | `1`         | 4, big-endian, high bit set | `80 00 04 01` → 1025 |
 
-### Object
+### Named Object
 
-`Person{1024, "C++"}`:
+`Person{1024, "C++"}` (17 bytes):
 
-| Bytes            | Meaning                                   |
-| :--------------- | :---------------------------------------- |
-| `02 49 64`       | length 2, `"Id"`                          |
-| `04 00 04 00 00` | length 4, `1024` as little-endian `int32` |
-| `04 4e 61 6d 65` | length 4, `"Name"`                        |
-| `03 43 2b 2b`    | length 3, `"C++"`                         |
+| Bytes            | Meaning                                       |
+| :--------------- | :-------------------------------------------- |
+| `02 49 64`       | key `"Id"`, length 2                          |
+| `04 00 04 00 00` | value `1024`, length 4, little-endian `int32` |
+| `04 4e 61 6d 65` | key `"Name"`, length 4                        |
+| `03 43 2b 2b`    | value `"C++"`, length 3                       |
 
-For a named object, every member is stored as a length prefix followed by its payload; the object
-itself has no additional header, so 17 bytes in total.
+Both the key and the value carry a length prefix, and the object itself has no additional header.
+Members are written in the order declared by the schema, but the format does not require any
+order: decoding looks members up by name.
 
 ### Nested Tuple
 
 ```cpp
-using Time  = std::tuple<std::int64_t, std::int32_t>;  // seconds, nanos
-using User  = std::tuple<std::string, std::int32_t>;   // name, id
-using Event = std::tuple<Time, User, std::string>;     // time, user, action
+using Time  = std::tuple<std::int64_t, std::int32_t>;  // Seconds, Nanos
+using User  = std::tuple<std::string, std::int32_t>;   // Name, Id
+using Event = std::tuple<Time, User, std::string>;     // Time, User, Action
 
 Event value{{1712, 500}, {"amy", 7}, "login"};
 ```
 
-| Bytes                     | Meaning                         |
-| :------------------------ | :------------------------------ |
-| `b0 06 00 00 00 00 00 00` | `Time.seconds = 1712`           |
-| `f4 01 00 00`             | `Time.nanos = 500`              |
-| `03 61 6d 79`             | `User.name = "amy"`, length 3   |
-| `07 00 00 00`             | `User.id = 7`                   |
-| `6c 6f 67 69 6e`          | action, last element, no prefix |
+| Bytes                     | Meaning                                  |
+| :------------------------ | :--------------------------------------- |
+| `b0 06 00 00 00 00 00 00` | `Time.Seconds = 1712`                    |
+| `f4 01 00 00`             | `Time.Nanos = 500`                       |
+| `03 61 6d 79`             | `User.Name = "amy"`, length 3            |
+| `07 00 00 00`             | `User.Id = 7`                            |
+| `6c 6f 67 69 6e`          | `Action`, last element, no length prefix |
 
 Tuples are flattened on the wire. `Event` above and the flat
 `std::tuple<std::int64_t, std::int32_t, std::string, std::int32_t, std::string>` produce the same 25
