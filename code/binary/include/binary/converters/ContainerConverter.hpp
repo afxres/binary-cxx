@@ -40,6 +40,17 @@ public:
         }
     }
 
+    BINARY_DEFINE_OVERRIDE_ENCODE_WITH_LENGTH_PREFIX_METHOD(T) {
+        if constexpr (Copyable) {
+            if (this->copy) {
+                assert(converter->Length() == sizeof(E));
+                ::binary::EncodeWithLengthPrefix(allocator, std::span(reinterpret_cast<const std::byte*>(item.data()), sizeof(E) * item.size()));
+                return;
+            }
+        }
+        Converter<T>::EncodeWithLengthPrefix(allocator, item);
+    }
+
     BINARY_DEFINE_OVERRIDE_DECODE_METHOD(T) {
         if constexpr (!::binary::internal::ContainerInsertFunction<T>::IsEnable) {
             ::binary::internal::ThrowNoSuitableEmplaceMethod(typeid(T));

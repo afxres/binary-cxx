@@ -5,12 +5,12 @@
 #include <concepts>
 #include <type_traits>
 
+#include "binary/ConverterExtensions.hpp"
 #include "binary/experimental/converters/LittleEndianConverter.hpp"
 #include "binary/experimental/helpers/ConverterDecodeAutoMethodHelper.hpp"
 #include "binary/experimental/helpers/ConverterEncodeAutoMethodHelper.hpp"
 #include "binary/experimental/helpers/GetConverterHelper.hpp"
 #include "binary/internal/ContainerInsertFunction.hpp"
-#include "binary/internal/ContainerLengthFunction.hpp"
 #include "binary/internal/ContainerResizeFunction.hpp"
 #include "binary/internal/Exception.hpp"
 #include "binary/internal/Length.hpp"
@@ -38,11 +38,8 @@ struct ContainerConverter {
     }
 
     BINARY_EXPERIMENTAL_DEFINE_STATIC_ENCODE_WITH_LENGTH_PREFIX_METHOD(T) {
-        constexpr size_t length = ValueConverterType::Length();
-        if constexpr (length != 0 && ::binary::internal::ContainerLengthFunction<T>::IsEnable) {
-            size_t size = ::binary::internal::ContainerLengthFunction<T>::Invoke(item);
-            ::binary::Encode(allocator, size * length);
-            Encode(allocator, item);
+        if constexpr (Copyable) {
+            ::binary::EncodeWithLengthPrefix(allocator, std::span(reinterpret_cast<const std::byte*>(item.data()), sizeof(ValueType) * item.size()));
         } else {
             using typename ::binary::internal::AllocatorUnsafeAccessor;
             size_t anchor = AllocatorUnsafeAccessor::Anchor(allocator);
