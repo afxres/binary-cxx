@@ -194,6 +194,38 @@ breaking existing data. Nesting adds no headers and no extra bytes: the fields o
 bytes in the stream with nothing wrapping them, and even `std::tuple<std::tuple<std::int32_t>>` is
 four bytes.
 
+## Testing
+
+A Debug configure enables the tests, so the build type matters:
+
+```bash
+bash scripts/test-multiarch.sh                       # host architecture
+```
+
+`test-multiarch.sh` builds and runs the same suite on one or more targets, each in
+`build-tests-<arch>/`, and prints one row per target:
+
+```bash
+bash scripts/test-multiarch.sh x86_64 aarch64 armhf s390x
+```
+
+| target  | bits | endian | tests    | status |
+| :------ | :--- | :----- | :------- | :----- |
+| x86_64  | 64   | little | 2 passed | ok     |
+| aarch64 | 64   | little | 2 passed | ok     |
+| armhf   | 32   | little | 2 passed | ok     |
+| s390x   | 64   | big    | 2 passed | ok     |
+
+Cross targets run under `qemu-user` with their own sysroot, so no `binfmt_misc` setup is needed.
+`--all` adds every supported target and skips the ones whose toolchain is not installed,
+`--allow-missing` turns a missing toolchain into a skip instead of a failure, and `--clean`
+reconfigures from scratch. The width and endianness of the produced binaries are read back from
+their ELF header, so a mislabelled target cannot pass silently.
+
+The scripts themselves are checked by `bash scripts/check-shell.sh`: `bash -n` for syntax,
+`shfmt -d` for formatting (the style lives in `.editorconfig`, shared with editors) and
+`shellcheck -S warning` for lint. `--fix` rewrites the files in place.
+
 ## License
 
 [MIT](LICENSE)

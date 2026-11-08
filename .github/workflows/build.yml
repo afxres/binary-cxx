@@ -10,13 +10,13 @@ jobs:
       - uses: actions/checkout@v7
 
       - name: Setup Environment
-        run: sh scripts/setup.sh
+        run: bash scripts/setup.sh
 
       - name: Build Tests
-        run: sh scripts/build-tests.sh
+        run: bash scripts/test-multiarch.sh
 
       - name: Coverage
-        run: sh scripts/run-coverage.sh
+        run: bash scripts/run-coverage.sh
 
       - name: Coveralls
         uses: coverallsapp/github-action@v2

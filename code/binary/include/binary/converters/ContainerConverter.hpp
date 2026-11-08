@@ -18,13 +18,14 @@ template <typename T>
 class ContainerConverter : public Converter<T> {
 private:
     using E = std::ranges::range_value_t<T>;
-    static constexpr bool Copyable = (requires(T& item) { item.data(); }) && (sizeof(E) == 1 || (std::endian::native == std::endian::little && std::is_trivially_copyable_v<E>));
+    static constexpr bool Contiguous = (requires(T& item) { item.data(); }) && (sizeof(E) == 1 || std::is_trivially_copyable_v<E>);
+    static constexpr bool Copyable = Contiguous && (sizeof(E) == 1 || std::endian::native == std::endian::little);
     std::shared_ptr<Converter<std::ranges::range_value_t<T>>> converter;
     bool copy;
 
 public:
     explicit ContainerConverter(const std::shared_ptr<Converter<std::ranges::range_value_t<T>>>& converter)
-        : converter(converter), copy(Copyable && dynamic_cast<LittleEndianConverter<E>*>(converter.get()) != nullptr) {
+        : converter(converter), copy(Contiguous && dynamic_cast<LittleEndianConverter<E>*>(converter.get()) != nullptr) {
     }
 
     BINARY_DEFINE_OVERRIDE_ENCODE_METHOD(T) {
@@ -45,6 +46,16 @@ public:
             if (this->copy) {
                 assert(converter->Length() == sizeof(E));
                 ::binary::EncodeWithLengthPrefix(allocator, std::span(reinterpret_cast<const std::byte*>(item.data()), sizeof(E) * item.size()));
+                return;
+            }
+        }
+        if constexpr (Contiguous && !Copyable) {
+            if (this->copy) {
+                assert(converter->Length() == sizeof(E));
+                ::binary::Encode(allocator, sizeof(E) * item.size());
+                for (const auto& i : item) {
+                    converter->EncodeAuto(allocator, i);
+                }
                 return;
             }
         }

@@ -1,14 +1,18 @@
 #!/bin/bash
+#
+# Write the integration benchmark as JSON, for benchmark comparison tooling.
+#
+#   bash scripts/run-benchmark-report.sh
+#
+# Building and locating the binary is `run-benchmark.sh`'s job, so this script
+# only picks the output format and the destination file.
 
-PROJECT_ROOT="$PWD"
-PROJECT_RESULT_DIR="$PROJECT_ROOT/build-result"
-BENCHMARK_RESULT_FILE_PATH="$PROJECT_RESULT_DIR/benchmark-result.json"
-BENCHMARK_EXE="$PROJECT_ROOT/build-benchmarks/binary-benchmarks/integration-tests/binary-benchmarks-integration-tests"
+set -uo pipefail
 
-if [ ! -f "$BENCHMARK_EXE" ]; then
-    echo "benchmark not found"
-    exit 1
-fi
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+RESULT_DIR="$PROJECT_ROOT/build-result"
+RESULT_FILE="$RESULT_DIR/benchmark-result.json"
 
-mkdir -p "$PROJECT_RESULT_DIR"
-"$BENCHMARK_EXE" --benchmark_format=json | tee "$BENCHMARK_RESULT_FILE_PATH"
+mkdir -p "$RESULT_DIR"
+bash "$PROJECT_ROOT/scripts/run-benchmark.sh" integration --benchmark_format=json |
+    tee "$RESULT_FILE"
