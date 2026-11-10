@@ -5,11 +5,13 @@
 #include <bit>
 #include <cstddef>
 #include <cstdint>
+#include <cstring>
 #include <format>
 #include <span>
 #include <stdexcept>
 #include <string_view>
 #include <tuple>
+#include <type_traits>
 #include <utility>
 
 #include "binary/ConverterExtensions.hpp"
@@ -26,11 +28,16 @@ inline constexpr auto PackedItemBytesLimit = 2 * sizeof(uint64_t) - 1;
 
 template <typename Item>
 constexpr auto Load(std::string_view name, size_t offset) {
-    uint64_t value = 0;
-    for (size_t index = 0; index < sizeof(Item); index++) {
-        value |= static_cast<uint64_t>(static_cast<unsigned char>(name[offset + index])) << (0x08U * index);
+    if (std::is_constant_evaluated() || std::endian::native != std::endian::little) {
+        uint64_t value = 0;
+        for (size_t index = 0; index < sizeof(Item); index++) {
+            value |= static_cast<uint64_t>(static_cast<unsigned char>(name[offset + index])) << (0x08U * index);
+        }
+        return static_cast<Item>(value);
     }
-    return static_cast<Item>(value);
+    Item value{};
+    std::memcpy(&value, name.data() + offset, sizeof(Item));
+    return value;
 }
 
 constexpr auto Pack(std::string_view name) {
@@ -56,17 +63,41 @@ constexpr auto MakeSlots(const std::array<std::string_view, Count>& names, std::
 }
 
 constexpr auto Hash(std::string_view name) {
-    uint32_t value = 2166136261U;
-    for (const auto item : name) {
-        value ^= static_cast<unsigned char>(item);
-        value *= 16777619U;
+    uint32_t value = static_cast<uint32_t>(name.size());
+    size_t index = 0;
+    for (; index + 4 <= name.size(); index += 4) {
+        value = value * 33U + Load<uint32_t>(name, index);
+    }
+    for (; index < name.size(); index++) {
+        value = value * 33U + static_cast<unsigned char>(name[index]);
     }
     return value;
+}
+
+constexpr auto Test(std::string_view left, std::string_view right) {
+    if (left.size() != right.size()) {
+        return false;
+    }
+    size_t length = left.size();
+    size_t offset = 0;
+    for (; length >= 8; length -= 8, offset += 8) {
+        if (Load<uint64_t>(left, offset) != Load<uint64_t>(right, offset)) {
+            return false;
+        }
+    }
+    if ((length & 0x04U) != 0 && Load<uint32_t>(left, offset + (length & 0x03U)) != Load<uint32_t>(right, offset + (length & 0x03U))) {
+        return false;
+    }
+    if ((length & 0x02U) != 0 && Load<uint16_t>(left, offset + (length & 0x01U)) != Load<uint16_t>(right, offset + (length & 0x01U))) {
+        return false;
+    }
+    return (length & 0x01U) == 0 || left[offset] == right[offset];
 }
 
 template <size_t Count>
 struct ChainTable {
     std::array<uint32_t, std::bit_ceil(Count * 2 < 16 ? 16 : Count * 2)> Heads;
+    std::array<uint32_t, Count> Items;
     std::array<uint32_t, Count> Nexts;
 };
 
@@ -77,7 +108,9 @@ constexpr ChainTable<Count> MakeChain(const std::array<std::string_view, Count>&
         head = UINT32_MAX;
     }
     for (size_t index = 0; index < Count; index++) {
-        const uint32_t bucket = Hash(names[index]) & (table.Heads.size() - 1);
+        const uint32_t hash = Hash(names[index]);
+        const uint32_t bucket = hash & static_cast<uint32_t>(table.Heads.size() - 1);
+        table.Items[index] = hash;
         table.Nexts[index] = table.Heads[bucket];
         table.Heads[bucket] = static_cast<uint32_t>(index);
     }
@@ -140,8 +173,9 @@ struct NamedObjectLayout {
             return SIZE_MAX;
         } else {
             const uint32_t hash = detail::Hash(name);
-            for (uint32_t cursor = Chain.Heads[hash & (Chain.Heads.size() - 1)]; cursor != UINT32_MAX; cursor = Chain.Nexts[cursor]) {
-                if (Names[cursor] == name) {
+            const uint32_t mask = static_cast<uint32_t>(Chain.Heads.size() - 1);
+            for (uint32_t cursor = Chain.Heads[hash & mask]; cursor != UINT32_MAX; cursor = Chain.Nexts[cursor]) {
+                if (Chain.Items[cursor] == hash && detail::Test(name, Names[cursor])) {
                     return static_cast<size_t>(cursor);
                 }
             }
