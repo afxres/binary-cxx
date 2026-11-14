@@ -2,6 +2,7 @@
 #define BINARY_EXPERIMENTAL_CONVERTERS_VARIANTCONVERTER_HPP
 
 #include <array>
+#include <type_traits>
 #include <utility>
 #include <variant>
 
@@ -22,25 +23,36 @@ private:
     template <size_t Index>
     using ElementConverterType = typename ::binary::experimental::helpers::GetConverterHelper<std::remove_cv_t<std::variant_alternative_t<Index, T>>>::Type;
 
+    template <size_t Index>
+    static constexpr bool IsMonostate = std::is_same_v<std::remove_cv_t<std::variant_alternative_t<Index, T>>, std::monostate>;
+
     template <size_t IsAuto, size_t Index>
-    static void EncodeElement(Allocator& allocator, const T& item) {
-        using ElementConverterType = ElementConverterType<Index>;
-        using ElementConverterEncodeAutoMethodHelperType = ::binary::experimental::helpers::ConverterEncodeAutoMethodHelper<ElementConverterType>;
-        if constexpr (IsAuto == 0) {
-            ElementConverterType::Encode(allocator, std::get<Index>(item));
+    static void EncodeElement([[maybe_unused]] Allocator& allocator, [[maybe_unused]] const T& item) {
+        if constexpr (IsMonostate<Index>) {
+            // The tag written by EncodeInternal is the whole payload of the monostate case.
         } else {
-            ElementConverterEncodeAutoMethodHelperType::Invoke(allocator, std::get<Index>(item));
+            using ElementConverterType = ElementConverterType<Index>;
+            using ElementConverterEncodeAutoMethodHelperType = ::binary::experimental::helpers::ConverterEncodeAutoMethodHelper<ElementConverterType>;
+            if constexpr (IsAuto == 0) {
+                ElementConverterType::Encode(allocator, std::get<Index>(item));
+            } else {
+                ElementConverterEncodeAutoMethodHelperType::Invoke(allocator, std::get<Index>(item));
+            }
         }
     }
 
     template <size_t IsAuto, size_t Index>
-    static T DecodeElement(std::span<const std::byte>& span) {
-        using ElementConverterType = ElementConverterType<Index>;
-        using ElementConverterDecodeAutoMethodHelperType = ::binary::experimental::helpers::ConverterDecodeAutoMethodHelper<ElementConverterType>;
-        if constexpr (IsAuto == 0) {
-            return T{std::in_place_index<Index>, ElementConverterType::Decode(span)};
+    static T DecodeElement([[maybe_unused]] std::span<const std::byte>& span) {
+        if constexpr (IsMonostate<Index>) {
+            return T{std::in_place_index<Index>};
         } else {
-            return T{std::in_place_index<Index>, ElementConverterDecodeAutoMethodHelperType::Invoke(span)};
+            using ElementConverterType = ElementConverterType<Index>;
+            using ElementConverterDecodeAutoMethodHelperType = ::binary::experimental::helpers::ConverterDecodeAutoMethodHelper<ElementConverterType>;
+            if constexpr (IsAuto == 0) {
+                return T{std::in_place_index<Index>, ElementConverterType::Decode(span)};
+            } else {
+                return T{std::in_place_index<Index>, ElementConverterDecodeAutoMethodHelperType::Invoke(span)};
+            }
         }
     }
 

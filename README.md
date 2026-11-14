@@ -144,6 +144,10 @@ automatically. A few details are worth knowing:
   format for ASCII.
 - Decoding truncated input throws `std::length_error`; a missing converter in a `Generator` throws
   `std::invalid_argument`.
+- `std::monostate` is the empty union case. Inside a `std::variant` it writes the tag and nothing
+  else, for `Encode` and `EncodeAuto` alike, and the tag alone delimits it, so it needs no
+  converter. It has no converter of its own: elsewhere it is a compile error in the template API
+  and a missing converter in the virtual API.
 
 ## Wire Format
 

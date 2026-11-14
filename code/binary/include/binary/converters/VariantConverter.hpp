@@ -4,10 +4,13 @@
 #include <array>
 #include <memory>
 #include <tuple>
+#include <type_traits>
+#include <utility>
 #include <variant>
 
 #include "binary/Converter.hpp"
 #include "binary/ConverterExtensions.hpp"
+#include "binary/GeneratorExtensions.hpp"
 #include "binary/internal/Define.hpp"
 #include "binary/internal/Exception.hpp"
 
@@ -24,23 +27,40 @@ private:
     using DecodeFunction = T (VariantConverter::*)(std::span<const std::byte>&);
     static constexpr size_t ElementCount = sizeof...(E);
 
+    template <size_t Index>
+    static constexpr bool IsMonostate = std::is_same_v<std::remove_cv_t<std::variant_alternative_t<Index, T>>, std::monostate>;
+
+    template <typename X>
+    using ElementSlot = std::conditional_t<
+        std::is_same_v<std::remove_cv_t<X>, std::monostate>,
+        std::monostate,
+        std::shared_ptr<Converter<std::remove_cv_t<X>>>>;
+
     template <size_t IsAuto, size_t Index>
-    void EncodeElement(Allocator& allocator, const T& item) {
-        const auto& element = std::get<Index>(this->converter);
-        if constexpr (IsAuto == 0) {
-            element->Encode(allocator, std::get<Index>(item));
+    void EncodeElement([[maybe_unused]] Allocator& allocator, [[maybe_unused]] const T& item) {
+        if constexpr (IsMonostate<Index>) {
+            // The tag written by EncodeInternal is the whole payload of the monostate case.
         } else {
-            element->EncodeAuto(allocator, std::get<Index>(item));
+            const auto& element = std::get<Index>(this->converter);
+            if constexpr (IsAuto == 0) {
+                element->Encode(allocator, std::get<Index>(item));
+            } else {
+                element->EncodeAuto(allocator, std::get<Index>(item));
+            }
         }
     }
 
     template <size_t IsAuto, size_t Index>
-    T DecodeElement(std::span<const std::byte>& span) {
-        const auto& element = std::get<Index>(this->converter);
-        if constexpr (IsAuto == 0) {
-            return T(std::in_place_index<Index>, element->Decode(span));
+    T DecodeElement([[maybe_unused]] std::span<const std::byte>& span) {
+        if constexpr (IsMonostate<Index>) {
+            return T(std::in_place_index<Index>);
         } else {
-            return T(std::in_place_index<Index>, element->DecodeAuto(span));
+            const auto& element = std::get<Index>(this->converter);
+            if constexpr (IsAuto == 0) {
+                return T(std::in_place_index<Index>, element->Decode(span));
+            } else {
+                return T(std::in_place_index<Index>, element->DecodeAuto(span));
+            }
         }
     }
 
@@ -77,10 +97,10 @@ private:
         return (this->*table[header])(span);
     }
 
-    std::tuple<std::shared_ptr<Converter<std::remove_cv_t<E>>>...> converter;
+    std::tuple<ElementSlot<E>...> converter;
 
 public:
-    explicit VariantConverter(const std::shared_ptr<Converter<std::remove_cv_t<E>>>&... converter)
+    explicit VariantConverter(const ElementSlot<E>&... converter)
         : converter({converter...}) {}
 
     BINARY_DEFINE_OVERRIDE_ENCODE_METHOD(T) {
@@ -98,6 +118,23 @@ public:
 
     BINARY_DEFINE_OVERRIDE_DECODE_AUTO_METHOD(T) {
         return DecodeInternal<1>(span);
+    }
+};
+}
+
+namespace binary::internal {
+template <template <typename...> typename V, typename... E>
+    requires requires { std::variant_size<V<E...>>::value; }
+struct ConverterCreateFunction<::binary::converters::VariantConverter<V<E...>>> {
+    static auto Invoke(const IGenerator& generator) {
+        auto make = [&generator]<typename X>() {
+            if constexpr (std::is_same_v<std::remove_cv_t<X>, std::monostate>) {
+                return std::monostate{};
+            } else {
+                return ::binary::GetConverter<std::remove_cv_t<X>>(generator);
+            }
+        };
+        return std::make_shared<::binary::converters::VariantConverter<V<E...>>>(make.template operator()<E>()...);
     }
 };
 }

@@ -13,7 +13,9 @@
 #include <cstdint>
 #include <format>
 #include <stdexcept>
+#include <string>
 #include <variant>
+#include <vector>
 
 namespace tests::binary::experimental::converters::VariantConverterTests {
 class FakeCopyType {
@@ -45,6 +47,20 @@ struct GetConverterHelper<::tests::binary::experimental::converters::VariantConv
 
 namespace tests::binary::experimental::converters::VariantConverterTests {
 BOOST_AUTO_TEST_SUITE(VariantConverterTests)
+
+namespace {
+std::string ToHex(std::span<const std::byte> span) {
+    static constexpr std::string_view Digits = "0123456789abcdef";
+    std::string result;
+    result.reserve(span.size() * 2);
+    for (std::byte i : span) {
+        auto value = static_cast<size_t>(i);
+        result.push_back(Digits[value / 16]);
+        result.push_back(Digits[value % 16]);
+    }
+    return result;
+}
+}
 
 using VariantConverterTestTypeData = boost::mpl::list<
     std::variant<int32_t, int32_t>,
@@ -173,6 +189,54 @@ BOOST_DATA_TEST_CASE(VariantConverterWithStringDataTest, StringData, data) {
     BOOST_REQUIRE(source == dataResult);
     BOOST_REQUIRE(source == autoResult);
     BOOST_REQUIRE_EQUAL(autoSpan.size(), 0);
+}
+
+BOOST_AUTO_TEST_CASE(VariantConverterWithMonostateTest) {
+    // std::monostate is the empty union case. Neither API registers a converter for it, and
+    // EncodeAuto must not add a length prefix, so both APIs must agree on the tag only payload.
+    using T = std::variant<std::monostate, std::int32_t>;
+    ::binary::Generator generator;
+    ::binary::AddConverter<::binary::converters::LittleEndianConverter<std::int32_t>>(generator);
+    ::binary::AddConverter<::binary::converters::VariantConverter<T>>(generator);
+    auto converter = ::binary::GetConverter<T>(generator);
+    T source;
+    auto dataBufferOrigin = ::binary::Allocator::Invoke([&source, &converter](auto& allocator) { converter->Encode(allocator, source); });
+    auto autoBufferOrigin = ::binary::Allocator::Invoke([&source, &converter](auto& allocator) { converter->EncodeAuto(allocator, source); });
+
+    using ConverterType = ::binary::experimental::Converter<T>;
+    auto dataBuffer = ::binary::Allocator::Invoke([&source](auto& allocator) { ConverterType::Encode(allocator, source); });
+    auto autoBuffer = ::binary::Allocator::Invoke([&source](auto& allocator) { ConverterType::EncodeAuto(allocator, source); });
+    BOOST_REQUIRE_EQUAL(ToHex(dataBufferOrigin), "00");
+    BOOST_REQUIRE_EQUAL(ToHex(autoBufferOrigin), "00");
+    BOOST_REQUIRE_EQUAL(ToHex(dataBuffer), ToHex(dataBufferOrigin));
+    BOOST_REQUIRE_EQUAL(ToHex(autoBuffer), ToHex(autoBufferOrigin));
+
+    std::span<const std::byte> dataSpan(dataBuffer);
+    std::span<const std::byte> autoSpan(autoBuffer);
+    auto dataResult = ConverterType::Decode(dataSpan);
+    auto autoResult = ConverterType::DecodeAuto(autoSpan);
+    BOOST_REQUIRE_EQUAL(0, dataResult.index());
+    BOOST_REQUIRE_EQUAL(0, autoResult.index());
+    BOOST_REQUIRE_EQUAL(autoSpan.size(), 0);
+}
+
+BOOST_AUTO_TEST_CASE(VariantConverterWithMonostateInContainerTest) {
+    // A monostate case is still framed by its tag, so a container of variants stays decodable.
+    using T = std::variant<std::monostate, std::int32_t>;
+    std::vector<T> source{T{}, T(42)};
+    using ConverterType = ::binary::experimental::Converter<std::vector<T>>;
+    using EncodeAuto = ::binary::experimental::helpers::ConverterEncodeAutoMethodHelper<ConverterType>;
+    using DecodeAuto = ::binary::experimental::helpers::ConverterDecodeAutoMethodHelper<ConverterType>;
+
+    auto buffer = ::binary::Allocator::Invoke([&source](auto& allocator) { EncodeAuto::Invoke(allocator, source); });
+    BOOST_REQUIRE_EQUAL(ToHex(buffer), "0600012a000000");
+
+    std::span<const std::byte> span(buffer);
+    auto result = DecodeAuto::Invoke(span);
+    BOOST_REQUIRE_EQUAL(2, result.size());
+    BOOST_REQUIRE_EQUAL(0, result[0].index());
+    BOOST_REQUIRE_EQUAL(1, result[1].index());
+    BOOST_REQUIRE_EQUAL(span.size(), 0);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
