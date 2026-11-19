@@ -162,12 +162,12 @@ automatically. A few details are worth knowing:
 
 `Person{1024, "C++"}` (17 bytes):
 
-| Bytes            | Meaning                                       |
-| :--------------- | :-------------------------------------------- |
-| `02 49 64`       | key `"Id"`, length 2                          |
-| `04 00 04 00 00` | value `1024`, length 4, little-endian `int32` |
-| `04 4e 61 6d 65` | key `"Name"`, length 4                        |
-| `03 43 2b 2b`    | value `"C++"`, length 3                       |
+| Bytes              | Meaning                                       |
+| :----------------- | :-------------------------------------------- |
+| `02` `49 64`       | key `"Id"`, length 2                          |
+| `04` `00 04 00 00` | value `1024`, length 4, little-endian `int32` |
+| `04` `4e 61 6d 65` | key `"Name"`, length 4                        |
+| `03` `43 2b 2b`    | value `"C++"`, length 3                       |
 
 Both the key and the value carry a length prefix, and the object itself has no additional header.
 Members are written in the order declared by the schema, but the format does not require any
@@ -187,7 +187,7 @@ Event value{{1712, 500}, {"amy", 7}, "login"};
 | :------------------------ | :--------------------------------------- |
 | `b0 06 00 00 00 00 00 00` | `Time.Seconds = 1712`                    |
 | `f4 01 00 00`             | `Time.Nanos = 500`                       |
-| `03 61 6d 79`             | `User.Name = "amy"`, length 3            |
+| `03` `61 6d 79`           | `User.Name = "amy"`, length 3            |
 | `07 00 00 00`             | `User.Id = 7`                            |
 | `6c 6f 67 69 6e`          | `Action`, last element, no length prefix |
 
