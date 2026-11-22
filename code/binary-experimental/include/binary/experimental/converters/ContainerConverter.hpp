@@ -44,6 +44,9 @@ struct ContainerConverter {
         } else if constexpr (Contiguous) {
             ::binary::Encode(allocator, sizeof(ValueType) * item.size());
             Encode(allocator, item);
+        } else if constexpr (std::ranges::sized_range<T> && ValueConverterType::Length() != 0) {
+            ::binary::Encode(allocator, ValueConverterType::Length() * static_cast<size_t>(std::ranges::size(item)));
+            Encode(allocator, item);
         } else {
             using typename ::binary::internal::AllocatorUnsafeAccessor;
             size_t anchor = AllocatorUnsafeAccessor::Anchor(allocator);

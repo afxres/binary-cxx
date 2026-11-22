@@ -26,6 +26,10 @@ void ThrowInvalidVariantIndex(size_t index) {
     throw std::invalid_argument(std::format("invalid variant index: {}", index));
 }
 
+void ThrowInvalidOptionalTag(size_t tag) {
+    throw std::invalid_argument(std::format("invalid optional tag: {}", tag));
+}
+
 void ThrowConverterLengthOverflow() {
     throw std::overflow_error("converter length overflow");
 }

@@ -59,6 +59,16 @@ public:
                 return;
             }
         }
+        if constexpr (!Contiguous && std::ranges::sized_range<T>) {
+            auto length = converter->Length();
+            if (length != 0) {
+                ::binary::Encode(allocator, length * static_cast<size_t>(std::ranges::size(item)));
+                for (const auto& i : item) {
+                    converter->EncodeAuto(allocator, i);
+                }
+                return;
+            }
+        }
         Converter<T>::EncodeWithLengthPrefix(allocator, item);
     }
 

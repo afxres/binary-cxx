@@ -100,10 +100,20 @@ BOOST_AUTO_TEST_CASE(ContainerConverterEncodeAutoNonBlittableKeepsAnchorTest) {
     BOOST_REQUIRE(result == source);
 }
 
-BOOST_AUTO_TEST_CASE(ContainerConverterEncodeAutoNonContiguousKeepsAnchorTest) {
+BOOST_AUTO_TEST_CASE(ContainerConverterEncodeAutoNonContiguousFixedLengthTest) {
     std::list<int32_t> source{1, 2, 3, 4, 5};
     auto buffer = EncodeAutoWithLengthPrefix(source);
-    auto expected = std::string("\x80\x00\x00\x14\x01\x00\x00\x00\x02\x00\x00\x00\x03\x00\x00\x00\x04\x00\x00\x00\x05\x00\x00\x00", 24);
+    auto expected = std::string("\x14\x01\x00\x00\x00\x02\x00\x00\x00\x03\x00\x00\x00\x04\x00\x00\x00\x05\x00\x00\x00", 21);
+    BOOST_REQUIRE_EQUAL(expected, ToBytes(buffer));
+}
+
+BOOST_AUTO_TEST_CASE(ContainerConverterEncodeAutoNonContiguousVariableLengthKeepsAnchorTest) {
+    std::list<std::string> source{"wire", "encode", "tuple", "named"};
+    auto buffer = EncodeAutoWithLengthPrefix(source);
+    auto expected = std::string("\x80\x00\x00\x18", 4);
+    for (const auto& word : source) {
+        expected += static_cast<char>(word.size()) + word;
+    }
     BOOST_REQUIRE_EQUAL(expected, ToBytes(buffer));
 }
 

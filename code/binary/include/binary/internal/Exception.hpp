@@ -10,6 +10,7 @@ namespace binary::internal {
 [[noreturn]] void ThrowInvalidBytesWrittenValue();
 [[noreturn]] void ThrowInvalidConverterType(std::type_index source, std::type_index target);
 [[noreturn]] void ThrowInvalidVariantIndex(size_t index);
+[[noreturn]] void ThrowInvalidOptionalTag(size_t tag);
 [[noreturn]] void ThrowConverterLengthOverflow();
 [[noreturn]] void ThrowNoSuitableEmplaceMethod(std::type_index container);
 }
