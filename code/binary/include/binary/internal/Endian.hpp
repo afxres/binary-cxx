@@ -3,6 +3,7 @@
 
 #include <bit>
 #include <concepts>
+#include <cstddef>
 #include <cstdint>
 #include <cstring>
 
@@ -31,6 +32,14 @@ Item LoadUnaligned(const void* source) {
     return item;
 }
 
+// Byte reversal is its own inverse, so both directions share this routine.
+inline void Swap128(void* target, const void* source) {
+    const auto head = LoadUnaligned<std::uint64_t>(source);
+    const auto tail = LoadUnaligned<std::uint64_t>(static_cast<const std::byte*>(source) + sizeof(head));
+    SaveUnaligned(target, BINARY_INTERNAL_SWAP_64(tail));
+    SaveUnaligned(static_cast<std::byte*>(target) + sizeof(tail), BINARY_INTERNAL_SWAP_64(head));
+}
+
 #define BINARY_INTERNAL_SWAP_SAVE_TEST(Size)                                                            \
     if constexpr (sizeof(Item) == sizeof(uint##Size##_t)) {                                             \
         return SaveUnaligned(target, BINARY_INTERNAL_SWAP_##Size(std::bit_cast<uint##Size##_t>(item))); \
@@ -46,6 +55,8 @@ template <typename Item, std::endian E>
 void Save(void* target, Item item) {
     if constexpr (std::endian::native == E || sizeof(Item) == 1) {
         SaveUnaligned(target, item);
+    } else if constexpr (sizeof(Item) == 16) {
+        Swap128(target, &item);
     } else {
         BINARY_INTERNAL_SWAP_SAVE_TEST(16);
         BINARY_INTERNAL_SWAP_SAVE_TEST(32);
@@ -59,6 +70,10 @@ template <typename Item, std::endian E>
 Item Load(const void* source) {
     if constexpr (std::endian::native == E || sizeof(Item) == 1) {
         return LoadUnaligned<Item>(source);
+    } else if constexpr (sizeof(Item) == 16) {
+        Item item{};
+        Swap128(&item, source);
+        return item;
     } else {
         BINARY_INTERNAL_SWAP_LOAD_TEST(16);
         BINARY_INTERNAL_SWAP_LOAD_TEST(32);

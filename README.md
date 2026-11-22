@@ -131,6 +131,10 @@ converters must be created, shared or injected at run time.
 | `std::tuple`                                                     | `TupleConverter<T>`                                                            |
 | Aggregate structs                                                | `NamedObjectConverter<T, Schema>` (named), or `TupleConverter<T>` (positional) |
 | `std::variant`                                                   | `VariantConverter<T>`                                                          |
+| `std::optional`                                                  | `OptionalConverter<T>`                                                         |
+
+`std::optional<E>` is a length-prefixed tag (`00` empty, `01` present) followed by the value in the
+same form the entry point uses, so it is byte-identical to `std::variant<std::monostate, E>`.
 
 The virtual API registers each converter explicitly; the template API derives them from the type
 automatically. A few details are worth knowing:
@@ -140,8 +144,7 @@ automatically. A few details are worth knowing:
 - Containers are decoded with `emplace` or `emplace_back`, so the container must be resizable;
   fixed size containers such as `std::array` are not supported for decoding.
 - Strings are written as little-endian code units without transcoding. `std::string` is stored as
-  its bytes (normally UTF-8), `std::u16string` as UTF-16LE, which only matches the C# UTF-8 wire
-  format for ASCII.
+  its bytes (normally UTF-8), `std::u16string` as UTF-16LE.
 - Decoding truncated input throws `std::length_error`; a missing converter in a `Generator` throws
   `std::invalid_argument`.
 - `std::monostate` is the empty union case. Inside a `std::variant` it writes the tag and nothing
@@ -215,10 +218,23 @@ bash scripts/test-multiarch.sh x86_64 aarch64 armhf s390x
 
 | target  | bits | endian | tests    | status |
 | :------ | :--- | :----- | :------- | :----- |
-| x86_64  | 64   | little | 2 passed | ok     |
-| aarch64 | 64   | little | 2 passed | ok     |
-| armhf   | 32   | little | 2 passed | ok     |
-| s390x   | 64   | big    | 2 passed | ok     |
+| x86_64  | 64   | little | 3 passed | ok     |
+| aarch64 | 64   | little | 3 passed | ok     |
+| armhf   | 32   | little | 3 passed | ok     |
+| s390x   | 64   | big    | 3 passed | ok     |
+
+Besides the two unit suites, `binary-wire-tests` asserts the cross-language wire contract. It reads
+`wire.tsv` — the same file, byte for byte, in every language repository — and checks every row marked
+`cxx` through both APIs and both entry points: `Encode` for the bare form, and the auto rule
+(`EncodeAuto`, i.e. a length prefix only where the converter is variable-length) for the self-delimiting
+one. The auto column may list more than one legal byte string, separated by `|`: a length header is 1 byte
+or 4 bytes and both widths are legal, so a row passes when the produced bytes equal one of the listed
+forms and fails otherwise — there is no decode fallback, because a value comparison would hide a real byte
+difference. The decode direction always runs twice: every row that carries its own length header is
+decoded from both a 1 byte and a 4 byte header, whether or not the table lists both, because a reader that
+only handles the width its own writer emits is a split reader. The `cs` and `cxx` markers simply state
+where the supported type sets differ between languages; they live in the file itself, so a missing row
+cannot be mistaken for a passing one.
 
 Cross targets run under `qemu-user` with their own sysroot, so no `binfmt_misc` setup is needed.
 `--all` adds every supported target and skips the ones whose toolchain is not installed,

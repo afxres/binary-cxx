@@ -50,5 +50,29 @@ BOOST_DATA_TEST_CASE(EndianI64Test, EndianI64TestData, number, buffer) {
     BOOST_REQUIRE_EQUAL(std::string(little.data(), little.size()), buffer);
 }
 
+#if defined(BINARY_HAS_INT128)
+__extension__ using Int128 = __int128;
+
+BOOST_AUTO_TEST_CASE(EndianI128Test) {
+    const auto value = static_cast<Int128>(0x0123456789ABCDEF);
+    std::array<char, 16> little;
+    ::binary::internal::EncodeLittleEndian(little.data(), value);
+    const std::string expected("\xEF\xCD\xAB\x89\x67\x45\x23\x01\x00\x00\x00\x00\x00\x00\x00\x00", 16);
+    BOOST_REQUIRE(std::string(little.data(), little.size()) == expected);
+    const auto roundtrip = ::binary::internal::DecodeLittleEndian<Int128>(little.data());
+    BOOST_REQUIRE(roundtrip == value);
+}
+
+BOOST_AUTO_TEST_CASE(EndianI128BigTest) {
+    const auto value = static_cast<Int128>(0x0123456789ABCDEF);
+    std::array<char, 16> big;
+    ::binary::internal::EncodeBigEndian(big.data(), value);
+    const std::string expected("\x00\x00\x00\x00\x00\x00\x00\x00\x01\x23\x45\x67\x89\xAB\xCD\xEF", 16);
+    BOOST_REQUIRE(std::string(big.data(), big.size()) == expected);
+    const auto roundtrip = ::binary::internal::DecodeBigEndian<Int128>(big.data());
+    BOOST_REQUIRE(roundtrip == value);
+}
+#endif
+
 BOOST_AUTO_TEST_SUITE_END()
 }

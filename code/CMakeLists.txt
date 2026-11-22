@@ -33,10 +33,23 @@ add_subdirectory("binary-experimental")
 if(BINARY_BUILD_TESTS)
     enable_testing()
     include(CTest)
+    include(CheckCXXSourceCompiles)
+    check_cxx_source_compiles([[
+        int main() {
+            __extension__ __int128 signed128 = 0;
+            __extension__ unsigned __int128 unsigned128 = 0;
+            return static_cast<int>(signed128) + static_cast<int>(unsigned128);
+        }
+    ]] BINARY_HAS_INT128)
+    if(BINARY_HAS_INT128)
+        message(STATUS "128-bit integers supported")
+    endif()
     add_subdirectory("binary-tests")
     add_subdirectory("binary-experimental-tests")
+    add_subdirectory("binary-wire-tests")
     add_test(NAME "BINARY_TESTS" COMMAND "binary-tests")
     add_test(NAME "BINARY_EXPERIMENTAL_TESTS" COMMAND "binary-experimental-tests")
+    add_test(NAME "BINARY_WIRE_TESTS" COMMAND "binary-wire-tests")
 endif()
 if(BINARY_BUILD_BENCHMARKS)
     add_subdirectory("binary-benchmarks/integration-tests")
