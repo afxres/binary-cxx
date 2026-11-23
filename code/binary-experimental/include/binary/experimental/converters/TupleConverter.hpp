@@ -13,6 +13,7 @@ template <typename T>
 struct TupleConverter {
 private:
     static constexpr size_t ElementCount = ::binary::internal::TupleSize<T>::Value;
+    static_assert(ElementCount > 0, "zero-member tuples are not supported");
 
     template <size_t Index>
     using ElementConverterType = typename ::binary::experimental::helpers::GetConverterHelper<std::remove_cv_t<typename ::binary::internal::TupleElement<Index, T>::Type>>::Type;

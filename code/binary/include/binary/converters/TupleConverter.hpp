@@ -13,6 +13,7 @@ template <typename T, typename... E>
 class TupleConverter : public ::binary::Converter<T> {
 private:
     static constexpr size_t ElementCount = ::binary::internal::TupleSize<T>::Value;
+    static_assert(ElementCount > 0, "zero-member tuples are not supported");
 
     template <size_t IsAuto, size_t Index>
     void EncodeInternal(Allocator& allocator, const T& item) {
