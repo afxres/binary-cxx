@@ -67,13 +67,13 @@ jobs:
         include:
           - target: aarch64
             arch: arm64
-            packages: g++-aarch64-linux-gnu libboost-test-dev:arm64
+            packages: g++-aarch64-linux-gnu
           - target: armhf
             arch: armhf
-            packages: g++-arm-linux-gnueabihf libboost-test-dev:armhf
+            packages: g++-arm-linux-gnueabihf
           - target: s390x
             arch: s390x
-            packages: g++-s390x-linux-gnu libboost-test-dev:s390x
+            packages: g++-s390x-linux-gnu
     steps:
       - name: Install the toolchain
         env:
@@ -83,7 +83,8 @@ jobs:
           dpkg --add-architecture "$ARCH"
           apt-get update
           apt-get install -y --no-install-recommends \
-            ca-certificates git cmake build-essential file qemu-user $PACKAGES
+            ca-certificates git cmake build-essential file qemu-user $PACKAGES \
+            "libboost-test-dev:$ARCH"
 
       - uses: actions/checkout@v7
 
