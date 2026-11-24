@@ -246,6 +246,11 @@ The scripts themselves are checked by `bash scripts/check-shell.sh`: `bash -n` f
 `shfmt -d` for formatting (the style lives in `.editorconfig`, shared with editors) and
 `shellcheck -S warning` for lint. `--fix` rewrites the files in place.
 
+The C++ sources are formatted by `bash scripts/check-format.sh`: `clang-format --dry-run --Werror`
+over every file under `code/`, with the style in `.clang-format`; `--fix` rewrites them in place.
+clang-format's output is not stable across major versions, so CI reports that check rather than
+gating on it.
+
 ## License
 
 [MIT](LICENSE)

@@ -3,17 +3,47 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
+
 jobs:
-  build:
+  lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
 
-      - name: Setup Environment
-        run: bash scripts/setup.sh
+      - name: Install tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang-format shfmt shellcheck
 
-      - name: Build Tests
-        run: bash scripts/test-multiarch.sh
+      # Advisory: clang-format output is not stable across major versions, so a
+      # runner image bump may reformat a file no commit touched. Report it, but
+      # do not fail the build on it.
+      - name: Format
+        continue-on-error: true
+        run: bash scripts/check-format.sh
+
+      - name: Shell scripts
+        run: bash scripts/check-shell.sh
+
+  test:
+    # The native run is also the coverage producer: run-coverage.sh only turns
+    # the .gcda files of the instrumented Debug build into an lcov file, so the
+    # tests have to run here anyway. Only the upload is allowed to fail, which
+    # keeps a flaky Coveralls from turning a green build red.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential cmake lcov libboost-serialization-dev \
+            libboost-test-dev libbenchmark-dev
+
+      - name: Test x86_64
+        run: bash scripts/test-multiarch.sh x86_64
 
       - name: Coverage
         run: bash scripts/run-coverage.sh
@@ -22,4 +52,40 @@ jobs:
         uses: coverallsapp/github-action@v2
         with:
           fail-on-error: false
-          file: "build-result/lcov.info"
+          file: build-result/lcov.info
+
+  cross:
+    # The cross packages of a foreign architecture are only served by the ports
+    # archive, which the Ubuntu runner does not configure; in Debian every
+    # architecture shares one archive, so `dpkg --add-architecture` is all it
+    # takes. The image has no git, hence the toolchain step before the checkout.
+    runs-on: ubuntu-latest
+    container: debian:trixie
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: aarch64
+            arch: arm64
+            packages: g++-aarch64-linux-gnu libboost-test-dev:arm64
+          - target: armhf
+            arch: armhf
+            packages: g++-arm-linux-gnueabihf libboost-test-dev:armhf
+          - target: s390x
+            arch: s390x
+            packages: g++-s390x-linux-gnu libboost-test-dev:s390x
+    steps:
+      - name: Install the toolchain
+        env:
+          ARCH: ${{ matrix.arch }}
+          PACKAGES: ${{ matrix.packages }}
+        run: |
+          dpkg --add-architecture "$ARCH"
+          apt-get update
+          apt-get install -y --no-install-recommends \
+            ca-certificates git cmake build-essential file qemu-user $PACKAGES
+
+      - uses: actions/checkout@v7
+
+      - name: Test ${{ matrix.target }}
+        run: bash scripts/test-multiarch.sh ${{ matrix.target }}
