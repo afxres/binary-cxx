@@ -1,6 +1,8 @@
 #ifndef BINARY_EXPERIMENTAL_CONVERTERS_TUPLECONVERTER_HPP
 #define BINARY_EXPERIMENTAL_CONVERTERS_TUPLECONVERTER_HPP
 
+#include <ranges>
+
 #include "binary/experimental/helpers/ConverterDecodeAutoMethodHelper.hpp"
 #include "binary/experimental/helpers/ConverterEncodeAutoMethodHelper.hpp"
 #include "binary/experimental/helpers/GetConverterHelper.hpp"
@@ -9,7 +11,10 @@
 #include "binary/experimental/internal/TupleSize.hpp"
 
 namespace binary::experimental::converters {
+// A range is not a tuple: it is written by its own converter family, with a
+// boundary per element, so the positional treatment of it would disagree.
 template <typename T>
+    requires requires { ::binary::internal::TupleSize<T>::Value; } && (!std::ranges::range<T>)
 struct TupleConverter {
 private:
     static constexpr size_t ElementCount = ::binary::internal::TupleSize<T>::Value;
@@ -96,6 +101,7 @@ namespace binary::experimental::helpers {
 template <typename T>
     requires std::same_as<T, std::remove_cv_t<T>> &&
     requires { ::binary::internal::TupleSize<T>::Value; } &&
+    (!std::ranges::range<T>) &&
     (!requires { GetNamedObjectSchema(static_cast<std::remove_cv_t<T>*>(nullptr)); }) &&
     (!requires { GetTupleObjectSchema(static_cast<std::remove_cv_t<T>*>(nullptr)); })
 struct GetConverterHelper<T> {

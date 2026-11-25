@@ -14,10 +14,13 @@
 #include "binary/internal/ContainerResizeFunction.hpp"
 #include "binary/internal/Exception.hpp"
 #include "binary/internal/Length.hpp"
+#include "binary/internal/TupleSize.hpp"
 
 namespace binary::experimental::converters {
+// A tuple like type is not a container: it is written positionally, with its own
+// element boundaries, so treating it as a range yields a wire nothing else reads.
 template <typename T>
-    requires std::same_as<T, std::remove_cv_t<T>>
+    requires std::same_as<T, std::remove_cv_t<T>> && (!requires { ::binary::internal::TupleSize<T>::Value; })
 struct ContainerConverter {
     using ValueType = std::ranges::range_value_t<T>;
     using ValueConverterType = typename ::binary::experimental::helpers::GetConverterHelper<ValueType>::Type;
@@ -88,7 +91,8 @@ struct ContainerConverter {
 namespace binary::experimental::helpers {
 template <typename T>
     requires std::same_as<T, std::remove_cv_t<T>> &&
-    std::ranges::input_range<T> && (!requires(const T& item) { item.c_str(); })
+    std::ranges::input_range<T> && (!requires(const T& item) { item.c_str(); }) &&
+    (!requires { ::binary::internal::TupleSize<T>::Value; })
 struct GetConverterHelper<T> {
     using Type = ::binary::experimental::converters::ContainerConverter<T>;
 };

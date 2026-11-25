@@ -11,10 +11,13 @@
 #include "binary/internal/Define.hpp"
 #include "binary/internal/Exception.hpp"
 #include "binary/internal/Length.hpp"
+#include "binary/internal/TupleSize.hpp"
 
 namespace binary::converters {
+// A tuple like type is not a container: it is written positionally, with its own
+// element boundaries, so treating it as a range yields a wire nothing else reads.
 template <typename T>
-    requires std::same_as<T, std::remove_cv_t<T>>
+    requires std::same_as<T, std::remove_cv_t<T>> && (!requires { ::binary::internal::TupleSize<T>::Value; })
 class ContainerConverter : public Converter<T> {
 private:
     using E = std::ranges::range_value_t<T>;

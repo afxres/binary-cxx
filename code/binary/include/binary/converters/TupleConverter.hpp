@@ -1,6 +1,8 @@
 #ifndef BINARY_CONVERTERS_TUPLECONVERTER_HPP
 #define BINARY_CONVERTERS_TUPLECONVERTER_HPP
 
+#include <ranges>
+
 #include "binary/internal/Define.hpp"
 #include "binary/internal/Module.hpp"
 #include "binary/internal/TupleElement.hpp"
@@ -8,8 +10,10 @@
 #include "binary/internal/TupleSize.hpp"
 
 namespace binary::internal::converters {
+// A range is not a tuple: it is written by its own converter family, with a
+// boundary per element, so the positional treatment of it would disagree.
 template <typename T, typename... E>
-    requires requires { ::binary::internal::TupleSize<T>::Value; }
+    requires requires { ::binary::internal::TupleSize<T>::Value; } && (!std::ranges::range<T>)
 class TupleConverter : public ::binary::Converter<T> {
 private:
     static constexpr size_t ElementCount = ::binary::internal::TupleSize<T>::Value;
@@ -75,7 +79,7 @@ template <typename T, typename Indices>
 struct TupleConverterHelper;
 
 template <typename T, size_t... Index>
-    requires requires { ::binary::internal::TupleSize<T>::Value; }
+    requires requires { ::binary::internal::TupleSize<T>::Value; } && (!std::ranges::range<T>)
 struct TupleConverterHelper<T, std::index_sequence<Index...>> {
     using Type = TupleConverter<T, std::remove_cv_t<typename ::binary::internal::TupleElement<Index, T>::Type>...>;
 };
@@ -83,7 +87,7 @@ struct TupleConverterHelper<T, std::index_sequence<Index...>> {
 
 namespace binary::converters {
 template <typename T>
-    requires requires { ::binary::internal::TupleSize<T>::Value; }
+    requires requires { ::binary::internal::TupleSize<T>::Value; } && (!std::ranges::range<T>)
 using TupleConverter = typename ::binary::internal::converters::TupleConverterHelper<T, std::make_index_sequence<::binary::internal::TupleSize<T>::Value>>::Type;
 }
 
