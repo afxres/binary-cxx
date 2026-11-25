@@ -154,5 +154,29 @@ BOOST_AUTO_TEST_CASE(NamedObjectLayoutDuplicateIndexTest) {
     BOOST_REQUIRE_EQUAL(::binary::components::detail::GetDuplicateIndex(unique), SIZE_MAX);
 }
 
+BOOST_AUTO_TEST_CASE(NamedObjectLayoutCompareTest) {
+    // `Test` only runs after a hash match, so these pairs are what a lookup sees
+    // on a collision: same hash, different bytes. Lengths pick the block sizes.
+    auto test = [](std::string_view left, std::string_view right) { return ::binary::components::detail::Test(left, right); };
+    std::string_view hex16 = "0123456789abcdef";
+
+    BOOST_REQUIRE(test(hex16, "0123456789abcdef"));
+    BOOST_REQUIRE(!test(hex16, "0123456789abcde"));
+    BOOST_REQUIRE(!test(hex16, "01234567X9abcdef"));
+    BOOST_REQUIRE(!test(hex16, "0123456789abcdeX"));
+
+    std::string_view hex12 = "0123456789ab";
+    BOOST_REQUIRE(test(hex12, "0123456789ab"));
+    BOOST_REQUIRE(!test(hex12, "0123456789aX"));
+
+    std::string_view hex10 = "0123456789";
+    BOOST_REQUIRE(test(hex10, "0123456789"));
+    BOOST_REQUIRE(!test(hex10, "01234567X9"));
+
+    std::string_view hex9 = "012345678";
+    BOOST_REQUIRE(test(hex9, "012345678"));
+    BOOST_REQUIRE(!test(hex9, "01234567X"));
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 }
