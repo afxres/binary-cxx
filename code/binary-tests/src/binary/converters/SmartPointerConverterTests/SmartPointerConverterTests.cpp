@@ -113,6 +113,51 @@ BOOST_AUTO_TEST_CASE(SmartPointerConverterRoundTripTest) {
     BOOST_REQUIRE_EQUAL("abc", *first);
 }
 
+BOOST_AUTO_TEST_CASE(SmartPointerConverterRawDecodeTest) {
+    auto generator = MakeGenerator();
+
+    // `Decode` forwards to the pointee unchanged, so no prefix is read and the
+    // caller owns the boundary of a variable length pointee.
+    std::byte integer[] = {std::byte{0x05}, std::byte{0x00}, std::byte{0x00}, std::byte{0x00}};
+    BOOST_REQUIRE_EQUAL(5, *::binary::GetConverter<std::unique_ptr<std::int32_t>>(generator)->Decode(integer));
+    BOOST_REQUIRE_EQUAL(5, *::binary::GetConverter<std::shared_ptr<std::int32_t>>(generator)->Decode(integer));
+
+    std::byte text[] = {std::byte{'a'}, std::byte{'b'}, std::byte{'c'}};
+    BOOST_REQUIRE_EQUAL("abc", *::binary::GetConverter<std::unique_ptr<std::string>>(generator)->Decode(text));
+    BOOST_REQUIRE_EQUAL("abc", *::binary::GetConverter<std::shared_ptr<std::string>>(generator)->Decode(text));
+}
+
+BOOST_AUTO_TEST_CASE(SmartPointerConverterPrefixEntryTest) {
+    auto generator = MakeGenerator();
+
+    // The prefix comes from the pointee pair, not from an anchor: a fixed length
+    // pointee yields its exact width, a variable length one its own prefix.
+    auto integer = ::binary::GetConverter<std::shared_ptr<std::int32_t>>(generator);
+    auto integerBytes = ::binary::Allocator::Invoke([&integer](auto& allocator) {
+        integer->EncodeWithLengthPrefix(allocator, std::make_shared<std::int32_t>(5));
+    });
+    BOOST_REQUIRE_EQUAL("0405000000", ToHex(integerBytes));
+
+    auto text = ::binary::GetConverter<std::shared_ptr<std::string>>(generator);
+    auto textBytes = ::binary::Allocator::Invoke([&text](auto& allocator) {
+        text->EncodeWithLengthPrefix(allocator, std::make_shared<std::string>("abc"));
+    });
+    BOOST_REQUIRE_EQUAL("03616263", ToHex(textBytes));
+
+    std::span<const std::byte> integerSpan(integerBytes);
+    BOOST_REQUIRE_EQUAL(5, *integer->DecodeWithLengthPrefix(integerSpan));
+    BOOST_REQUIRE_EQUAL(0, integerSpan.size());
+
+    std::span<const std::byte> textSpan(textBytes);
+    BOOST_REQUIRE_EQUAL("abc", *text->DecodeWithLengthPrefix(textSpan));
+    BOOST_REQUIRE_EQUAL(0, textSpan.size());
+
+    auto uniqueText = ::binary::GetConverter<std::unique_ptr<std::string>>(generator);
+    std::span<const std::byte> uniqueSpan(textBytes);
+    BOOST_REQUIRE_EQUAL("abc", *uniqueText->DecodeWithLengthPrefix(uniqueSpan));
+    BOOST_REQUIRE_EQUAL(0, uniqueSpan.size());
+}
+
 BOOST_AUTO_TEST_CASE(SmartPointerConverterNullTest) {
     auto generator = MakeGenerator();
 
