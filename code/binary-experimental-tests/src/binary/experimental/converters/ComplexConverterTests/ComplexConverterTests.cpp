@@ -4,6 +4,8 @@
 
 #include <binary/experimental/Converter.hpp>
 #include <binary/experimental/converters/ComplexConverter.hpp>
+#include <binary/experimental/converters/ContainerConverter.hpp>
+#include <binary/experimental/converters/LittleEndianConverter.hpp>
 #include <binary/experimental/helpers/ConverterDecodeAutoMethodHelper.hpp>
 #include <binary/experimental/helpers/ConverterEncodeAutoMethodHelper.hpp>
 

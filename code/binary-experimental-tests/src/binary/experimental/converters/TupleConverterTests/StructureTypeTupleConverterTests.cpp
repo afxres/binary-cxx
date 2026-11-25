@@ -10,6 +10,10 @@
 #include <binary/converters/TupleConverter.hpp>
 
 #include <binary/experimental/Converter.hpp>
+#include <binary/experimental/converters/ContainerConverter.hpp>
+#include <binary/experimental/converters/LittleEndianConverter.hpp>
+#include <binary/experimental/converters/LittleEndianStringConverter.hpp>
+#include <binary/experimental/converters/TupleConverter.hpp>
 
 namespace tests::binary::experimental::converters::TupleConverterTests {
 BOOST_AUTO_TEST_SUITE(StructureTypeTupleConverterTests)

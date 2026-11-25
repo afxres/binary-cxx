@@ -1,6 +1,8 @@
 #include <boost/test/unit_test.hpp>
 
 #include <binary/experimental/Converter.hpp>
+#include <binary/experimental/converters/LittleEndianConverter.hpp>
+#include <binary/experimental/helpers/ConverterDecodeAutoMethodHelper.hpp>
 
 namespace tests::binary::experimental::helpers::ConverterDecodeAutoMethodHelperTests {
 BOOST_AUTO_TEST_SUITE(ConverterDecodeAutoMethodHelperTests)

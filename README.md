@@ -136,8 +136,8 @@ converters must be created, shared or injected at run time.
 | `std::optional`                                                  | `OptionalConverter<T>`                                                         |
 | `std::unique_ptr`, `std::shared_ptr`                             | `SmartPointerConverter<T>`                                                     |
 
-The virtual API registers each converter explicitly; the template API derives them from the type
-automatically. A few details are worth knowing:
+The virtual API registers each converter explicitly; the template API derives them from the type,
+so the code using one has to include its header. A few details are worth knowing:
 
 - Positional aggregate conversion relies on Boost.PFR, which is included by `binary-experimental`,
   even when only the virtual API is otherwise used.

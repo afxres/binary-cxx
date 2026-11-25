@@ -3,6 +3,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include <binary/experimental/Converter.hpp>
+#include <binary/experimental/converters/LittleEndianConverter.hpp>
 
 #include <array>
 

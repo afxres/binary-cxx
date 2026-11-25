@@ -1,17 +1,13 @@
 #ifndef BINARY_EXPERIMENTAL_CONVERTER_HPP
 #define BINARY_EXPERIMENTAL_CONVERTER_HPP
 
-#include "binary/experimental/components/NamedObjectConverter.hpp"
-#include "binary/experimental/components/TupleObjectConverter.hpp"
-#include "binary/experimental/converters/ArrayConverter.hpp"
-#include "binary/experimental/converters/ComplexConverter.hpp"
-#include "binary/experimental/converters/ContainerConverter.hpp"
-#include "binary/experimental/converters/LittleEndianConverter.hpp"
-#include "binary/experimental/converters/LittleEndianStringConverter.hpp"
-#include "binary/experimental/converters/OptionalConverter.hpp"
-#include "binary/experimental/converters/SmartPointerConverter.hpp"
-#include "binary/experimental/converters/TupleConverter.hpp"
-#include "binary/experimental/converters/VariantConverter.hpp"
+#include <concepts>
+#include <functional>
+#include <span>
+#include <type_traits>
+
+#include "binary/Allocator.hpp"
+#include "binary/experimental/helpers/GetConverterHelper.hpp"
 
 namespace binary::experimental {
 template <typename T>

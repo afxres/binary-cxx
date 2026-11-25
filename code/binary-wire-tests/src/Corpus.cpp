@@ -20,6 +20,13 @@
 #include <binary/converters/OptionalConverter.hpp>
 #include <binary/converters/TupleConverter.hpp>
 #include <binary/experimental/Converter.hpp>
+#include <binary/experimental/components/NamedObjectConverter.hpp>
+#include <binary/experimental/components/TupleObjectConverter.hpp>
+#include <binary/experimental/converters/ContainerConverter.hpp>
+#include <binary/experimental/converters/LittleEndianConverter.hpp>
+#include <binary/experimental/converters/LittleEndianStringConverter.hpp>
+#include <binary/experimental/converters/OptionalConverter.hpp>
+#include <binary/experimental/converters/TupleConverter.hpp>
 #include <binary/experimental/helpers/ConverterDecodeAutoMethodHelper.hpp>
 #include <binary/experimental/helpers/ConverterEncodeAutoMethodHelper.hpp>
 

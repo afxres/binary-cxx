@@ -8,6 +8,9 @@
 #include <binary/converters/LittleEndianStringConverter.hpp>
 #include <binary/experimental/Converter.hpp>
 #include <binary/experimental/components/TupleObjectConverter.hpp>
+#include <binary/experimental/converters/ContainerConverter.hpp>
+#include <binary/experimental/converters/LittleEndianConverter.hpp>
+#include <binary/experimental/converters/LittleEndianStringConverter.hpp>
 
 #include <algorithm>
 #include <cstdint>

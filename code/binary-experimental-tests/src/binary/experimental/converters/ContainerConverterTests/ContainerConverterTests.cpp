@@ -3,6 +3,10 @@
 #include <boost/test/unit_test.hpp>
 
 #include <binary/experimental/Converter.hpp>
+#include <binary/experimental/converters/ContainerConverter.hpp>
+#include <binary/experimental/converters/LittleEndianConverter.hpp>
+#include <binary/experimental/converters/LittleEndianStringConverter.hpp>
+#include <binary/experimental/converters/TupleConverter.hpp>
 
 #include <map>
 #include <set>

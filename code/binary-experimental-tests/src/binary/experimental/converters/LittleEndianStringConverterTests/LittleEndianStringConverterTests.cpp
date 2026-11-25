@@ -4,6 +4,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include <binary/experimental/Converter.hpp>
+#include <binary/experimental/converters/LittleEndianStringConverter.hpp>
 
 template <>
 struct boost::test_tools::tt_detail::print_log_value<std::wstring> {
