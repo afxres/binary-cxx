@@ -13,6 +13,7 @@ namespace binary::internal {
 [[noreturn]] void ThrowInvalidOptionalTag(size_t tag);
 [[noreturn]] void ThrowConverterLengthOverflow();
 [[noreturn]] void ThrowNoSuitableEmplaceMethod(std::type_index container);
+[[noreturn]] void ThrowNullPointer(std::type_index type);
 }
 
 #endif

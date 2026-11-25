@@ -37,4 +37,8 @@ void ThrowConverterLengthOverflow() {
 void ThrowNoSuitableEmplaceMethod(std::type_index container) {
     throw std::logic_error(std::format("no suitable emplace method found, type: {}", container.name()));
 }
+
+void ThrowNullPointer(std::type_index type) {
+    throw std::invalid_argument(std::format("null pointer has no value to encode, type: {}", type.name()));
+}
 }

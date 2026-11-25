@@ -134,6 +134,7 @@ converters must be created, shared or injected at run time.
 | Aggregate structs                                                | `NamedObjectConverter<T, Schema>` (named), or `TupleConverter<T>` (positional) |
 | `std::variant`                                                   | `VariantConverter<T>`                                                          |
 | `std::optional`                                                  | `OptionalConverter<T>`                                                         |
+| `std::unique_ptr`, `std::shared_ptr`                             | `SmartPointerConverter<T>`                                                     |
 
 `std::optional<E>` is a length-prefixed tag (`00` empty, `01` present) followed by the value in the
 same form the entry point uses, so it is byte-identical to `std::variant<std::monostate, E>`.
