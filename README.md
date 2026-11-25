@@ -134,7 +134,8 @@ converters must be created, shared or injected at run time.
 | Aggregate structs                                                | `NamedObjectConverter<T, Schema>` (named), or `TupleConverter<T>` (positional) |
 | `std::variant`                                                   | `VariantConverter<T>`                                                          |
 | `std::optional`                                                  | `OptionalConverter<T>`                                                         |
-| `std::unique_ptr`, `std::shared_ptr`                             | `SmartPointerConverter<T>`                                                     |
+| `std::unique_ptr`                                                | `UniquePointerConverter<T>`                                                    |
+| `std::shared_ptr`                                                | `SharedPointerConverter<T>`                                                    |
 
 The virtual API registers each converter explicitly; the template API derives them from the type,
 so the code using one has to include its header. A few details are worth knowing:
