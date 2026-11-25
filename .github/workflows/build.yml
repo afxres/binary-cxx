@@ -11,10 +11,12 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      # `libboost-dev` carries the PFR headers the tuple path includes, so the
+      # header check parses the same sources the build does.
       - name: Install tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y clang-format shfmt shellcheck
+          sudo apt-get install -y clang-format g++ libboost-dev shfmt shellcheck
 
       # Advisory: clang-format output is not stable across major versions, so a
       # runner image bump may reformat a file no commit touched. Report it, but
@@ -22,6 +24,12 @@ jobs:
       - name: Format
         continue-on-error: true
         run: bash scripts/check-format.sh
+
+      # Each header compiled on its own, which is the only way a missing include
+      # shows up: through a translation unit that happens to include the same
+      # header indirectly, the compiler stays quiet and the editor does not.
+      - name: Headers
+        run: bash scripts/check-headers.sh
 
       - name: Shell scripts
         run: bash scripts/check-shell.sh
