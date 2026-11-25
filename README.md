@@ -130,6 +130,7 @@ converters must be created, shared or injected at run time.
 | Ranges (`std::vector`, `std::list`, `std::set`, `std::map`, ...) | `ContainerConverter<T>`                                                        |
 | `std::tuple`                                                     | `TupleConverter<T>`                                                            |
 | `std::array<T, N>`                                               | `ArrayConverter<T>`                                                            |
+| `std::complex<float>`, `std::complex<double>`                    | `ComplexConverter<T>`                                                          |
 | Aggregate structs                                                | `NamedObjectConverter<T, Schema>` (named), or `TupleConverter<T>` (positional) |
 | `std::variant`                                                   | `VariantConverter<T>`                                                          |
 | `std::optional`                                                  | `OptionalConverter<T>`                                                         |
