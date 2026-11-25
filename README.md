@@ -136,23 +136,18 @@ converters must be created, shared or injected at run time.
 | `std::optional`                                                  | `OptionalConverter<T>`                                                         |
 | `std::unique_ptr`, `std::shared_ptr`                             | `SmartPointerConverter<T>`                                                     |
 
-`std::optional<E>` is a length-prefixed tag (`00` empty, `01` present) followed by the value in the
-same form the entry point uses, so it is byte-identical to `std::variant<std::monostate, E>`.
-
 The virtual API registers each converter explicitly; the template API derives them from the type
 automatically. A few details are worth knowing:
 
 - Positional aggregate conversion relies on Boost.PFR, which is included by `binary-experimental`,
   even when only the virtual API is otherwise used.
 - Containers are decoded with `emplace` or `emplace_back`, so the container must be resizable.
-- Strings are written as little-endian code units without transcoding. `std::string` is stored as
-  its bytes (normally UTF-8), `std::u16string` as UTF-16LE.
+- Strings are written as little-endian code units without transcoding: `std::string` bytes as-is
+  (normally UTF-8), `std::u16string` as UTF-16LE.
 - Decoding truncated input throws `std::length_error`; a missing converter in a `Generator` throws
   `std::invalid_argument`.
-- `std::monostate` is the empty union case. Inside a `std::variant` it writes the tag and nothing
-  else, for `Encode` and `EncodeAuto` alike, and the tag alone delimits it, so it needs no
-  converter. It has no converter of its own: elsewhere it is a compile error in the template API
-  and a missing converter in the virtual API.
+- `std::monostate` has no converter of its own: only a `std::variant` case supports it, where it
+  writes the tag and nothing else.
 
 ## Wire Format
 
