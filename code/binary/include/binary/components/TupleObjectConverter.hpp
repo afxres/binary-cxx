@@ -162,13 +162,4 @@ public:
 };
 }
 
-namespace binary::internal {
-template <typename T, typename Schema>
-struct ConverterCreateFunction<::binary::components::TupleObjectConverter<T, Schema>> {
-    static auto Invoke(const IGenerator& generator) {
-        return std::make_shared<::binary::components::TupleObjectConverter<T, Schema>>(generator);
-    }
-};
-}
-
 #endif

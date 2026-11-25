@@ -2,8 +2,8 @@
 #define BINARY_GENERATOREXTENSIONS_HPP
 
 #include "binary/Converter.hpp"
+#include "binary/ConverterCreator.hpp"
 #include "binary/IGenerator.hpp"
-#include "binary/internal/ConverterCreateFunction.hpp"
 #include "binary/internal/Module.hpp"
 
 namespace binary {
@@ -19,24 +19,10 @@ Converter<T>* GetConverterRawPtr(const IGenerator& generator) {
     return ::binary::internal::GetConverterRawPtr<T>(generator.GetConverter(typeid(T)));
 }
 
-template <typename TConverter>
-    requires requires(const IGenerator& generator) { ::binary::internal::ConverterCreateFunction<TConverter>::Invoke(generator); }
-std::shared_ptr<TConverter> CreateConverter(const IGenerator& generator) {
-    return ::binary::internal::ConverterCreateFunction<TConverter>::Invoke(generator);
-}
-
-template <typename TConverter>
-    requires requires(const IGenerator& generator) { CreateConverter<TConverter>(generator); }
-void AddConverter(IGenerator& generator) {
-    std::shared_ptr<IConverter> converter = CreateConverter<TConverter>(generator);
-    generator.AddConverter(converter);
-}
-
 template <typename TConverter, typename... TArguments>
-    requires(sizeof...(TArguments) > 0 || !std::constructible_from<TConverter, const IGenerator&>) &&
-    std::derived_from<TConverter, IConverter> && std::constructible_from<TConverter, const std::shared_ptr<Converter<TArguments>>&...>
+    requires requires(const IGenerator& generator) { ::binary::ConverterCreator<TConverter, TArguments...>::Create(generator); }
 void AddConverter(IGenerator& generator) {
-    std::shared_ptr<IConverter> converter = std::make_shared<TConverter>(GetConverter<TArguments>(generator)...);
+    std::shared_ptr<IConverter> converter = ::binary::ConverterCreator<TConverter, TArguments...>::Create(generator);
     generator.AddConverter(converter);
 }
 }

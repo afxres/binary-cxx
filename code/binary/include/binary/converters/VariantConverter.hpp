@@ -122,11 +122,11 @@ public:
 };
 }
 
-namespace binary::internal {
+namespace binary {
 template <template <typename...> typename V, typename... E>
     requires requires { std::variant_size<V<E...>>::value; }
-struct ConverterCreateFunction<::binary::converters::VariantConverter<V<E...>>> {
-    static auto Invoke(const IGenerator& generator) {
+struct ConverterCreator<::binary::converters::VariantConverter<V<E...>>> {
+    static auto Create(const IGenerator& generator) {
         auto make = [&generator]<typename X>() {
             if constexpr (std::is_same_v<std::remove_cv_t<X>, std::monostate>) {
                 return std::monostate{};

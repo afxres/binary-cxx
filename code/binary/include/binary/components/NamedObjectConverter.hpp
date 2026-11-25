@@ -134,13 +134,4 @@ public:
 };
 }
 
-namespace binary::internal {
-template <typename T, typename Schema>
-struct ConverterCreateFunction<::binary::components::NamedObjectConverter<T, Schema>> {
-    static auto Invoke(const IGenerator& generator) {
-        return std::make_shared<::binary::components::NamedObjectConverter<T, Schema>>(generator);
-    }
-};
-}
-
 #endif

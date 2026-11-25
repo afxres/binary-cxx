@@ -82,5 +82,26 @@ BOOST_AUTO_TEST_CASE(GeneratorExtensionsAddNonTemplateConverterTest) {
     BOOST_REQUIRE_EQUAL(converters.size(), 3);
 }
 
+BOOST_AUTO_TEST_CASE(GeneratorExtensionsAddDefaultConverterTest) {
+    std::map<std::type_index, std::shared_ptr<IConverter>> converters;
+    FakeGenerator generator(converters);
+
+    AddConverter<FakeDoubleConverter>(generator);
+    BOOST_REQUIRE_EQUAL(converters.size(), 1);
+    std::shared_ptr<FakeDoubleConverter> a = std::dynamic_pointer_cast<FakeDoubleConverter>(converters.at(typeid(double)));
+    BOOST_REQUIRE(a != nullptr);
+}
+
+BOOST_AUTO_TEST_CASE(GeneratorExtensionsAddConstArgumentTest) {
+    std::map<std::type_index, std::shared_ptr<IConverter>> converters;
+    FakeGenerator generator(converters);
+
+    generator.AddConverter(std::make_shared<FakeDoubleConverter>());
+    AddConverter<FakeNonTemplateMultipleArgumentsConverter, const double>(generator);
+    std::shared_ptr<FakeNonTemplateMultipleArgumentsConverter> a = std::dynamic_pointer_cast<FakeNonTemplateMultipleArgumentsConverter>(converters.at(typeid(FakeType<void>)));
+    BOOST_REQUIRE_EQUAL(a->Result(), 1);
+    BOOST_REQUIRE_EQUAL(converters.size(), 2);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 }

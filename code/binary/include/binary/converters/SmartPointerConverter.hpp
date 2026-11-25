@@ -5,9 +5,9 @@
 #include <type_traits>
 
 #include "binary/Converter.hpp"
+#include "binary/ConverterCreator.hpp"
 #include "binary/IConverter.hpp"
 #include "binary/IGenerator.hpp"
-#include "binary/internal/ConverterCreateFunction.hpp"
 #include "binary/internal/Define.hpp"
 #include "binary/internal/Exception.hpp"
 #include "binary/internal/Module.hpp"
@@ -117,14 +117,14 @@ public:
 };
 }
 
-namespace binary::internal {
+namespace binary {
 // `std::unique_ptr<T, D>` carries two template arguments, so the generic rule of
 // "one converter per template argument" would ask for a converter for the
 // deleter as well.
 template <typename T, typename D>
     requires std::same_as<T, std::remove_cv_t<T>> && (!std::is_array_v<T>) && std::is_default_constructible_v<D>
-struct ConverterCreateFunction<::binary::converters::SmartPointerConverter<std::unique_ptr<T, D>>> {
-    static auto Invoke(const IGenerator& generator) {
+struct ConverterCreator<::binary::converters::SmartPointerConverter<std::unique_ptr<T, D>>> {
+    static auto Create(const IGenerator& generator) {
         return std::make_shared<::binary::converters::SmartPointerConverter<std::unique_ptr<T, D>>>(
             ::binary::internal::GetConverter<T>(generator.GetConverter(typeid(T)))
         );

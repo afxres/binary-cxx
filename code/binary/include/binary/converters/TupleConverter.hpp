@@ -3,6 +3,7 @@
 
 #include <ranges>
 
+#include "binary/ConverterCreator.hpp"
 #include "binary/internal/Define.hpp"
 #include "binary/internal/Module.hpp"
 #include "binary/internal/TupleElement.hpp"
@@ -76,11 +77,11 @@ public:
 };
 
 template <typename T, typename Indices>
-struct TupleConverterHelper;
+struct TupleConverterTypeHelper;
 
 template <typename T, size_t... Index>
     requires requires { ::binary::internal::TupleSize<T>::Value; } && (!std::ranges::range<T>)
-struct TupleConverterHelper<T, std::index_sequence<Index...>> {
+struct TupleConverterTypeHelper<T, std::index_sequence<Index...>> {
     using Type = TupleConverter<T, std::remove_cv_t<typename ::binary::internal::TupleElement<Index, T>::Type>...>;
 };
 }
@@ -88,7 +89,17 @@ struct TupleConverterHelper<T, std::index_sequence<Index...>> {
 namespace binary::converters {
 template <typename T>
     requires requires { ::binary::internal::TupleSize<T>::Value; } && (!std::ranges::range<T>)
-using TupleConverter = typename ::binary::internal::converters::TupleConverterHelper<T, std::make_index_sequence<::binary::internal::TupleSize<T>::Value>>::Type;
+using TupleConverter = typename ::binary::internal::converters::TupleConverterTypeHelper<T, std::make_index_sequence<::binary::internal::TupleSize<T>::Value>>::Type;
+}
+
+namespace binary {
+template <typename TTuple, typename... TElements>
+    requires std::derived_from<::binary::internal::converters::TupleConverter<TTuple, TElements...>, IConverter>
+struct ConverterCreator<::binary::internal::converters::TupleConverter<TTuple, TElements...>> {
+    static auto Create(const IGenerator& generator) {
+        return std::make_shared<::binary::internal::converters::TupleConverter<TTuple, TElements...>>(GetConverter<TElements>(generator)...);
+    }
+};
 }
 
 #endif
