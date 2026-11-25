@@ -129,6 +129,7 @@ converters must be created, shared or injected at run time.
 | `std::string`, `std::u16string`, `std::u32string`                | `LittleEndianStringConverter<T>`                                               |
 | Ranges (`std::vector`, `std::list`, `std::set`, `std::map`, ...) | `ContainerConverter<T>`                                                        |
 | `std::tuple`                                                     | `TupleConverter<T>`                                                            |
+| `std::array<T, N>`                                               | `ArrayConverter<T>`                                                            |
 | Aggregate structs                                                | `NamedObjectConverter<T, Schema>` (named), or `TupleConverter<T>` (positional) |
 | `std::variant`                                                   | `VariantConverter<T>`                                                          |
 | `std::optional`                                                  | `OptionalConverter<T>`                                                         |
@@ -141,8 +142,7 @@ automatically. A few details are worth knowing:
 
 - Positional aggregate conversion relies on Boost.PFR, which is included by `binary-experimental`,
   even when only the virtual API is otherwise used.
-- Containers are decoded with `emplace` or `emplace_back`, so the container must be resizable;
-  fixed size containers such as `std::array` are not supported for decoding.
+- Containers are decoded with `emplace` or `emplace_back`, so the container must be resizable.
 - Strings are written as little-endian code units without transcoding. `std::string` is stored as
   its bytes (normally UTF-8), `std::u16string` as UTF-16LE.
 - Decoding truncated input throws `std::length_error`; a missing converter in a `Generator` throws

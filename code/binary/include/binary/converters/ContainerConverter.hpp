@@ -42,17 +42,17 @@ public:
     }
 
     BINARY_DEFINE_OVERRIDE_ENCODE_WITH_LENGTH_PREFIX_METHOD(T) {
-        if constexpr (Copyable) {
-            if (this->copy) {
+        if constexpr (Contiguous) {
+            if (this->copy && Copyable) {
                 assert(converter->Length() == sizeof(E));
                 ::binary::EncodeWithLengthPrefix(allocator, std::span(reinterpret_cast<const std::byte*>(item.data()), sizeof(E) * item.size()));
                 return;
             }
-        }
-        if constexpr (Contiguous && !Copyable) {
-            if (this->copy) {
-                assert(converter->Length() == sizeof(E));
-                ::binary::Encode(allocator, sizeof(E) * item.size());
+            // The byte length is known even when the elements are not copied as raw
+            // bytes, so write the exact prefix width instead of the anchored one.
+            auto length = converter->Length();
+            if (length != 0) {
+                ::binary::Encode(allocator, length * item.size());
                 for (const auto& i : item) {
                     converter->EncodeAuto(allocator, i);
                 }

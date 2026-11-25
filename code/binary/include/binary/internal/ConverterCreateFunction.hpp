@@ -21,8 +21,12 @@ struct ConverterCreateFunction<TConverter> {
     }
 };
 
+// `std::array` is tuple like and a range at once, so the constructor signature --
+// not the shape -- is what separates this specialization from the range one.
 template <template <typename, typename...> typename TConverter, typename TTuple, typename... TElements>
-    requires std::derived_from<TConverter<TTuple, TElements...>, IConverter> && requires { ::binary::internal::TupleSize<TTuple>::Value; }
+    requires std::derived_from<TConverter<TTuple, TElements...>, IConverter> &&
+    requires { ::binary::internal::TupleSize<TTuple>::Value; } &&
+    std::constructible_from<TConverter<TTuple, TElements...>, const std::shared_ptr<Converter<TElements>>&...>
 struct ConverterCreateFunction<TConverter<TTuple, TElements...>> {
     static auto Invoke(const IGenerator& generator) {
         return std::make_shared<TConverter<TTuple, TElements...>>(GetConverter<TElements>(generator)...);
