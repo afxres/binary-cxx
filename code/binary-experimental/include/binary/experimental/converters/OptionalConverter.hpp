@@ -17,8 +17,7 @@ struct OptionalConverter;
 
 // Static counterpart of `binary::converters::OptionalConverter`. Same wire:
 // length-prefixed tag (0 = empty, 1 = value) plus the value in the requested
-// mode. The tag matches `VariantConverter<std::variant<std::monostate, E>>`,
-// which is already pinned by the variant tests.
+// mode, tag matching `VariantConverter<std::variant<std::monostate, E>>`.
 template <typename E>
     requires std::same_as<E, std::remove_cv_t<E>>
 struct OptionalConverter<std::optional<E>> : ConverterMethodHelper<OptionalConverter<std::optional<E>>> {

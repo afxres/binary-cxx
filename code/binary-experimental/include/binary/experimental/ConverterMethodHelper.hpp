@@ -11,10 +11,8 @@
 
 namespace binary::experimental {
 // The four entry points a converter may leave to the length rule, matching the
-// virtual `binary::Converter<T>`. A converter that declares one of them hides
-// the default, so `Length`/`Encode`/`Decode` are the only required members --
-// declaring them here as well would make `D::Encode` resolve back to this class
-// and recurse.
+// virtual `binary::Converter<T>`; forwarding `Length`/`Encode`/`Decode` here as
+// well would make `D::Encode` resolve back to this class and recurse.
 template <typename D>
 struct ConverterMethodHelper {
     template <typename T>

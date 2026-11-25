@@ -15,8 +15,7 @@ template <typename T>
 struct UniquePointerConverter;
 
 // Static counterpart of `binary::converters::UniquePointerConverter`, same wire:
-// the pointee. All six entry points are forwarded, so a pointer stays
-// byte-identical to its pointee in every position.
+// the pointee.
 template <typename T, typename D>
     requires std::same_as<T, std::remove_cv_t<T>> && (!std::is_array_v<T>) && std::is_default_constructible_v<D>
 struct UniquePointerConverter<std::unique_ptr<T, D>> : ConverterMethodHelper<UniquePointerConverter<std::unique_ptr<T, D>>> {

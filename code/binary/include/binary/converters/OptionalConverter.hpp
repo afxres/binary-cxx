@@ -14,18 +14,11 @@ namespace binary::converters {
 template <typename T>
 class OptionalConverter;
 
-// `std::optional<E>` is the two-case tagged union that C# calls `Nullable<T>`
-// and Rust calls `Option<T>`: a length-prefixed tag (0 = empty, 1 = value)
-// followed by the value in the same mode as the entry point -- `Encode` writes
-// it raw, `EncodeAuto` lets the element delimit itself.
-//
-// The tag is byte-identical to what `VariantConverter` writes for
-// `std::variant<std::monostate, E>`, because that converter already treats
-// `std::monostate` as "tag only, no payload". This class does not reuse
-// `VariantConverter` for two reasons, neither of which is a wire difference:
-// the variant class is constrained on `std::variant_size<V<E...>>` (which is
-// ill-formed for `std::optional`) and it reaches into the variant interface
-// with `item.index()`, `std::get<Index>` and `std::in_place_index<Index>`.
+// A length-prefixed tag (0 = empty, 1 = value) followed by the value in the
+// same mode as the entry point. The tag is byte-identical to what
+// `VariantConverter` writes for `std::monostate`; that converter is not reused
+// because its constraint is ill-formed for `std::optional` and its interface
+// is variant-specific.
 template <typename E>
     requires std::same_as<E, std::remove_cv_t<E>>
 class OptionalConverter<std::optional<E>> : public Converter<std::optional<E>> {

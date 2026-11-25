@@ -15,8 +15,7 @@ template <typename T>
 struct SharedPointerConverter;
 
 // Static counterpart of `binary::converters::SharedPointerConverter`, same wire:
-// the pointee. All six entry points are forwarded, so a pointer stays
-// byte-identical to its pointee in every position.
+// the pointee.
 template <typename T>
     requires std::same_as<T, std::remove_cv_t<T>>
 struct SharedPointerConverter<std::shared_ptr<T>> : ConverterMethodHelper<SharedPointerConverter<std::shared_ptr<T>>> {

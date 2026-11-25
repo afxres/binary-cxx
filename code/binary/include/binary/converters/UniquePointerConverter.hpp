@@ -6,7 +6,6 @@
 
 #include "binary/Converter.hpp"
 #include "binary/ConverterCreator.hpp"
-#include "binary/IConverter.hpp"
 #include "binary/IGenerator.hpp"
 #include "binary/internal/Define.hpp"
 #include "binary/internal/Exception.hpp"
@@ -16,16 +15,9 @@ namespace binary::converters {
 template <typename T>
 class UniquePointerConverter;
 
-// The ownership indirection is not part of the format: the wire is the pointee,
-// so `std::unique_ptr<T, D>` and `T` agree byte for byte and a container keeps
-// its element size.
-//
-// Every entry point is forwarded to the element converter explicitly. The
-// inherited ones dispatch on `Length()` and would drop an override on the
-// element -- the anchor of `EncodeWithLengthPrefix` widens a payload whose own
-// writer already knows its width. A null pointer has no value to write and is
-// rejected instead of taking a tag: a tag would make the pointer a different
-// wire type from its pointee. Use `std::optional` for a value that may be absent.
+// The wire is the pointee: a null pointer is rejected instead of taking a tag,
+// and entry points forward to the element converter explicitly, since the
+// inherited ones dispatch on `Length()` and would drop an override on it.
 template <typename T, typename D>
     requires std::same_as<T, std::remove_cv_t<T>> && (!std::is_array_v<T>) && std::is_default_constructible_v<D>
 class UniquePointerConverter<std::unique_ptr<T, D>> : public Converter<std::unique_ptr<T, D>> {
@@ -73,9 +65,8 @@ public:
 }
 
 namespace binary {
-// `std::unique_ptr<T, D>` carries two template arguments, so the generic rule of
-// "one converter per template argument" would ask for a converter for the
-// deleter as well.
+// The deleter is a second template argument, so the generic rule of "one
+// converter per template argument" would ask for it too.
 template <typename T, typename D>
     requires std::same_as<T, std::remove_cv_t<T>> && (!std::is_array_v<T>) && std::is_default_constructible_v<D>
 struct ConverterCreator<::binary::converters::UniquePointerConverter<std::unique_ptr<T, D>>> {
