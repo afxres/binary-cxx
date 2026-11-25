@@ -7,12 +7,12 @@
 #include <type_traits>
 
 #include "binary/Allocator.hpp"
-#include "binary/experimental/helpers/GetConverterHelper.hpp"
+#include "binary/experimental/ConverterTypeHelper.hpp"
 
 namespace binary::experimental {
 template <typename T>
     requires std::same_as<T, std::remove_cv_t<T>>
-using Converter = typename ::binary::experimental::helpers::GetConverterHelper<T>::Type;
+using Converter = typename ::binary::experimental::ConverterTypeHelper<T>::Type;
 
 template <typename T, typename R = std::invoke_result_t<decltype(Allocator::Invoke<>), const std::function<void(Allocator&)>&>>
     requires std::same_as<T, std::remove_cv_t<T>> &&

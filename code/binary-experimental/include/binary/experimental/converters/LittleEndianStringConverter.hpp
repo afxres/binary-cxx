@@ -4,15 +4,15 @@
 #include <concepts>
 
 #include "binary/ConverterExtensions.hpp"
-#include "binary/experimental/ConverterDefaults.hpp"
-#include "binary/experimental/helpers/GetConverterHelper.hpp"
+#include "binary/experimental/ConverterMethodHelper.hpp"
+#include "binary/experimental/ConverterTypeHelper.hpp"
 #include "binary/experimental/internal/Define.hpp"
 #include "binary/internal/String.hpp"
 
 namespace binary::experimental::converters {
 template <typename T>
     requires std::same_as<T, std::remove_cv_t<T>>
-struct LittleEndianStringConverter : ConverterDefaults<LittleEndianStringConverter<T>> {
+struct LittleEndianStringConverter : ConverterMethodHelper<LittleEndianStringConverter<T>> {
     using ValueType = typename T::value_type;
 
     BINARY_EXPERIMENTAL_STATIC_LENGTH_METHOD() {
@@ -35,12 +35,12 @@ struct LittleEndianStringConverter : ConverterDefaults<LittleEndianStringConvert
 };
 }
 
-namespace binary::experimental::helpers {
+namespace binary::experimental {
 template <typename T>
     requires std::same_as<T, std::remove_cv_t<T>> &&
     requires { typename T::value_type; } &&
     requires(const T& item) { item.empty(); item.data(); item.size(); item.c_str(); }
-struct GetConverterHelper<T> {
+struct ConverterTypeHelper<T> {
     using Type = ::binary::experimental::converters::LittleEndianStringConverter<T>;
 };
 }

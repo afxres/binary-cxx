@@ -5,8 +5,8 @@
 #include <type_traits>
 
 #include "binary/Allocator.hpp"
-#include "binary/experimental/ConverterDefaults.hpp"
-#include "binary/experimental/helpers/GetConverterHelper.hpp"
+#include "binary/experimental/ConverterMethodHelper.hpp"
+#include "binary/experimental/ConverterTypeHelper.hpp"
 #include "binary/experimental/internal/Define.hpp"
 #include "binary/internal/Exception.hpp"
 
@@ -19,11 +19,11 @@ struct SmartPointerConverter;
 // byte-identical to its pointee in every position.
 template <typename T, typename D>
     requires std::same_as<T, std::remove_cv_t<T>> && (!std::is_array_v<T>) && std::is_default_constructible_v<D>
-struct SmartPointerConverter<std::unique_ptr<T, D>> : ConverterDefaults<SmartPointerConverter<std::unique_ptr<T, D>>> {
+struct SmartPointerConverter<std::unique_ptr<T, D>> : ConverterMethodHelper<SmartPointerConverter<std::unique_ptr<T, D>>> {
 private:
     using P = std::unique_ptr<T, D>;
 
-    using C = typename ::binary::experimental::helpers::GetConverterHelper<T>::Type;
+    using C = typename ::binary::experimental::ConverterTypeHelper<T>::Type;
 
     static const T& Value(const P& item) {
         if (!item) {
@@ -64,11 +64,11 @@ public:
 
 template <typename T>
     requires std::same_as<T, std::remove_cv_t<T>>
-struct SmartPointerConverter<std::shared_ptr<T>> : ConverterDefaults<SmartPointerConverter<std::shared_ptr<T>>> {
+struct SmartPointerConverter<std::shared_ptr<T>> : ConverterMethodHelper<SmartPointerConverter<std::shared_ptr<T>>> {
 private:
     using P = std::shared_ptr<T>;
 
-    using C = typename ::binary::experimental::helpers::GetConverterHelper<T>::Type;
+    using C = typename ::binary::experimental::ConverterTypeHelper<T>::Type;
 
     static const T& Value(const P& item) {
         if (!item) {
@@ -108,16 +108,16 @@ public:
 };
 }
 
-namespace binary::experimental::helpers {
+namespace binary::experimental {
 template <typename T, typename D>
     requires std::same_as<T, std::remove_cv_t<T>> && (!std::is_array_v<T>) && std::is_default_constructible_v<D>
-struct GetConverterHelper<std::unique_ptr<T, D>> {
+struct ConverterTypeHelper<std::unique_ptr<T, D>> {
     using Type = ::binary::experimental::converters::SmartPointerConverter<std::unique_ptr<T, D>>;
 };
 
 template <typename T>
     requires std::same_as<T, std::remove_cv_t<T>>
-struct GetConverterHelper<std::shared_ptr<T>> {
+struct ConverterTypeHelper<std::shared_ptr<T>> {
     using Type = ::binary::experimental::converters::SmartPointerConverter<std::shared_ptr<T>>;
 };
 }

@@ -42,9 +42,9 @@ struct FakeCopyTypeConverter {
 };
 }
 
-namespace binary::experimental::helpers {
+namespace binary::experimental {
 template <>
-struct GetConverterHelper<::tests::binary::experimental::converters::VariantConverterTests::FakeCopyType> {
+struct ConverterTypeHelper<::tests::binary::experimental::converters::VariantConverterTests::FakeCopyType> {
     using Type = ::tests::binary::experimental::converters::VariantConverterTests::FakeCopyTypeConverter;
 };
 }

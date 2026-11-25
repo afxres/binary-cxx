@@ -3,8 +3,8 @@
 
 #include <ranges>
 
-#include "binary/experimental/ConverterDefaults.hpp"
-#include "binary/experimental/helpers/GetConverterHelper.hpp"
+#include "binary/experimental/ConverterMethodHelper.hpp"
+#include "binary/experimental/ConverterTypeHelper.hpp"
 #include "binary/experimental/internal/Define.hpp"
 #include "binary/experimental/internal/TupleElement.hpp"
 #include "binary/experimental/internal/TupleGetHelper.hpp"
@@ -15,13 +15,13 @@ namespace binary::experimental::converters {
 // boundary per element, so the positional treatment of it would disagree.
 template <typename T>
     requires requires { ::binary::internal::TupleSize<T>::Value; } && (!std::ranges::range<T>)
-struct TupleConverter : ConverterDefaults<TupleConverter<T>> {
+struct TupleConverter : ConverterMethodHelper<TupleConverter<T>> {
 private:
     static constexpr size_t ElementCount = ::binary::internal::TupleSize<T>::Value;
     static_assert(ElementCount > 0, "zero-member tuples are not supported");
 
     template <size_t Index>
-    using ElementConverterType = typename ::binary::experimental::helpers::GetConverterHelper<std::remove_cv_t<typename ::binary::internal::TupleElement<Index, T>::Type>>::Type;
+    using ElementConverterType = typename ::binary::experimental::ConverterTypeHelper<std::remove_cv_t<typename ::binary::internal::TupleElement<Index, T>::Type>>::Type;
 
     template <size_t IsAuto, size_t Index>
     static void EncodeInternal(Allocator& allocator, const T& item) {
@@ -95,14 +95,14 @@ public:
 };
 }
 
-namespace binary::experimental::helpers {
+namespace binary::experimental {
 template <typename T>
     requires std::same_as<T, std::remove_cv_t<T>> &&
     requires { ::binary::internal::TupleSize<T>::Value; } &&
     (!std::ranges::range<T>) &&
     (!requires { GetNamedObjectSchema(static_cast<std::remove_cv_t<T>*>(nullptr)); }) &&
     (!requires { GetTupleObjectSchema(static_cast<std::remove_cv_t<T>*>(nullptr)); })
-struct GetConverterHelper<T> {
+struct ConverterTypeHelper<T> {
     using Type = ::binary::experimental::converters::TupleConverter<T>;
 };
 }

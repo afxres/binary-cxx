@@ -6,8 +6,8 @@
 #include <type_traits>
 
 #include "binary/ConverterExtensions.hpp"
-#include "binary/experimental/ConverterDefaults.hpp"
-#include "binary/experimental/helpers/GetConverterHelper.hpp"
+#include "binary/experimental/ConverterMethodHelper.hpp"
+#include "binary/experimental/ConverterTypeHelper.hpp"
 #include "binary/experimental/internal/Define.hpp"
 #include "binary/internal/Exception.hpp"
 
@@ -21,11 +21,11 @@ struct OptionalConverter;
 // which is already pinned by the variant tests.
 template <typename E>
     requires std::same_as<E, std::remove_cv_t<E>>
-struct OptionalConverter<std::optional<E>> : ConverterDefaults<OptionalConverter<std::optional<E>>> {
+struct OptionalConverter<std::optional<E>> : ConverterMethodHelper<OptionalConverter<std::optional<E>>> {
 private:
     using T = std::optional<E>;
 
-    using C = typename ::binary::experimental::helpers::GetConverterHelper<E>::Type;
+    using C = typename ::binary::experimental::ConverterTypeHelper<E>::Type;
 
     static constexpr size_t None = 0;
     static constexpr size_t Some = 1;
@@ -81,10 +81,10 @@ public:
 };
 }
 
-namespace binary::experimental::helpers {
+namespace binary::experimental {
 template <typename E>
     requires std::same_as<E, std::remove_cv_t<E>>
-struct GetConverterHelper<std::optional<E>> {
+struct ConverterTypeHelper<std::optional<E>> {
     using Type = ::binary::experimental::converters::OptionalConverter<std::optional<E>>;
 };
 }

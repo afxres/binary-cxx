@@ -6,21 +6,21 @@
 #include <utility>
 #include <variant>
 
-#include "binary/experimental/ConverterDefaults.hpp"
-#include "binary/experimental/helpers/GetConverterHelper.hpp"
+#include "binary/experimental/ConverterMethodHelper.hpp"
+#include "binary/experimental/ConverterTypeHelper.hpp"
 #include "binary/experimental/internal/Define.hpp"
 #include "binary/internal/Exception.hpp"
 
 namespace binary::experimental::converters {
 template <typename T>
-struct VariantConverter : ConverterDefaults<VariantConverter<T>> {
+struct VariantConverter : ConverterMethodHelper<VariantConverter<T>> {
 private:
     using EncodeFunction = void (*)(Allocator&, const T&);
     using DecodeFunction = T (*)(std::span<const std::byte>&);
     static constexpr size_t ElementCount = std::variant_size_v<T>;
 
     template <size_t Index>
-    using ElementConverterType = typename ::binary::experimental::helpers::GetConverterHelper<std::remove_cv_t<std::variant_alternative_t<Index, T>>>::Type;
+    using ElementConverterType = typename ::binary::experimental::ConverterTypeHelper<std::remove_cv_t<std::variant_alternative_t<Index, T>>>::Type;
 
     template <size_t Index>
     static constexpr bool IsMonostate = std::is_same_v<std::remove_cv_t<std::variant_alternative_t<Index, T>>, std::monostate>;
@@ -109,11 +109,11 @@ public:
 };
 }
 
-namespace binary::experimental::helpers {
+namespace binary::experimental {
 template <typename T>
     requires std::same_as<T, std::remove_cv_t<T>> &&
     requires { std::variant_size<T>::value; }
-struct GetConverterHelper<T> {
+struct ConverterTypeHelper<T> {
     using Type = ::binary::experimental::converters::VariantConverter<T>;
 };
 }

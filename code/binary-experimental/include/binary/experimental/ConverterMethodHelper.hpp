@@ -1,5 +1,5 @@
-#ifndef BINARY_EXPERIMENTAL_CONVERTERDEFAULTS_HPP
-#define BINARY_EXPERIMENTAL_CONVERTERDEFAULTS_HPP
+#ifndef BINARY_EXPERIMENTAL_CONVERTERMETHODHELPER_HPP
+#define BINARY_EXPERIMENTAL_CONVERTERMETHODHELPER_HPP
 
 #include <cstddef>
 #include <span>
@@ -16,7 +16,7 @@ namespace binary::experimental {
 // declaring them here as well would make `D::Encode` resolve back to this class
 // and recurse.
 template <typename D>
-struct ConverterDefaults {
+struct ConverterMethodHelper {
     template <typename T>
     static void EncodeAuto(Allocator& allocator, const T& item) {
         if constexpr (D::Length() != 0) {

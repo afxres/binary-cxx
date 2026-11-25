@@ -19,10 +19,10 @@
 #include <variant>
 #include <vector>
 
-namespace tests::binary::experimental::ConverterDefaultsTests {
-BOOST_AUTO_TEST_SUITE(ConverterDefaultsTests)
+namespace tests::binary::experimental::ConverterMethodHelperTests {
+BOOST_AUTO_TEST_SUITE(ConverterMethodHelperTests)
 
-BOOST_AUTO_TEST_CASE(ConverterDefaultsDecodeAutoNotEnoughBytesTest) {
+BOOST_AUTO_TEST_CASE(ConverterMethodHelperDecodeAutoNotEnoughBytesTest) {
     // `int64_t` has a fixed length, so the inherited default slices it and never
     // reads past the end of the buffer.
     using ConverterType = ::binary::experimental::Converter<int64_t>;
@@ -49,7 +49,7 @@ BOOST_AUTO_TEST_CASE(ConverterDefaultsDecodeAutoNotEnoughBytesTest) {
     );
 }
 
-using ConverterDefaultsEncodeWithLengthPrefixTestTypeData = boost::mpl::list<
+using ConverterMethodHelperEncodeWithLengthPrefixTestTypeData = boost::mpl::list<
     int32_t,
     std::string,
     std::tuple<int32_t>,
@@ -57,7 +57,7 @@ using ConverterDefaultsEncodeWithLengthPrefixTestTypeData = boost::mpl::list<
     std::vector<int32_t>,
     std::list<std::string>>;
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(ConverterDefaultsEncodeWithLengthPrefixTest, T, ConverterDefaultsEncodeWithLengthPrefixTestTypeData) {
+BOOST_AUTO_TEST_CASE_TEMPLATE(ConverterMethodHelperEncodeWithLengthPrefixTest, T, ConverterMethodHelperEncodeWithLengthPrefixTestTypeData) {
     using ConverterType = ::binary::experimental::Converter<T>;
     auto buffer = ::binary::Allocator::Invoke([](auto& allocator) { ConverterType::EncodeWithLengthPrefix(allocator, T{}); });
     std::span<const std::byte> span = buffer;

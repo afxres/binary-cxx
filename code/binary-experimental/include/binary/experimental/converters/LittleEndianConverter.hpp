@@ -4,8 +4,8 @@
 #include <concepts>
 
 #include "binary/Allocator.hpp"
-#include "binary/experimental/ConverterDefaults.hpp"
-#include "binary/experimental/helpers/GetConverterHelper.hpp"
+#include "binary/experimental/ConverterMethodHelper.hpp"
+#include "binary/experimental/ConverterTypeHelper.hpp"
 #include "binary/experimental/internal/Define.hpp"
 #include "binary/internal/AllocatorUnsafeAccessor.hpp"
 #include "binary/internal/Endian.hpp"
@@ -14,7 +14,7 @@
 namespace binary::experimental::converters {
 template <typename T>
     requires std::same_as<T, std::remove_cv_t<T>>
-struct LittleEndianConverter : ConverterDefaults<LittleEndianConverter<T>> {
+struct LittleEndianConverter : ConverterMethodHelper<LittleEndianConverter<T>> {
     BINARY_EXPERIMENTAL_STATIC_LENGTH_METHOD() {
         return sizeof(T);
     }
@@ -32,11 +32,11 @@ struct LittleEndianConverter : ConverterDefaults<LittleEndianConverter<T>> {
 };
 }
 
-namespace binary::experimental::helpers {
+namespace binary::experimental {
 template <typename T>
     requires std::same_as<T, std::remove_cv_t<T>> &&
     (std::is_arithmetic_v<T> || std::is_enum_v<T>)
-struct GetConverterHelper<T> {
+struct ConverterTypeHelper<T> {
     using Type = ::binary::experimental::converters::LittleEndianConverter<T>;
 };
 }

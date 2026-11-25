@@ -12,8 +12,8 @@
 #include "binary/ConverterExtensions.hpp"
 #include "binary/components/MemberAccessor.hpp"
 #include "binary/components/NamedObjectLayout.hpp"
-#include "binary/experimental/ConverterDefaults.hpp"
-#include "binary/experimental/helpers/GetConverterHelper.hpp"
+#include "binary/experimental/ConverterMethodHelper.hpp"
+#include "binary/experimental/ConverterTypeHelper.hpp"
 #include "binary/experimental/internal/Define.hpp"
 
 namespace binary::experimental::components {
@@ -24,7 +24,7 @@ struct NamedObjectMember {
     using DescriptorType = std::tuple_element_t<Index, Members>;
     using AccessorType = std::remove_cvref_t<decltype(std::declval<DescriptorType&>().Accessor)>;
     using MemberType = std::remove_cv_t<typename ::binary::components::AccessorValue<T, AccessorType>::Type>;
-    using ElementConverterType = typename ::binary::experimental::helpers::GetConverterHelper<MemberType>::Type;
+    using ElementConverterType = typename ::binary::experimental::ConverterTypeHelper<MemberType>::Type;
 
     static void Encode(Allocator& allocator, const T& item) {
         const auto& descriptor = std::get<Index>(Schema::Members);
@@ -41,7 +41,7 @@ struct NamedObjectMember {
 }
 
 template <typename T, typename Schema>
-class NamedObjectConverter : public ConverterDefaults<NamedObjectConverter<T, Schema>> {
+class NamedObjectConverter : public ConverterMethodHelper<NamedObjectConverter<T, Schema>> {
 private:
     using Layout = ::binary::components::NamedObjectLayout<Schema>;
 
@@ -74,10 +74,10 @@ public:
 };
 }
 
-namespace binary::experimental::helpers {
+namespace binary::experimental {
 template <typename T>
     requires requires { GetNamedObjectSchema(static_cast<std::remove_cv_t<T>*>(nullptr)); }
-struct GetConverterHelper<T> {
+struct ConverterTypeHelper<T> {
     using Type = ::binary::experimental::components::NamedObjectConverter<T, std::remove_cvref_t<decltype(GetNamedObjectSchema(static_cast<std::remove_cv_t<T>*>(nullptr)))>>;
 };
 }

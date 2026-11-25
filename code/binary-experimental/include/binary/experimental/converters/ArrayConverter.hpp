@@ -8,8 +8,8 @@
 #include <type_traits>
 #include <utility>
 
-#include "binary/experimental/ConverterDefaults.hpp"
-#include "binary/experimental/helpers/GetConverterHelper.hpp"
+#include "binary/experimental/ConverterMethodHelper.hpp"
+#include "binary/experimental/ConverterTypeHelper.hpp"
 #include "binary/experimental/internal/Define.hpp"
 
 namespace binary::experimental::converters {
@@ -19,10 +19,10 @@ struct ArrayConverter;
 // Static counterpart of `binary::converters::ArrayConverter`, same wire.
 template <typename E, size_t N>
     requires std::same_as<E, std::remove_cv_t<E>>
-struct ArrayConverter<std::array<E, N>> : ConverterDefaults<ArrayConverter<std::array<E, N>>> {
+struct ArrayConverter<std::array<E, N>> : ConverterMethodHelper<ArrayConverter<std::array<E, N>>> {
 private:
     using T = std::array<E, N>;
-    using C = typename ::binary::experimental::helpers::GetConverterHelper<E>::Type;
+    using C = typename ::binary::experimental::ConverterTypeHelper<E>::Type;
 
     template <size_t... Index>
     static T DecodeInternal(std::span<const std::byte>& span, std::index_sequence<Index...>) {
@@ -53,10 +53,10 @@ public:
 };
 }
 
-namespace binary::experimental::helpers {
+namespace binary::experimental {
 template <typename E, size_t N>
     requires std::same_as<E, std::remove_cv_t<E>>
-struct GetConverterHelper<std::array<E, N>> {
+struct ConverterTypeHelper<std::array<E, N>> {
     using Type = ::binary::experimental::converters::ArrayConverter<std::array<E, N>>;
 };
 }
