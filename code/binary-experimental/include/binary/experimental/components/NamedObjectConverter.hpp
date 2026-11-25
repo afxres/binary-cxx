@@ -12,7 +12,7 @@
 #include "binary/ConverterExtensions.hpp"
 #include "binary/components/MemberAccessor.hpp"
 #include "binary/components/NamedObjectLayout.hpp"
-#include "binary/experimental/helpers/ConverterEncodeWithLengthPrefixMethodHelper.hpp"
+#include "binary/experimental/ConverterDefaults.hpp"
 #include "binary/experimental/helpers/GetConverterHelper.hpp"
 #include "binary/experimental/internal/Define.hpp"
 
@@ -30,7 +30,7 @@ struct NamedObjectMember {
         const auto& descriptor = std::get<Index>(Schema::Members);
         const std::string_view name = ::binary::components::NamedObjectLayout<Schema>::Names[Index];
         ::binary::EncodeWithLengthPrefix(allocator, std::span<const std::byte>(reinterpret_cast<const std::byte*>(name.data()), name.size()));
-        ::binary::experimental::helpers::ConverterEncodeWithLengthPrefixMethodHelper<ElementConverterType>::Invoke(allocator, descriptor.Accessor.Get(item));
+        ElementConverterType::EncodeWithLengthPrefix(allocator, descriptor.Accessor.Get(item));
     }
 
     static void Decode(T& item, std::span<const std::byte> span) {
@@ -41,7 +41,7 @@ struct NamedObjectMember {
 }
 
 template <typename T, typename Schema>
-class NamedObjectConverter {
+class NamedObjectConverter : public ConverterDefaults<NamedObjectConverter<T, Schema>> {
 private:
     using Layout = ::binary::components::NamedObjectLayout<Schema>;
 

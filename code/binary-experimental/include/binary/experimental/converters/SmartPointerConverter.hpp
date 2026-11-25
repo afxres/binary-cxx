@@ -5,10 +5,7 @@
 #include <type_traits>
 
 #include "binary/Allocator.hpp"
-#include "binary/experimental/helpers/ConverterDecodeAutoMethodHelper.hpp"
-#include "binary/experimental/helpers/ConverterDecodeWithLengthPrefixMethodHelper.hpp"
-#include "binary/experimental/helpers/ConverterEncodeAutoMethodHelper.hpp"
-#include "binary/experimental/helpers/ConverterEncodeWithLengthPrefixMethodHelper.hpp"
+#include "binary/experimental/ConverterDefaults.hpp"
 #include "binary/experimental/helpers/GetConverterHelper.hpp"
 #include "binary/experimental/internal/Define.hpp"
 #include "binary/internal/Exception.hpp"
@@ -22,7 +19,7 @@ struct SmartPointerConverter;
 // byte-identical to its pointee in every position.
 template <typename T, typename D>
     requires std::same_as<T, std::remove_cv_t<T>> && (!std::is_array_v<T>) && std::is_default_constructible_v<D>
-struct SmartPointerConverter<std::unique_ptr<T, D>> {
+struct SmartPointerConverter<std::unique_ptr<T, D>> : ConverterDefaults<SmartPointerConverter<std::unique_ptr<T, D>>> {
 private:
     using P = std::unique_ptr<T, D>;
 
@@ -45,11 +42,11 @@ public:
     }
 
     BINARY_EXPERIMENTAL_STATIC_ENCODE_AUTO_METHOD(P) {
-        ::binary::experimental::helpers::ConverterEncodeAutoMethodHelper<C>::Invoke(allocator, Value(item));
+        C::EncodeAuto(allocator, Value(item));
     }
 
     BINARY_EXPERIMENTAL_STATIC_ENCODE_WITH_LENGTH_PREFIX_METHOD(P) {
-        ::binary::experimental::helpers::ConverterEncodeWithLengthPrefixMethodHelper<C>::Invoke(allocator, Value(item));
+        C::EncodeWithLengthPrefix(allocator, Value(item));
     }
 
     BINARY_EXPERIMENTAL_STATIC_DECODE_METHOD(P) {
@@ -57,17 +54,17 @@ public:
     }
 
     BINARY_EXPERIMENTAL_STATIC_DECODE_AUTO_METHOD(P) {
-        return P(new T(::binary::experimental::helpers::ConverterDecodeAutoMethodHelper<C>::Invoke(span)));
+        return P(new T(C::DecodeAuto(span)));
     }
 
     BINARY_EXPERIMENTAL_STATIC_DECODE_METHOD_WITH_NAME(P, DecodeWithLengthPrefix) {
-        return P(new T(::binary::experimental::helpers::ConverterDecodeWithLengthPrefixMethodHelper<C>::Invoke(span)));
+        return P(new T(C::DecodeWithLengthPrefix(span)));
     }
 };
 
 template <typename T>
     requires std::same_as<T, std::remove_cv_t<T>>
-struct SmartPointerConverter<std::shared_ptr<T>> {
+struct SmartPointerConverter<std::shared_ptr<T>> : ConverterDefaults<SmartPointerConverter<std::shared_ptr<T>>> {
 private:
     using P = std::shared_ptr<T>;
 
@@ -90,11 +87,11 @@ public:
     }
 
     BINARY_EXPERIMENTAL_STATIC_ENCODE_AUTO_METHOD(P) {
-        ::binary::experimental::helpers::ConverterEncodeAutoMethodHelper<C>::Invoke(allocator, Value(item));
+        C::EncodeAuto(allocator, Value(item));
     }
 
     BINARY_EXPERIMENTAL_STATIC_ENCODE_WITH_LENGTH_PREFIX_METHOD(P) {
-        ::binary::experimental::helpers::ConverterEncodeWithLengthPrefixMethodHelper<C>::Invoke(allocator, Value(item));
+        C::EncodeWithLengthPrefix(allocator, Value(item));
     }
 
     BINARY_EXPERIMENTAL_STATIC_DECODE_METHOD(P) {
@@ -102,11 +99,11 @@ public:
     }
 
     BINARY_EXPERIMENTAL_STATIC_DECODE_AUTO_METHOD(P) {
-        return std::make_shared<T>(::binary::experimental::helpers::ConverterDecodeAutoMethodHelper<C>::Invoke(span));
+        return std::make_shared<T>(C::DecodeAuto(span));
     }
 
     BINARY_EXPERIMENTAL_STATIC_DECODE_METHOD_WITH_NAME(P, DecodeWithLengthPrefix) {
-        return std::make_shared<T>(::binary::experimental::helpers::ConverterDecodeWithLengthPrefixMethodHelper<C>::Invoke(span));
+        return std::make_shared<T>(C::DecodeWithLengthPrefix(span));
     }
 };
 }

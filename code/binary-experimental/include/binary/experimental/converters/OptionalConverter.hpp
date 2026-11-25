@@ -6,8 +6,7 @@
 #include <type_traits>
 
 #include "binary/ConverterExtensions.hpp"
-#include "binary/experimental/helpers/ConverterDecodeAutoMethodHelper.hpp"
-#include "binary/experimental/helpers/ConverterEncodeAutoMethodHelper.hpp"
+#include "binary/experimental/ConverterDefaults.hpp"
 #include "binary/experimental/helpers/GetConverterHelper.hpp"
 #include "binary/experimental/internal/Define.hpp"
 #include "binary/internal/Exception.hpp"
@@ -22,7 +21,7 @@ struct OptionalConverter;
 // which is already pinned by the variant tests.
 template <typename E>
     requires std::same_as<E, std::remove_cv_t<E>>
-struct OptionalConverter<std::optional<E>> {
+struct OptionalConverter<std::optional<E>> : ConverterDefaults<OptionalConverter<std::optional<E>>> {
 private:
     using T = std::optional<E>;
 
@@ -36,7 +35,7 @@ private:
         ::binary::Encode(allocator, item.has_value() ? Some : None);
         if (item.has_value()) {
             if constexpr (IsAuto) {
-                ::binary::experimental::helpers::ConverterEncodeAutoMethodHelper<C>::Invoke(allocator, *item);
+                C::EncodeAuto(allocator, *item);
             } else {
                 C::Encode(allocator, *item);
             }
@@ -53,7 +52,7 @@ private:
             ::binary::internal::ThrowInvalidOptionalTag(tag);
         }
         if constexpr (IsAuto) {
-            return T(std::in_place, ::binary::experimental::helpers::ConverterDecodeAutoMethodHelper<C>::Invoke(span));
+            return T(std::in_place, C::DecodeAuto(span));
         } else {
             return T(std::in_place, C::Decode(span));
         }

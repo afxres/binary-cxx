@@ -27,8 +27,6 @@
 #include <binary/experimental/converters/LittleEndianStringConverter.hpp>
 #include <binary/experimental/converters/OptionalConverter.hpp>
 #include <binary/experimental/converters/TupleConverter.hpp>
-#include <binary/experimental/helpers/ConverterDecodeAutoMethodHelper.hpp>
-#include <binary/experimental/helpers/ConverterEncodeAutoMethodHelper.hpp>
 
 #include "Types.hpp"
 
@@ -119,7 +117,7 @@ std::vector<std::byte> EncodeTemplate(const T& item, bool isAuto) {
     using Converter = ::binary::experimental::Converter<T>;
     return ::binary::Allocator::Invoke([&item, isAuto](::binary::Allocator& allocator) {
         if (isAuto) {
-            ::binary::experimental::helpers::ConverterEncodeAutoMethodHelper<Converter>::Invoke(allocator, item);
+            Converter::EncodeAuto(allocator, item);
         } else {
             Converter::Encode(allocator, item);
         }
@@ -156,7 +154,7 @@ T DecodeTemplate(const std::vector<std::byte>& bytes, bool isAuto) {
     using Converter = ::binary::experimental::Converter<T>;
     if (isAuto) {
         std::span<const std::byte> span(bytes);
-        return ::binary::experimental::helpers::ConverterDecodeAutoMethodHelper<Converter>::Invoke(span);
+        return Converter::DecodeAuto(span);
     }
     return Converter::Decode(std::span<const std::byte>(bytes));
 }

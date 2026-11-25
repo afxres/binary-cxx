@@ -6,10 +6,10 @@
 #include <type_traits>
 
 #include "binary/ConverterExtensions.hpp"
+#include "binary/experimental/ConverterDefaults.hpp"
 #include "binary/experimental/converters/LittleEndianConverter.hpp"
-#include "binary/experimental/helpers/ConverterDecodeAutoMethodHelper.hpp"
-#include "binary/experimental/helpers/ConverterEncodeAutoMethodHelper.hpp"
 #include "binary/experimental/helpers/GetConverterHelper.hpp"
+#include "binary/experimental/internal/Define.hpp"
 #include "binary/internal/ContainerInsertFunction.hpp"
 #include "binary/internal/ContainerResizeFunction.hpp"
 #include "binary/internal/Exception.hpp"
@@ -21,7 +21,7 @@ namespace binary::experimental::converters {
 // element boundaries, so treating it as a range yields a wire nothing else reads.
 template <typename T>
     requires std::same_as<T, std::remove_cv_t<T>> && (!requires { ::binary::internal::TupleSize<T>::Value; })
-struct ContainerConverter {
+struct ContainerConverter : ConverterDefaults<ContainerConverter<T>> {
     using ValueType = std::ranges::range_value_t<T>;
     using ValueConverterType = typename ::binary::experimental::helpers::GetConverterHelper<ValueType>::Type;
     static constexpr bool Contiguous = std::same_as<ValueConverterType, ::binary::experimental::converters::LittleEndianConverter<ValueType>> && std::is_trivially_copyable_v<ValueType> && requires(T& item) { item.data(); item.size(); };
@@ -36,7 +36,7 @@ struct ContainerConverter {
             allocator.Append(std::span(reinterpret_cast<const std::byte*>(item.data()), sizeof(ValueType) * item.size()));
         } else {
             for (const auto& i : item) {
-                ::binary::experimental::helpers::ConverterEncodeAutoMethodHelper<ValueConverterType>::Invoke(allocator, i);
+                ValueConverterType::EncodeAuto(allocator, i);
             }
         }
     }
@@ -79,7 +79,7 @@ struct ContainerConverter {
                     }
                 }
                 while (!copy.empty()) {
-                    ::binary::internal::ContainerInsertFunction<T>::Invoke(result, ::binary::experimental::helpers::ConverterDecodeAutoMethodHelper<ValueConverterType>::Invoke(copy));
+                    ::binary::internal::ContainerInsertFunction<T>::Invoke(result, ValueConverterType::DecodeAuto(copy));
                 }
                 return result;
             }

@@ -58,7 +58,7 @@ template <typename T>
 std::vector<std::byte> EncodeAutoWithLengthPrefix(const T& source) {
     using ConverterType = ::binary::experimental::Converter<T>;
     return ::binary::Allocator::Invoke([&source](auto& allocator) {
-        ::binary::experimental::helpers::ConverterEncodeAutoMethodHelper<ConverterType>::Invoke(allocator, source);
+        ConverterType::EncodeAuto(allocator, source);
     });
 }
 
@@ -74,7 +74,7 @@ BOOST_AUTO_TEST_CASE(ContainerConverterEncodeAutoBlittableShortLengthPrefixTest)
     auto expected = std::string("\x14\x01\x00\x00\x00\x02\x00\x00\x00\x03\x00\x00\x00\x04\x00\x00\x00\x05\x00\x00\x00", 21);
     BOOST_REQUIRE_EQUAL(expected, ToBytes(buffer));
     std::span<const std::byte> span(buffer);
-    auto result = ::binary::experimental::helpers::ConverterDecodeAutoMethodHelper<ConverterType>::Invoke(span);
+    auto result = ConverterType::DecodeAuto(span);
     BOOST_REQUIRE_EQUAL(0, span.size());
     BOOST_REQUIRE(result == source);
 }
@@ -99,7 +99,7 @@ BOOST_AUTO_TEST_CASE(ContainerConverterEncodeAutoNonBlittableKeepsAnchorTest) {
     }
     BOOST_REQUIRE_EQUAL(expected, ToBytes(buffer));
     std::span<const std::byte> span(buffer);
-    auto result = ::binary::experimental::helpers::ConverterDecodeAutoMethodHelper<ConverterType>::Invoke(span);
+    auto result = ConverterType::DecodeAuto(span);
     BOOST_REQUIRE_EQUAL(0, span.size());
     BOOST_REQUIRE(result == source);
 }

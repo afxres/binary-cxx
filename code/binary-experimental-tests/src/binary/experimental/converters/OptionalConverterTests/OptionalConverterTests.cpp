@@ -9,8 +9,6 @@
 #include <binary/experimental/converters/LittleEndianStringConverter.hpp>
 #include <binary/experimental/converters/OptionalConverter.hpp>
 #include <binary/experimental/converters/VariantConverter.hpp>
-#include <binary/experimental/helpers/ConverterDecodeAutoMethodHelper.hpp>
-#include <binary/experimental/helpers/ConverterEncodeAutoMethodHelper.hpp>
 
 #include <array>
 #include <cstdint>
@@ -49,14 +47,14 @@ std::string EncodeHex(const T& item) {
 template <typename T>
 std::string EncodeAutoHex(const T& item) {
     using C = ::binary::experimental::Converter<T>;
-    auto buffer = ::binary::Allocator::Invoke([&item](auto& allocator) { ::binary::experimental::helpers::ConverterEncodeAutoMethodHelper<C>::Invoke(allocator, item); });
+    auto buffer = ::binary::Allocator::Invoke([&item](auto& allocator) { C::EncodeAuto(allocator, item); });
     return ToHex(buffer);
 }
 
 template <typename T>
 T DecodeAuto(std::span<const std::byte>& span) {
     using C = ::binary::experimental::Converter<T>;
-    return ::binary::experimental::helpers::ConverterDecodeAutoMethodHelper<C>::Invoke(span);
+    return C::DecodeAuto(span);
 }
 }
 

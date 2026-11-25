@@ -9,8 +9,6 @@
 #include <binary/experimental/converters/ContainerConverter.hpp>
 #include <binary/experimental/converters/LittleEndianConverter.hpp>
 #include <binary/experimental/converters/LittleEndianStringConverter.hpp>
-#include <binary/experimental/helpers/ConverterDecodeAutoMethodHelper.hpp>
-#include <binary/experimental/helpers/ConverterEncodeAutoMethodHelper.hpp>
 
 #include <array>
 #include <cstdint>
@@ -48,7 +46,7 @@ std::string EncodeHex(const T& item) {
 template <typename T>
 std::string EncodeAutoHex(const T& item) {
     using C = ::binary::experimental::Converter<T>;
-    auto buffer = ::binary::Allocator::Invoke([&item](auto& allocator) { ::binary::experimental::helpers::ConverterEncodeAutoMethodHelper<C>::Invoke(allocator, item); });
+    auto buffer = ::binary::Allocator::Invoke([&item](auto& allocator) { C::EncodeAuto(allocator, item); });
     return ToHex(buffer);
 }
 }
@@ -97,9 +95,9 @@ BOOST_AUTO_TEST_CASE(ArrayConverterInContainerTest) {
     Source source{{1, 2, 3}, {4, 5, 6}};
     BOOST_REQUIRE_EQUAL("18010000000200000003000000040000000500000006000000", EncodeAutoHex(source));
 
-    auto bytes = ::binary::Allocator::Invoke([&source](auto& allocator) { ::binary::experimental::helpers::ConverterEncodeAutoMethodHelper<SourceConverter>::Invoke(allocator, source); });
+    auto bytes = ::binary::Allocator::Invoke([&source](auto& allocator) { SourceConverter::EncodeAuto(allocator, source); });
     std::span<const std::byte> span(bytes);
-    auto result = ::binary::experimental::helpers::ConverterDecodeAutoMethodHelper<SourceConverter>::Invoke(span);
+    auto result = SourceConverter::DecodeAuto(span);
     BOOST_REQUIRE_EQUAL(0, span.size());
     BOOST_REQUIRE_EQUAL(2, result.size());
     BOOST_REQUIRE_EQUAL(6, result.at(1).at(2));
@@ -109,7 +107,7 @@ BOOST_AUTO_TEST_CASE(ArrayConverterTruncatedTest) {
     std::array<std::byte, 8> shortBytes{};
     std::span<const std::byte> span(shortBytes);
     BOOST_REQUIRE_EXCEPTION(
-        ::binary::experimental::helpers::ConverterDecodeAutoMethodHelper<::binary::experimental::Converter<Fixed>>::Invoke(span),
+        ::binary::experimental::Converter<Fixed>::DecodeAuto(span),
         std::length_error,
         [](const std::length_error& e) {
             BOOST_REQUIRE_EQUAL(e.what(), "not enough bytes or byte sequence invalid");

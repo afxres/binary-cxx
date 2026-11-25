@@ -6,8 +6,6 @@
 #include <binary/experimental/converters/ComplexConverter.hpp>
 #include <binary/experimental/converters/ContainerConverter.hpp>
 #include <binary/experimental/converters/LittleEndianConverter.hpp>
-#include <binary/experimental/helpers/ConverterDecodeAutoMethodHelper.hpp>
-#include <binary/experimental/helpers/ConverterEncodeAutoMethodHelper.hpp>
 
 #include <array>
 #include <complex>
@@ -41,7 +39,7 @@ std::string EncodeHex(const T& item) {
 template <typename T>
 std::string EncodeAutoHex(const T& item) {
     using C = ::binary::experimental::Converter<T>;
-    auto buffer = ::binary::Allocator::Invoke([&item](auto& allocator) { ::binary::experimental::helpers::ConverterEncodeAutoMethodHelper<C>::Invoke(allocator, item); });
+    auto buffer = ::binary::Allocator::Invoke([&item](auto& allocator) { C::EncodeAuto(allocator, item); });
     return ToHex(buffer);
 }
 }
@@ -85,9 +83,9 @@ BOOST_AUTO_TEST_CASE(ComplexConverterInContainerTest) {
     Source source{{1.5, -2.25}};
     BOOST_REQUIRE_EQUAL("10000000000000f83f00000000000002c0", EncodeAutoHex(source));
 
-    auto bytes = ::binary::Allocator::Invoke([&source](auto& allocator) { ::binary::experimental::helpers::ConverterEncodeAutoMethodHelper<::binary::experimental::Converter<Source>>::Invoke(allocator, source); });
+    auto bytes = ::binary::Allocator::Invoke([&source](auto& allocator) { ::binary::experimental::Converter<Source>::EncodeAuto(allocator, source); });
     std::span<const std::byte> span(bytes);
-    auto result = ::binary::experimental::helpers::ConverterDecodeAutoMethodHelper<::binary::experimental::Converter<Source>>::Invoke(span);
+    auto result = ::binary::experimental::Converter<Source>::DecodeAuto(span);
     BOOST_REQUIRE_EQUAL(0, span.size());
     BOOST_REQUIRE_EQUAL(source.front(), result.front());
 }

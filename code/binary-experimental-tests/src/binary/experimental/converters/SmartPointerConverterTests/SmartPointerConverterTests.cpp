@@ -7,9 +7,6 @@
 #include <binary/experimental/converters/LittleEndianConverter.hpp>
 #include <binary/experimental/converters/LittleEndianStringConverter.hpp>
 #include <binary/experimental/converters/SmartPointerConverter.hpp>
-#include <binary/experimental/helpers/ConverterDecodeAutoMethodHelper.hpp>
-#include <binary/experimental/helpers/ConverterEncodeAutoMethodHelper.hpp>
-#include <binary/experimental/helpers/ConverterEncodeWithLengthPrefixMethodHelper.hpp>
 
 #include <cstdint>
 #include <memory>
@@ -42,21 +39,21 @@ std::string EncodeHex(const T& item) {
 template <typename T>
 std::string EncodeAutoHex(const T& item) {
     using C = ::binary::experimental::Converter<T>;
-    auto buffer = ::binary::Allocator::Invoke([&item](auto& allocator) { ::binary::experimental::helpers::ConverterEncodeAutoMethodHelper<C>::Invoke(allocator, item); });
+    auto buffer = ::binary::Allocator::Invoke([&item](auto& allocator) { C::EncodeAuto(allocator, item); });
     return ToHex(buffer);
 }
 
 template <typename T>
 std::string EncodeWithPrefixHex(const T& item) {
     using C = ::binary::experimental::Converter<T>;
-    auto buffer = ::binary::Allocator::Invoke([&item](auto& allocator) { ::binary::experimental::helpers::ConverterEncodeWithLengthPrefixMethodHelper<C>::Invoke(allocator, item); });
+    auto buffer = ::binary::Allocator::Invoke([&item](auto& allocator) { C::EncodeWithLengthPrefix(allocator, item); });
     return ToHex(buffer);
 }
 
 template <typename T>
 std::vector<std::byte> EncodeAutoBuffer(const T& item) {
     using C = ::binary::experimental::Converter<T>;
-    return ::binary::Allocator::Invoke([&item](auto& allocator) { ::binary::experimental::helpers::ConverterEncodeAutoMethodHelper<C>::Invoke(allocator, item); });
+    return ::binary::Allocator::Invoke([&item](auto& allocator) { C::EncodeAuto(allocator, item); });
 }
 }
 
@@ -85,13 +82,13 @@ BOOST_AUTO_TEST_CASE(SmartPointerConverterRoundTripTest) {
 
     auto bytes = EncodeAutoBuffer(std::make_shared<std::string>("abc"));
     std::span<const std::byte> span(bytes);
-    auto first = ::binary::experimental::helpers::ConverterDecodeAutoMethodHelper<::binary::experimental::Converter<T>>::Invoke(span);
+    auto first = ::binary::experimental::Converter<T>::DecodeAuto(span);
     BOOST_REQUIRE_EQUAL(0, span.size());
     BOOST_REQUIRE(first != nullptr);
     BOOST_REQUIRE_EQUAL("abc", *first);
 
     std::span<const std::byte> again(bytes);
-    auto second = ::binary::experimental::helpers::ConverterDecodeAutoMethodHelper<::binary::experimental::Converter<T>>::Invoke(again);
+    auto second = ::binary::experimental::Converter<T>::DecodeAuto(again);
     BOOST_REQUIRE(first != second);
     *second = "xyz";
     BOOST_REQUIRE_EQUAL("abc", *first);
@@ -125,10 +122,10 @@ BOOST_AUTO_TEST_CASE(SmartPointerConverterInContainerTest) {
     BOOST_REQUIRE_EQUAL(EncodeAutoHex(Values{1, 2, 3}), EncodeAutoHex(pointers));
 
     auto bytes = ::binary::Allocator::Invoke([&pointers](auto& allocator) {
-        ::binary::experimental::helpers::ConverterEncodeAutoMethodHelper<::binary::experimental::Converter<Pointers>>::Invoke(allocator, pointers);
+        ::binary::experimental::Converter<Pointers>::EncodeAuto(allocator, pointers);
     });
     std::span<const std::byte> span(bytes);
-    auto result = ::binary::experimental::helpers::ConverterDecodeAutoMethodHelper<::binary::experimental::Converter<Pointers>>::Invoke(span);
+    auto result = ::binary::experimental::Converter<Pointers>::DecodeAuto(span);
     BOOST_REQUIRE_EQUAL(0, span.size());
     BOOST_REQUIRE_EQUAL(3, result.size());
     BOOST_REQUIRE_EQUAL(2, *result.at(1));

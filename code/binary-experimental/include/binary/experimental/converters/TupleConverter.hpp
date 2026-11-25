@@ -3,9 +3,9 @@
 
 #include <ranges>
 
-#include "binary/experimental/helpers/ConverterDecodeAutoMethodHelper.hpp"
-#include "binary/experimental/helpers/ConverterEncodeAutoMethodHelper.hpp"
+#include "binary/experimental/ConverterDefaults.hpp"
 #include "binary/experimental/helpers/GetConverterHelper.hpp"
+#include "binary/experimental/internal/Define.hpp"
 #include "binary/experimental/internal/TupleElement.hpp"
 #include "binary/experimental/internal/TupleGetHelper.hpp"
 #include "binary/experimental/internal/TupleSize.hpp"
@@ -15,7 +15,7 @@ namespace binary::experimental::converters {
 // boundary per element, so the positional treatment of it would disagree.
 template <typename T>
     requires requires { ::binary::internal::TupleSize<T>::Value; } && (!std::ranges::range<T>)
-struct TupleConverter {
+struct TupleConverter : ConverterDefaults<TupleConverter<T>> {
 private:
     static constexpr size_t ElementCount = ::binary::internal::TupleSize<T>::Value;
     static_assert(ElementCount > 0, "zero-member tuples are not supported");
@@ -27,11 +27,10 @@ private:
     static void EncodeInternal(Allocator& allocator, const T& item) {
         using ElementGetHelper = ::binary::internal::TupleGetHelper<Index, T>;
         using ElementConverterType = ElementConverterType<Index>;
-        using ElementConverterEncodeAutoMethodHelperType = ::binary::experimental::helpers::ConverterEncodeAutoMethodHelper<ElementConverterType>;
         if constexpr (IsAuto == 0 && Index == ElementCount - 1) {
             ElementConverterType::Encode(allocator, ElementGetHelper::Invoke(item));
         } else {
-            ElementConverterEncodeAutoMethodHelperType::Invoke(allocator, ElementGetHelper::Invoke(item));
+            ElementConverterType::EncodeAuto(allocator, ElementGetHelper::Invoke(item));
         }
     }
 
@@ -43,11 +42,10 @@ private:
     template <size_t IsAuto, size_t Index>
     static auto DecodeInternal(std::span<const std::byte>& span) {
         using ElementConverterType = ElementConverterType<Index>;
-        using ElementConverterDecodeAutoMethodHelperType = ::binary::experimental::helpers::ConverterDecodeAutoMethodHelper<ElementConverterType>;
         if constexpr (IsAuto == 0 && Index == ElementCount - 1) {
             return ElementConverterType::Decode(span);
         } else {
-            return ElementConverterDecodeAutoMethodHelperType::Invoke(span);
+            return ElementConverterType::DecodeAuto(span);
         }
     }
 

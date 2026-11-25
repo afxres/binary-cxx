@@ -7,6 +7,7 @@
 #include <type_traits>
 
 #include "binary/Allocator.hpp"
+#include "binary/experimental/ConverterDefaults.hpp"
 #include "binary/experimental/helpers/GetConverterHelper.hpp"
 #include "binary/experimental/internal/Define.hpp"
 #include "binary/internal/Exception.hpp"
@@ -18,7 +19,7 @@ struct ComplexConverter;
 // Static counterpart of `binary::converters::ComplexConverter`, same wire.
 template <typename T>
     requires std::same_as<T, std::remove_cv_t<T>> && (std::same_as<T, float> || std::same_as<T, double>)
-struct ComplexConverter<std::complex<T>> {
+struct ComplexConverter<std::complex<T>> : ConverterDefaults<ComplexConverter<std::complex<T>>> {
 private:
     using C = std::complex<T>;
     using L = typename ::binary::experimental::helpers::GetConverterHelper<T>::Type;

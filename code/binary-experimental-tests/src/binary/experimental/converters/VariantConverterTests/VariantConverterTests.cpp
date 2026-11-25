@@ -229,14 +229,12 @@ BOOST_AUTO_TEST_CASE(VariantConverterWithMonostateInContainerTest) {
     using T = std::variant<std::monostate, std::int32_t>;
     std::vector<T> source{T{}, T(42)};
     using ConverterType = ::binary::experimental::Converter<std::vector<T>>;
-    using EncodeAuto = ::binary::experimental::helpers::ConverterEncodeAutoMethodHelper<ConverterType>;
-    using DecodeAuto = ::binary::experimental::helpers::ConverterDecodeAutoMethodHelper<ConverterType>;
 
-    auto buffer = ::binary::Allocator::Invoke([&source](auto& allocator) { EncodeAuto::Invoke(allocator, source); });
+    auto buffer = ::binary::Allocator::Invoke([&source](auto& allocator) { ConverterType::EncodeAuto(allocator, source); });
     BOOST_REQUIRE_EQUAL(ToHex(buffer), "0600012a000000");
 
     std::span<const std::byte> span(buffer);
-    auto result = DecodeAuto::Invoke(span);
+    auto result = ConverterType::DecodeAuto(span);
     BOOST_REQUIRE_EQUAL(2, result.size());
     BOOST_REQUIRE_EQUAL(0, result[0].index());
     BOOST_REQUIRE_EQUAL(1, result[1].index());

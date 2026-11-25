@@ -6,15 +6,14 @@
 #include <utility>
 #include <variant>
 
-#include "binary/experimental/helpers/ConverterDecodeAutoMethodHelper.hpp"
-#include "binary/experimental/helpers/ConverterEncodeAutoMethodHelper.hpp"
+#include "binary/experimental/ConverterDefaults.hpp"
 #include "binary/experimental/helpers/GetConverterHelper.hpp"
 #include "binary/experimental/internal/Define.hpp"
 #include "binary/internal/Exception.hpp"
 
 namespace binary::experimental::converters {
 template <typename T>
-struct VariantConverter {
+struct VariantConverter : ConverterDefaults<VariantConverter<T>> {
 private:
     using EncodeFunction = void (*)(Allocator&, const T&);
     using DecodeFunction = T (*)(std::span<const std::byte>&);
@@ -32,11 +31,10 @@ private:
             // The tag written by EncodeInternal is the whole payload of the monostate case.
         } else {
             using ElementConverterType = ElementConverterType<Index>;
-            using ElementConverterEncodeAutoMethodHelperType = ::binary::experimental::helpers::ConverterEncodeAutoMethodHelper<ElementConverterType>;
             if constexpr (IsAuto == 0) {
                 ElementConverterType::Encode(allocator, std::get<Index>(item));
             } else {
-                ElementConverterEncodeAutoMethodHelperType::Invoke(allocator, std::get<Index>(item));
+                ElementConverterType::EncodeAuto(allocator, std::get<Index>(item));
             }
         }
     }
@@ -47,11 +45,10 @@ private:
             return T{std::in_place_index<Index>};
         } else {
             using ElementConverterType = ElementConverterType<Index>;
-            using ElementConverterDecodeAutoMethodHelperType = ::binary::experimental::helpers::ConverterDecodeAutoMethodHelper<ElementConverterType>;
             if constexpr (IsAuto == 0) {
                 return T{std::in_place_index<Index>, ElementConverterType::Decode(span)};
             } else {
-                return T{std::in_place_index<Index>, ElementConverterDecodeAutoMethodHelperType::Invoke(span)};
+                return T{std::in_place_index<Index>, ElementConverterType::DecodeAuto(span)};
             }
         }
     }

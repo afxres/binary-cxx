@@ -9,8 +9,7 @@
 
 #include "binary/ConverterExtensions.hpp"
 #include "binary/components/MemberAccessor.hpp"
-#include "binary/experimental/helpers/ConverterDecodeAutoMethodHelper.hpp"
-#include "binary/experimental/helpers/ConverterEncodeAutoMethodHelper.hpp"
+#include "binary/experimental/ConverterDefaults.hpp"
 #include "binary/experimental/helpers/GetConverterHelper.hpp"
 #include "binary/experimental/internal/Define.hpp"
 #include "binary/internal/Module.hpp"
@@ -35,7 +34,7 @@ struct TupleObjectMember {
         if constexpr (Last) {
             ElementConverterType::Encode(allocator, descriptor.Accessor.Get(item));
         } else {
-            ::binary::experimental::helpers::ConverterEncodeAutoMethodHelper<ElementConverterType>::Invoke(allocator, descriptor.Accessor.Get(item));
+            ElementConverterType::EncodeAuto(allocator, descriptor.Accessor.Get(item));
         }
     }
 
@@ -44,7 +43,7 @@ struct TupleObjectMember {
         if constexpr (Last) {
             std::get<Index>(Schema::Members).Accessor.Set(item, ElementConverterType::Decode(span));
         } else {
-            std::get<Index>(Schema::Members).Accessor.Set(item, ::binary::experimental::helpers::ConverterDecodeAutoMethodHelper<ElementConverterType>::Invoke(span));
+            std::get<Index>(Schema::Members).Accessor.Set(item, ElementConverterType::DecodeAuto(span));
         }
     }
 };
@@ -56,7 +55,7 @@ constexpr size_t GetTupleObjectLength(std::index_sequence<Index...>) {
 }
 
 template <typename T, typename Schema>
-class TupleObjectConverter {
+class TupleObjectConverter : public ConverterDefaults<TupleObjectConverter<T, Schema>> {
 private:
     using Members = std::remove_const_t<decltype(Schema::Members)>;
     static constexpr size_t MemberCount = std::tuple_size_v<Members>;
