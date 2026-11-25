@@ -45,6 +45,18 @@ std::string EncodeAutoHex(const std::shared_ptr<::binary::Converter<T>>& convert
     auto buffer = ::binary::Allocator::Invoke([&converter, &item](auto& allocator) { converter->EncodeAuto(allocator, item); });
     return ToHex(buffer);
 }
+
+// Claims a 512 MiB element, which no encoder ever sees: the array length is
+// computed in the constructor, and that is what the overflow guard rejects.
+class HugeLengthConverter : public ::binary::Converter<std::uint64_t> {
+public:
+    HugeLengthConverter()
+        : ::binary::Converter<std::uint64_t>(0x20000000) {}
+
+    void Encode(::binary::Allocator&, const std::uint64_t&) override {}
+
+    std::uint64_t Decode(std::span<const std::byte>) override { return 0; }
+};
 }
 
 BOOST_AUTO_TEST_CASE(ArrayConverterLengthTest) {
@@ -144,6 +156,16 @@ BOOST_AUTO_TEST_CASE(ArrayConverterEmptyTest) {
     auto result = converter->DecodeAuto(span);
     BOOST_REQUIRE_EQUAL(0, result.size());
     BOOST_REQUIRE_EQUAL(0, span.size());
+}
+
+BOOST_AUTO_TEST_CASE(ArrayConverterLengthOverflowTest) {
+    // Three elements fit in the 32 bit prefix, four do not: the guard is exact,
+    // not a coarse upper bound.
+    using Small = std::array<std::uint64_t, 3>;
+    using Huge = std::array<std::uint64_t, 4>;
+    auto fits = std::make_shared<::binary::converters::ArrayConverter<Small>>(std::make_shared<HugeLengthConverter>());
+    BOOST_REQUIRE_EQUAL(0x60000000, fits->Length());
+    BOOST_REQUIRE_THROW((std::make_shared<::binary::converters::ArrayConverter<Huge>>(std::make_shared<HugeLengthConverter>())), std::overflow_error);
 }
 
 BOOST_AUTO_TEST_CASE(ArrayConverterInContainerTest) {
