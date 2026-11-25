@@ -46,27 +46,27 @@ public:
         : Converter<P>(converter->Length())
         , converter(converter) {}
 
-    BINARY_DEFINE_OVERRIDE_ENCODE_METHOD(P) {
+    BINARY_OVERRIDE_ENCODE_METHOD(P) {
         this->converter->Encode(allocator, Value(item));
     }
 
-    BINARY_DEFINE_OVERRIDE_ENCODE_AUTO_METHOD(P) {
+    BINARY_OVERRIDE_ENCODE_AUTO_METHOD(P) {
         this->converter->EncodeAuto(allocator, Value(item));
     }
 
-    BINARY_DEFINE_OVERRIDE_ENCODE_WITH_LENGTH_PREFIX_METHOD(P) {
+    BINARY_OVERRIDE_ENCODE_WITH_LENGTH_PREFIX_METHOD(P) {
         this->converter->EncodeWithLengthPrefix(allocator, Value(item));
     }
 
-    BINARY_DEFINE_OVERRIDE_DECODE_METHOD(P) {
+    BINARY_OVERRIDE_DECODE_METHOD(P) {
         return P(new T(this->converter->Decode(span)));
     }
 
-    BINARY_DEFINE_OVERRIDE_DECODE_AUTO_METHOD(P) {
+    BINARY_OVERRIDE_DECODE_AUTO_METHOD(P) {
         return P(new T(this->converter->DecodeAuto(span)));
     }
 
-    BINARY_DEFINE_OVERRIDE_DECODE_WITH_LENGTH_PREFIX_METHOD(P) {
+    BINARY_OVERRIDE_DECODE_WITH_LENGTH_PREFIX_METHOD(P) {
         return P(new T(this->converter->DecodeWithLengthPrefix(span)));
     }
 };
@@ -91,27 +91,27 @@ public:
         : Converter<P>(converter->Length())
         , converter(converter) {}
 
-    BINARY_DEFINE_OVERRIDE_ENCODE_METHOD(P) {
+    BINARY_OVERRIDE_ENCODE_METHOD(P) {
         this->converter->Encode(allocator, Value(item));
     }
 
-    BINARY_DEFINE_OVERRIDE_ENCODE_AUTO_METHOD(P) {
+    BINARY_OVERRIDE_ENCODE_AUTO_METHOD(P) {
         this->converter->EncodeAuto(allocator, Value(item));
     }
 
-    BINARY_DEFINE_OVERRIDE_ENCODE_WITH_LENGTH_PREFIX_METHOD(P) {
+    BINARY_OVERRIDE_ENCODE_WITH_LENGTH_PREFIX_METHOD(P) {
         this->converter->EncodeWithLengthPrefix(allocator, Value(item));
     }
 
-    BINARY_DEFINE_OVERRIDE_DECODE_METHOD(P) {
+    BINARY_OVERRIDE_DECODE_METHOD(P) {
         return std::make_shared<T>(this->converter->Decode(span));
     }
 
-    BINARY_DEFINE_OVERRIDE_DECODE_AUTO_METHOD(P) {
+    BINARY_OVERRIDE_DECODE_AUTO_METHOD(P) {
         return std::make_shared<T>(this->converter->DecodeAuto(span));
     }
 
-    BINARY_DEFINE_OVERRIDE_DECODE_WITH_LENGTH_PREFIX_METHOD(P) {
+    BINARY_OVERRIDE_DECODE_WITH_LENGTH_PREFIX_METHOD(P) {
         return std::make_shared<T>(this->converter->DecodeWithLengthPrefix(span));
     }
 };

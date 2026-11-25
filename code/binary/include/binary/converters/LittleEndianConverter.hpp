@@ -15,23 +15,23 @@ public:
     LittleEndianConverter()
         : Converter<T>(sizeof(T)) {}
 
-    BINARY_DEFINE_OVERRIDE_ENCODE_METHOD(T) {
+    BINARY_OVERRIDE_ENCODE_METHOD(T) {
         ::binary::internal::EncodeLittleEndian(::binary::internal::AllocatorUnsafeAccessor::Assign(allocator, sizeof(T)), item);
     }
 
-    BINARY_DEFINE_OVERRIDE_ENCODE_WITH_LENGTH_PREFIX_METHOD(T) {
+    BINARY_OVERRIDE_ENCODE_WITH_LENGTH_PREFIX_METHOD(T) {
         ::binary::Encode(allocator, sizeof(T));
         Encode(allocator, item);
     }
 
-    BINARY_DEFINE_OVERRIDE_DECODE_METHOD(T) {
+    BINARY_OVERRIDE_DECODE_METHOD(T) {
         if (span.size() < sizeof(T)) {
             ::binary::internal::ThrowNotEnoughBytes();
         }
         return ::binary::internal::DecodeLittleEndian<T>(span.data());
     }
 
-    BINARY_DEFINE_OVERRIDE_DECODE_AUTO_METHOD(T) {
+    BINARY_OVERRIDE_DECODE_AUTO_METHOD(T) {
         auto result = Decode(span);
         span = span.subspan(sizeof(T));
         return result;

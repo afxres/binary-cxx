@@ -11,7 +11,7 @@ struct ConverterEncodeWithLengthPrefixMethodHelper;
 
 template <typename C>
 struct ConverterEncodeWithLengthPrefixMethodHelper {
-    BINARY_EXPERIMENTAL_DEFINE_STATIC_ENCODE_METHOD_WITH_NAME(auto, Invoke) {
+    BINARY_EXPERIMENTAL_STATIC_ENCODE_METHOD_WITH_NAME(auto, Invoke) {
         constexpr size_t length = C::Length();
         if constexpr (length != 0) {
             ::binary::Encode(allocator, length);
@@ -28,7 +28,7 @@ struct ConverterEncodeWithLengthPrefixMethodHelper {
 template <typename C>
     requires requires { &C::EncodeWithLengthPrefix; }
 struct ConverterEncodeWithLengthPrefixMethodHelper<C> {
-    BINARY_EXPERIMENTAL_DEFINE_STATIC_ENCODE_METHOD_WITH_NAME(auto, Invoke) {
+    BINARY_EXPERIMENTAL_STATIC_ENCODE_METHOD_WITH_NAME(auto, Invoke) {
         C::EncodeWithLengthPrefix(allocator, item);
     }
 };

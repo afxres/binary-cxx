@@ -42,21 +42,21 @@ public:
         : Converter<T>()
         , converter(converter) {}
 
-    BINARY_DEFINE_OVERRIDE_ENCODE_METHOD(T) {
+    BINARY_OVERRIDE_ENCODE_METHOD(T) {
         ::binary::Encode(allocator, item.has_value() ? Some : None);
         if (item.has_value()) {
             this->converter->Encode(allocator, *item);
         }
     }
 
-    BINARY_DEFINE_OVERRIDE_ENCODE_AUTO_METHOD(T) {
+    BINARY_OVERRIDE_ENCODE_AUTO_METHOD(T) {
         ::binary::Encode(allocator, item.has_value() ? Some : None);
         if (item.has_value()) {
             this->converter->EncodeAuto(allocator, *item);
         }
     }
 
-    BINARY_DEFINE_OVERRIDE_DECODE_METHOD(T) {
+    BINARY_OVERRIDE_DECODE_METHOD(T) {
         auto tag = ::binary::Decode(span);
         if (tag == None) {
             return {};
@@ -67,7 +67,7 @@ public:
         return T(std::in_place, this->converter->Decode(span));
     }
 
-    BINARY_DEFINE_OVERRIDE_DECODE_AUTO_METHOD(T) {
+    BINARY_OVERRIDE_DECODE_AUTO_METHOD(T) {
         auto tag = ::binary::Decode(span);
         if (tag == None) {
             return {};

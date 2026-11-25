@@ -36,31 +36,31 @@ private:
     }
 
 public:
-    BINARY_EXPERIMENTAL_DEFINE_STATIC_LENGTH_METHOD() {
+    BINARY_EXPERIMENTAL_STATIC_LENGTH_METHOD() {
         return C::Length();
     }
 
-    BINARY_EXPERIMENTAL_DEFINE_STATIC_ENCODE_METHOD(P) {
+    BINARY_EXPERIMENTAL_STATIC_ENCODE_METHOD(P) {
         C::Encode(allocator, Value(item));
     }
 
-    BINARY_EXPERIMENTAL_DEFINE_STATIC_ENCODE_AUTO_METHOD(P) {
+    BINARY_EXPERIMENTAL_STATIC_ENCODE_AUTO_METHOD(P) {
         ::binary::experimental::helpers::ConverterEncodeAutoMethodHelper<C>::Invoke(allocator, Value(item));
     }
 
-    BINARY_EXPERIMENTAL_DEFINE_STATIC_ENCODE_WITH_LENGTH_PREFIX_METHOD(P) {
+    BINARY_EXPERIMENTAL_STATIC_ENCODE_WITH_LENGTH_PREFIX_METHOD(P) {
         ::binary::experimental::helpers::ConverterEncodeWithLengthPrefixMethodHelper<C>::Invoke(allocator, Value(item));
     }
 
-    BINARY_EXPERIMENTAL_DEFINE_STATIC_DECODE_METHOD(P) {
+    BINARY_EXPERIMENTAL_STATIC_DECODE_METHOD(P) {
         return P(new T(C::Decode(span)));
     }
 
-    BINARY_EXPERIMENTAL_DEFINE_STATIC_DECODE_AUTO_METHOD(P) {
+    BINARY_EXPERIMENTAL_STATIC_DECODE_AUTO_METHOD(P) {
         return P(new T(::binary::experimental::helpers::ConverterDecodeAutoMethodHelper<C>::Invoke(span)));
     }
 
-    BINARY_EXPERIMENTAL_DEFINE_STATIC_DECODE_METHOD_WITH_NAME(P, DecodeWithLengthPrefix) {
+    BINARY_EXPERIMENTAL_STATIC_DECODE_METHOD_WITH_NAME(P, DecodeWithLengthPrefix) {
         return P(new T(::binary::experimental::helpers::ConverterDecodeWithLengthPrefixMethodHelper<C>::Invoke(span)));
     }
 };
@@ -81,31 +81,31 @@ private:
     }
 
 public:
-    BINARY_EXPERIMENTAL_DEFINE_STATIC_LENGTH_METHOD() {
+    BINARY_EXPERIMENTAL_STATIC_LENGTH_METHOD() {
         return C::Length();
     }
 
-    BINARY_EXPERIMENTAL_DEFINE_STATIC_ENCODE_METHOD(P) {
+    BINARY_EXPERIMENTAL_STATIC_ENCODE_METHOD(P) {
         C::Encode(allocator, Value(item));
     }
 
-    BINARY_EXPERIMENTAL_DEFINE_STATIC_ENCODE_AUTO_METHOD(P) {
+    BINARY_EXPERIMENTAL_STATIC_ENCODE_AUTO_METHOD(P) {
         ::binary::experimental::helpers::ConverterEncodeAutoMethodHelper<C>::Invoke(allocator, Value(item));
     }
 
-    BINARY_EXPERIMENTAL_DEFINE_STATIC_ENCODE_WITH_LENGTH_PREFIX_METHOD(P) {
+    BINARY_EXPERIMENTAL_STATIC_ENCODE_WITH_LENGTH_PREFIX_METHOD(P) {
         ::binary::experimental::helpers::ConverterEncodeWithLengthPrefixMethodHelper<C>::Invoke(allocator, Value(item));
     }
 
-    BINARY_EXPERIMENTAL_DEFINE_STATIC_DECODE_METHOD(P) {
+    BINARY_EXPERIMENTAL_STATIC_DECODE_METHOD(P) {
         return std::make_shared<T>(C::Decode(span));
     }
 
-    BINARY_EXPERIMENTAL_DEFINE_STATIC_DECODE_AUTO_METHOD(P) {
+    BINARY_EXPERIMENTAL_STATIC_DECODE_AUTO_METHOD(P) {
         return std::make_shared<T>(::binary::experimental::helpers::ConverterDecodeAutoMethodHelper<C>::Invoke(span));
     }
 
-    BINARY_EXPERIMENTAL_DEFINE_STATIC_DECODE_METHOD_WITH_NAME(P, DecodeWithLengthPrefix) {
+    BINARY_EXPERIMENTAL_STATIC_DECODE_METHOD_WITH_NAME(P, DecodeWithLengthPrefix) {
         return std::make_shared<T>(::binary::experimental::helpers::ConverterDecodeWithLengthPrefixMethodHelper<C>::Invoke(span));
     }
 };

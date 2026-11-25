@@ -72,26 +72,26 @@ private:
     }
 
 public:
-    BINARY_EXPERIMENTAL_DEFINE_STATIC_LENGTH_METHOD() {
+    BINARY_EXPERIMENTAL_STATIC_LENGTH_METHOD() {
         return detail::GetTupleObjectLength<T, Schema>(std::make_index_sequence<MemberCount>());
     }
 
-    BINARY_EXPERIMENTAL_DEFINE_STATIC_ENCODE_METHOD(T) {
+    BINARY_EXPERIMENTAL_STATIC_ENCODE_METHOD(T) {
         EncodeInternal<0>(allocator, item, std::make_index_sequence<MemberCount>());
     }
 
-    BINARY_EXPERIMENTAL_DEFINE_STATIC_ENCODE_AUTO_METHOD(T) {
+    BINARY_EXPERIMENTAL_STATIC_ENCODE_AUTO_METHOD(T) {
         EncodeInternal<1>(allocator, item, std::make_index_sequence<MemberCount>());
     }
 
-    BINARY_EXPERIMENTAL_DEFINE_STATIC_DECODE_METHOD(T) {
+    BINARY_EXPERIMENTAL_STATIC_DECODE_METHOD(T) {
         std::span<const std::byte> copy = span;
         T result{};
         DecodeInternal<0>(result, copy, std::make_index_sequence<MemberCount>());
         return result;
     }
 
-    BINARY_EXPERIMENTAL_DEFINE_STATIC_DECODE_AUTO_METHOD(T) {
+    BINARY_EXPERIMENTAL_STATIC_DECODE_AUTO_METHOD(T) {
         T result{};
         DecodeInternal<1>(result, span, std::make_index_sequence<MemberCount>());
         return result;

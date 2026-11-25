@@ -27,11 +27,11 @@ struct ContainerConverter {
     static constexpr bool Contiguous = std::same_as<ValueConverterType, ::binary::experimental::converters::LittleEndianConverter<ValueType>> && std::is_trivially_copyable_v<ValueType> && requires(T& item) { item.data(); item.size(); };
     static constexpr bool Copyable = Contiguous && (sizeof(ValueType) == 1 || std::endian::native == std::endian::little);
 
-    BINARY_EXPERIMENTAL_DEFINE_STATIC_LENGTH_METHOD() {
+    BINARY_EXPERIMENTAL_STATIC_LENGTH_METHOD() {
         return 0;
     }
 
-    BINARY_EXPERIMENTAL_DEFINE_STATIC_ENCODE_METHOD(T) {
+    BINARY_EXPERIMENTAL_STATIC_ENCODE_METHOD(T) {
         if constexpr (Copyable) {
             allocator.Append(std::span(reinterpret_cast<const std::byte*>(item.data()), sizeof(ValueType) * item.size()));
         } else {
@@ -41,7 +41,7 @@ struct ContainerConverter {
         }
     }
 
-    BINARY_EXPERIMENTAL_DEFINE_STATIC_ENCODE_WITH_LENGTH_PREFIX_METHOD(T) {
+    BINARY_EXPERIMENTAL_STATIC_ENCODE_WITH_LENGTH_PREFIX_METHOD(T) {
         if constexpr (Copyable) {
             ::binary::EncodeWithLengthPrefix(allocator, std::span(reinterpret_cast<const std::byte*>(item.data()), sizeof(ValueType) * item.size()));
         } else if constexpr (Contiguous) {
@@ -58,7 +58,7 @@ struct ContainerConverter {
         }
     }
 
-    BINARY_EXPERIMENTAL_DEFINE_STATIC_DECODE_METHOD(T) {
+    BINARY_EXPERIMENTAL_STATIC_DECODE_METHOD(T) {
         if constexpr (!::binary::internal::ContainerInsertFunction<T>::IsEnable) {
             ::binary::internal::ThrowNoSuitableEmplaceMethod(typeid(T));
         } else {

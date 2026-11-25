@@ -103,20 +103,20 @@ public:
     explicit VariantConverter(const ElementSlot<E>&... converter)
         : converter({converter...}) {}
 
-    BINARY_DEFINE_OVERRIDE_ENCODE_METHOD(T) {
+    BINARY_OVERRIDE_ENCODE_METHOD(T) {
         EncodeInternal<0>(allocator, item);
     }
 
-    BINARY_DEFINE_OVERRIDE_ENCODE_AUTO_METHOD(T) {
+    BINARY_OVERRIDE_ENCODE_AUTO_METHOD(T) {
         EncodeInternal<1>(allocator, item);
     }
 
-    BINARY_DEFINE_OVERRIDE_DECODE_METHOD(T) {
+    BINARY_OVERRIDE_DECODE_METHOD(T) {
         std::span<const std::byte> copy = span;
         return DecodeInternal<0>(copy);
     }
 
-    BINARY_DEFINE_OVERRIDE_DECODE_AUTO_METHOD(T) {
+    BINARY_OVERRIDE_DECODE_AUTO_METHOD(T) {
         return DecodeInternal<1>(span);
     }
 };

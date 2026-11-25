@@ -33,12 +33,12 @@ public:
         assert(converter->Length() == sizeof(T));
     }
 
-    BINARY_DEFINE_OVERRIDE_ENCODE_METHOD(C) {
+    BINARY_OVERRIDE_ENCODE_METHOD(C) {
         this->converter->Encode(allocator, item.real());
         this->converter->Encode(allocator, item.imag());
     }
 
-    BINARY_DEFINE_OVERRIDE_DECODE_METHOD(C) {
+    BINARY_OVERRIDE_DECODE_METHOD(C) {
         if (span.size() < sizeof(C)) {
             ::binary::internal::ThrowNotEnoughBytes();
         }

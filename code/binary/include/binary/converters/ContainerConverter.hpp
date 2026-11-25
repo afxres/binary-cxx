@@ -31,7 +31,7 @@ public:
         : converter(converter), copy(Contiguous && dynamic_cast<LittleEndianConverter<E>*>(converter.get()) != nullptr) {
     }
 
-    BINARY_DEFINE_OVERRIDE_ENCODE_METHOD(T) {
+    BINARY_OVERRIDE_ENCODE_METHOD(T) {
         if constexpr (Copyable) {
             if (this->copy) {
                 assert(converter->Length() == sizeof(E));
@@ -44,7 +44,7 @@ public:
         }
     }
 
-    BINARY_DEFINE_OVERRIDE_ENCODE_WITH_LENGTH_PREFIX_METHOD(T) {
+    BINARY_OVERRIDE_ENCODE_WITH_LENGTH_PREFIX_METHOD(T) {
         if constexpr (Contiguous) {
             if (this->copy && Copyable) {
                 assert(converter->Length() == sizeof(E));
@@ -75,7 +75,7 @@ public:
         Converter<T>::EncodeWithLengthPrefix(allocator, item);
     }
 
-    BINARY_DEFINE_OVERRIDE_DECODE_METHOD(T) {
+    BINARY_OVERRIDE_DECODE_METHOD(T) {
         if constexpr (!::binary::internal::ContainerInsertFunction<T>::IsEnable) {
             ::binary::internal::ThrowNoSuitableEmplaceMethod(typeid(T));
         } else {

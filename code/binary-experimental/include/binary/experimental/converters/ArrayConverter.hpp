@@ -32,7 +32,7 @@ private:
     }
 
 public:
-    BINARY_EXPERIMENTAL_DEFINE_STATIC_LENGTH_METHOD() {
+    BINARY_EXPERIMENTAL_STATIC_LENGTH_METHOD() {
         constexpr size_t length = C::Length();
         if constexpr (length == 0 || N == 0) {
             return 0;
@@ -42,14 +42,14 @@ public:
         }
     }
 
-    BINARY_EXPERIMENTAL_DEFINE_STATIC_ENCODE_METHOD(T) {
+    BINARY_EXPERIMENTAL_STATIC_ENCODE_METHOD(T) {
         using EncodeHelper = ::binary::experimental::helpers::ConverterEncodeAutoMethodHelper<C>;
         for (const auto& i : item) {
             EncodeHelper::Invoke(allocator, i);
         }
     }
 
-    BINARY_EXPERIMENTAL_DEFINE_STATIC_DECODE_METHOD(T) {
+    BINARY_EXPERIMENTAL_STATIC_DECODE_METHOD(T) {
         std::span<const std::byte> copy = span;
         return DecodeInternal(copy, std::make_index_sequence<N>());
     }

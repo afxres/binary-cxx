@@ -60,23 +60,23 @@ private:
     }
 
 public:
-    BINARY_EXPERIMENTAL_DEFINE_STATIC_LENGTH_METHOD() {
+    BINARY_EXPERIMENTAL_STATIC_LENGTH_METHOD() {
         return 0;
     }
 
-    BINARY_EXPERIMENTAL_DEFINE_STATIC_ENCODE_METHOD(T) {
+    BINARY_EXPERIMENTAL_STATIC_ENCODE_METHOD(T) {
         EncodeInternal<false>(allocator, item);
     }
 
-    BINARY_EXPERIMENTAL_DEFINE_STATIC_ENCODE_AUTO_METHOD(T) {
+    BINARY_EXPERIMENTAL_STATIC_ENCODE_AUTO_METHOD(T) {
         EncodeInternal<true>(allocator, item);
     }
 
-    BINARY_EXPERIMENTAL_DEFINE_STATIC_DECODE_METHOD(T) {
+    BINARY_EXPERIMENTAL_STATIC_DECODE_METHOD(T) {
         return DecodeInternal<false>(span);
     }
 
-    BINARY_EXPERIMENTAL_DEFINE_STATIC_DECODE_AUTO_METHOD(T) {
+    BINARY_EXPERIMENTAL_STATIC_DECODE_AUTO_METHOD(T) {
         return DecodeInternal<true>(span);
     }
 };

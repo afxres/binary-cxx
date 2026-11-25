@@ -24,17 +24,17 @@ private:
     using L = typename ::binary::experimental::helpers::GetConverterHelper<T>::Type;
 
 public:
-    BINARY_EXPERIMENTAL_DEFINE_STATIC_LENGTH_METHOD() {
+    BINARY_EXPERIMENTAL_STATIC_LENGTH_METHOD() {
         static_assert(L::Length() == sizeof(T));
         return 2 * sizeof(T);
     }
 
-    BINARY_EXPERIMENTAL_DEFINE_STATIC_ENCODE_METHOD(C) {
+    BINARY_EXPERIMENTAL_STATIC_ENCODE_METHOD(C) {
         L::Encode(allocator, item.real());
         L::Encode(allocator, item.imag());
     }
 
-    BINARY_EXPERIMENTAL_DEFINE_STATIC_DECODE_METHOD(C) {
+    BINARY_EXPERIMENTAL_STATIC_DECODE_METHOD(C) {
         if (span.size() < sizeof(C)) {
             ::binary::internal::ThrowNotEnoughBytes();
         }

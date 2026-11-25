@@ -57,20 +57,20 @@ public:
         : ::binary::Converter<T>(::binary::internal::GetConverterLength(std::initializer_list{converter->Length()...}))
         , converter({converter...}) {}
 
-    BINARY_DEFINE_OVERRIDE_ENCODE_METHOD(T) {
+    BINARY_OVERRIDE_ENCODE_METHOD(T) {
         EncodeInternal<0>(allocator, item, std::make_index_sequence<ElementCount>());
     }
 
-    BINARY_DEFINE_OVERRIDE_ENCODE_AUTO_METHOD(T) {
+    BINARY_OVERRIDE_ENCODE_AUTO_METHOD(T) {
         EncodeInternal<1>(allocator, item, std::make_index_sequence<ElementCount>());
     }
 
-    BINARY_DEFINE_OVERRIDE_DECODE_METHOD(T) {
+    BINARY_OVERRIDE_DECODE_METHOD(T) {
         std::span<const std::byte> copy = span;
         return DecodeInternal<0>(copy, std::make_index_sequence<ElementCount>());
     }
 
-    BINARY_DEFINE_OVERRIDE_DECODE_AUTO_METHOD(T) {
+    BINARY_OVERRIDE_DECODE_AUTO_METHOD(T) {
         return DecodeInternal<1>(span, std::make_index_sequence<ElementCount>());
     }
 };

@@ -47,13 +47,13 @@ public:
         : Converter<T>(GetArrayLength(converter))
         , converter(converter) {}
 
-    BINARY_DEFINE_OVERRIDE_ENCODE_METHOD(T) {
+    BINARY_OVERRIDE_ENCODE_METHOD(T) {
         for (const auto& i : item) {
             this->converter->EncodeAuto(allocator, i);
         }
     }
 
-    BINARY_DEFINE_OVERRIDE_DECODE_METHOD(T) {
+    BINARY_OVERRIDE_DECODE_METHOD(T) {
         std::span<const std::byte> copy = span;
         return DecodeInternal(copy, std::make_index_sequence<N>());
     }

@@ -14,21 +14,21 @@ template <typename T>
 struct LittleEndianStringConverter {
     using ValueType = typename T::value_type;
 
-    BINARY_EXPERIMENTAL_DEFINE_STATIC_LENGTH_METHOD() {
+    BINARY_EXPERIMENTAL_STATIC_LENGTH_METHOD() {
         return 0;
     }
 
-    BINARY_EXPERIMENTAL_DEFINE_STATIC_ENCODE_METHOD(T) {
+    BINARY_EXPERIMENTAL_STATIC_ENCODE_METHOD(T) {
         ::binary::internal::EncodeLittleEndianString(allocator, item);
     }
 
-    BINARY_EXPERIMENTAL_DEFINE_STATIC_ENCODE_WITH_LENGTH_PREFIX_METHOD(T) {
+    BINARY_EXPERIMENTAL_STATIC_ENCODE_WITH_LENGTH_PREFIX_METHOD(T) {
         constexpr size_t size = sizeof(ValueType);
         ::binary::Encode(allocator, size * item.size());
         Encode(allocator, item);
     }
 
-    BINARY_EXPERIMENTAL_DEFINE_STATIC_DECODE_METHOD(T) {
+    BINARY_EXPERIMENTAL_STATIC_DECODE_METHOD(T) {
         return ::binary::internal::DecodeLittleEndianString<T>(span);
     }
 };

@@ -14,15 +14,15 @@ namespace binary::experimental::converters {
 template <typename T>
     requires std::same_as<T, std::remove_cv_t<T>>
 struct LittleEndianConverter {
-    BINARY_EXPERIMENTAL_DEFINE_STATIC_LENGTH_METHOD() {
+    BINARY_EXPERIMENTAL_STATIC_LENGTH_METHOD() {
         return sizeof(T);
     }
 
-    BINARY_EXPERIMENTAL_DEFINE_STATIC_ENCODE_METHOD(T) {
+    BINARY_EXPERIMENTAL_STATIC_ENCODE_METHOD(T) {
         ::binary::internal::EncodeLittleEndian(::binary::internal::AllocatorUnsafeAccessor::Assign(allocator, sizeof(T)), item);
     }
 
-    BINARY_EXPERIMENTAL_DEFINE_STATIC_DECODE_METHOD(T) {
+    BINARY_EXPERIMENTAL_STATIC_DECODE_METHOD(T) {
         if (span.size() < sizeof(T)) {
             ::binary::internal::ThrowNotEnoughBytes();
         }
